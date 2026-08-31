@@ -1,9 +1,8 @@
 import React from 'react';
 import { CommandInput } from '../components/dashboard/CommandInput';
-import { QuickActionCards } from '../components/dashboard/QuickActionCards';
 import { IntegrationBar } from '../components/dashboard/IntegrationBar';
 import { RecentActivityWidget } from '../components/dashboard/RecentActivityWidget';
-import { Sparkles, Layers, Cpu, CheckCircle2, Zap, Clock } from 'lucide-react';
+import { Sparkles, Layers, Cpu } from 'lucide-react';
 import { GlassPanel, GlassCard, ExecutionDialGauge, StatusPill } from '../components/ui/NeoTactileSystem';
 import { useWorkflow } from '../context/WorkflowContext';
 
@@ -11,11 +10,11 @@ export const DashboardPage: React.FC = () => {
   const { currentWorkflow } = useWorkflow();
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn max-w-6xl mx-auto">
       {/* Hero Welcome & Goal Section */}
-      <GlassPanel glowEdge={true} className="relative p-9 shadow-2xl border border-white/20">
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-bold font-mono">
+      <GlassPanel glowEdge={true} className="relative p-8 shadow-2xl border border-white/20">
+        <div className="relative z-10 max-w-3xl space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-bold font-mono">
             <Sparkles className="w-3.5 h-3.5" />
             <span>OrkaAI • Autonomous AI Execution OS</span>
           </div>
@@ -31,46 +30,41 @@ export const DashboardPage: React.FC = () => {
         </div>
       </GlassPanel>
 
-      {/* Outcome Command Center (Hero Interaction) */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-base font-bold flex items-center gap-2.5 font-mono">
-            <Cpu className="w-5 h-5 text-blue-400" />
-            <span>Command Control Center</span>
-          </h2>
-          <span className="text-xs text-cyan-300 font-mono font-bold tracking-wider">
-            GOAL → CONTEXT → PLAN → EXECUTE → VERIFY
-          </span>
+      {/* Hero 2-Column Section: Command Input & Active Execution Progress Gauge */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <div className="lg:col-span-2 space-y-3 flex flex-col justify-between">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-base font-bold flex items-center gap-2.5 font-mono">
+              <Cpu className="w-5 h-5 text-blue-400" />
+              <span>Command Control Center</span>
+            </h2>
+            <span className="text-xs text-cyan-300 font-mono font-bold tracking-wider">
+              GOAL → CONTEXT → PLAN → EXECUTE
+            </span>
+          </div>
+          <CommandInput />
         </div>
-        <CommandInput />
-      </div>
 
-      {/* Hero Interactive Execution Gauge Card (Matching Target Image 2 Progress Dial) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <GlassCard className="lg:col-span-1 p-7 flex flex-col items-center justify-between text-center relative overflow-hidden">
-          <div className="w-full flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+        {/* Active Workflow Dial Gauge */}
+        <GlassCard className="lg:col-span-1 p-6 flex flex-col items-center justify-between text-center relative overflow-hidden">
+          <div className="w-full flex items-center justify-between border-b border-white/10 pb-3 mb-2">
             <span className="text-xs font-mono font-bold uppercase text-slate-400">ACTIVE WORKFLOW GAUGE</span>
             <StatusPill status={currentWorkflow ? 'running' : 'completed'} text={currentWorkflow ? 'EXECUTING' : 'READY'} />
           </div>
 
-          <ExecutionDialGauge progress={currentWorkflow ? 68 : 100} title="Progress" subtitle="Track Record" size={210} />
+          <ExecutionDialGauge progress={currentWorkflow ? 68 : 100} title="Progress" subtitle="Track Record" size={190} />
 
-          <div className="w-full grid grid-cols-2 gap-3 pt-4 border-t border-white/10 font-mono text-xs text-left">
+          <div className="w-full grid grid-cols-2 gap-2 pt-3 border-t border-white/10 font-mono text-xs text-left">
             <div>
-              <span className="text-slate-400 text-[10px]">Actions Executed:</span>
-              <p className="font-bold text-cyan-300">8 Actions</p>
+              <span className="text-slate-400 text-[10px]">Actions:</span>
+              <p className="font-bold text-cyan-300">8 Executed</p>
             </div>
             <div>
-              <span className="text-slate-400 text-[10px]">API Verified:</span>
-              <p className="font-bold text-emerald-400">✓ 100% Verified</p>
+              <span className="text-slate-400 text-[10px]">Verification:</span>
+              <p className="font-bold text-emerald-400">✓ Verified</p>
             </div>
           </div>
         </GlassCard>
-
-        {/* Suggested AI Actions */}
-        <div className="lg:col-span-2">
-          <QuickActionCards />
-        </div>
       </div>
 
       {/* HOW ORKA WORKS CONTRAST CARD */}
