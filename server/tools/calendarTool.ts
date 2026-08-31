@@ -10,10 +10,9 @@ export class CalendarTool {
   }
 
   static async createEventNotes(eventId: string, notes: string) {
-    return {
-      eventId,
-      status: 'updated',
-      notesAttached: true
-    };
+    throw new Error(
+      `Calendar event notes are not implemented for event ${eventId}. ` +
+      'Configure a WorkspaceDataProvider method for Calendar writes before enabling this action.'
+    );
   }
 }

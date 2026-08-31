@@ -1,9 +1,30 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
+import { execSync } from 'child_process';
 import { EmailIngestionService } from '../services/emailIngestion';
 import { EmailClassifier } from '../agents/emailClassifier';
 import { emailTaskStore, EmailTaskItem } from '../storage/emailTaskStore';
 import { CodingAgent } from '../agents/codingAgent';
+
+
+function sh(command: string, cwd: string) {
+  return execSync(command, { cwd, encoding: 'utf8' }).trim();
+}
+
+function createScratchRepo() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'orkaai-mail-e2e-'));
+  fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({ scripts: { test: 'node test.js', build: 'node -e "import(\'./src/feature.js\')"' }, type: 'module' }, null, 2));
+  fs.mkdirSync(path.join(dir, 'src'));
+  fs.writeFileSync(path.join(dir, 'src', 'feature.js'), 'export const featureEnabled = false;\n');
+  fs.writeFileSync(path.join(dir, 'test.js'), 'import { featureEnabled } from "./src/feature.js"; if (!featureEnabled) process.exit(1);\n');
+  sh('git init -b main', dir);
+  sh('git config user.email test@example.com', dir);
+  sh('git config user.name "Orka Test"', dir);
+  sh('git add .', dir);
+  sh('git commit -m initial', dir);
+  return dir;
+}
 
 async function runCheckAndScanMailE2E() {
   console.log('⚡ Starting OrkaAI "Check & Scan My Mail" E2E Pipeline Verification Test...\n');
@@ -76,20 +97,27 @@ async function runCheckAndScanMailE2E() {
   emailTaskStore.updateTaskStatus(taskItem.id, 'EXECUTING');
   console.log('✓ Step 6: Initiating Autonomous Coding Agent execution...');
 
+  const scratchRepo = createScratchRepo();
   const codingResult = await CodingAgent.executeCodingTask(
     approvedTask.requestedAction || approvedTask.subject,
-    approvedTask.repositoryUrls?.[0],
-    [],
+    scratchRepo,
+    [{ filePath: 'src/feature.js', content: 'export const featureEnabled = true;\n' }],
     `feat: ${approvedTask.requestedAction}`
   );
 
-  if (!codingResult.branchName.startsWith('orka/task/') || !codingResult.commitResult) {
+  if (codingResult.status !== 'COMPLETED' || !codingResult.branchName.startsWith('orka/task/') || !codingResult.commitResult) {
     console.error('✕ Step 6 Failed: Coding agent execution did not return branch or commit SHA.');
     process.exit(1);
   }
 
-  if (!codingResult.typecheckPassed || !codingResult.buildPassed) {
-    console.error('✕ Step 6 Failed: Automated typecheck & build verification failed.');
+  if (!codingResult.testsPassed || !codingResult.buildPassed) {
+    console.error('✕ Step 6 Failed: Target repository test/build verification failed.');
+    process.exit(1);
+  }
+
+  const committedContent = sh(`git show ${codingResult.commitResult.commitSha}:src/feature.js`, codingResult.repository.workspacePath!);
+  if (!committedContent.includes('true')) {
+    console.error('✕ Step 6 Failed: Commit does not contain requested scratch repository change.');
     process.exit(1);
   }
 
@@ -117,7 +145,7 @@ async function runCheckAndScanMailE2E() {
   }
 
   console.log(`✓ Step 7: Execution Receipt generated [${receipt.receiptId}] on branch [${receipt.branch}] with commit [${receipt.commitSha}].`);
-  console.log(`✓ Pull Request opened: ${receipt.prUrl}`);
+  console.log(`✓ Local coding-agent commit verified: ${receipt.commitSha}`);
 
   console.log('\n🎉 "CHECK & SCAN MY MAIL" E2E PIPELINE VERIFICATION PASSED 100% CLEANLY!\n');
 }
