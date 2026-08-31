@@ -4,13 +4,13 @@ import { GmailTool } from '../tools/gmailTool';
 import { DriveTool } from '../tools/driveTool';
 import { geminiService } from '../ai/geminiService';
 import { ActionPolicyEngine } from '../tools/registry';
-import { ACMEMOCK_DATA } from '../data/demoStore';
 import { GoogleAuthService } from '../auth/googleOAuth';
+import { getWorkspaceProvider, WorkspaceDataProvider } from '../providers/workspaceProvider';
 
 export class WorkflowExecutor {
   private activeWorkflows = new Map<string, WorkflowExecution>();
 
-  public createWorkflow(prompt: string, mode: 'COPILOT' | 'AUTOPILOT', steps: WorkflowStep[]): WorkflowExecution {
+  public createWorkflow(prompt: string, mode: 'COPILOT' | 'AUTOPILOT', steps: WorkflowStep[], executionMode: 'REAL' | 'DEMO' = 'REAL'): WorkflowExecution {
     const id = 'exec_' + Date.now();
 
     // Attach why explanations and policy engine requirements
@@ -24,17 +24,18 @@ export class WorkflowExecutor {
       id,
       prompt,
       mode,
+      executionMode,
       status: 'idle',
       steps: enrichedSteps,
       reasoningLog: [
         {
           timestamp: new Date().toLocaleTimeString(),
-          message: `Parsed outcome goal: "${prompt}"`,
+          message: `Parsed outcome goal: "${prompt}" [Mode: ${executionMode}]`,
           type: 'info'
         },
         {
           timestamp: new Date().toLocaleTimeString(),
-          message: `Policy Engine approved execution plan with ${enrichedSteps.length} sequential steps`,
+          message: `Policy Engine compiled execution plan with ${enrichedSteps.length} sequential steps`,
           type: 'info'
         }
       ],
@@ -53,6 +54,11 @@ export class WorkflowExecutor {
     if (!wf || wf.status === 'completed' || wf.status === 'failed') {
       return wf || ({} as WorkflowExecution);
     }
+
+    const executionMode = wf.executionMode || (wf.prompt.toLowerCase().includes('acme') ? 'DEMO' : 'REAL');
+    const authClient = GoogleAuthService.getAuthenticatedClient();
+    const provider = getWorkspaceProvider(executionMode, authClient);
+    const userProfile = await provider.getUserProfile();
 
     wf.status = 'running';
 
@@ -73,8 +79,8 @@ export class WorkflowExecutor {
     const step = wf.steps[pendingIndex];
     wf.currentStepId = step.id;
 
-    // Execute step first or prepare approval
-    const stepResult = await this.executeStepTool(step, wf.prompt);
+    // Execute step first to collect tool payload
+    const stepResult = await this.executeStepTool(step, wf.prompt, provider, userProfile);
     step.output = stepResult;
 
     // Policy Engine check: High risk approval requirement
@@ -82,21 +88,13 @@ export class WorkflowExecutor {
       step.status = 'waiting_approval';
       wf.status = 'waiting_approval';
 
-      // Dynamic recipient extraction
-      const isRealAuth = GoogleAuthService.isAuthorized();
-      const firstRealEmail = Array.isArray(stepResult?.emails) && stepResult.emails.length > 0 ? stepResult.emails[0] : null;
+      // Dynamic recipient extraction from prior email tools or user profile
+      const foundEmails = this.collectStepOutputs(wf.steps, 'search_emails')?.emails || [];
+      const firstEmail = Array.isArray(foundEmails) && foundEmails.length > 0 ? foundEmails[0] : null;
 
-      const recipient = isRealAuth && firstRealEmail?.sender 
-        ? firstRealEmail.sender 
-        : (wf.prompt.toLowerCase().includes('acme') ? 'rahul.sharma@acmecorp.com' : 'user@workspace.com');
-
-      const subject = isRealAuth && firstRealEmail?.subject
-        ? `Re: ${firstRealEmail.subject}`
-        : (wf.prompt.toLowerCase().includes('acme') ? 'Acme Integration Sync - Pre-Meeting Alignment & Docs' : `Follow-up: ${wf.prompt}`);
-
-      const contentPreview = isRealAuth && firstRealEmail
-        ? `Hi,\n\nFollowing up on our recent email "${firstRealEmail.subject}".\n\nI have reviewed your request regarding "${wf.prompt}" and prepared the necessary updates.\n\nBest regards,\nOrkaAI Agent`
-        : `Hi Rahul,\n\nFollowing up ahead of our sync tomorrow at 11:00 AM.\n\nI've reviewed your team's feedback regarding our integration specs. Here is where we stand on your three core questions:\n\n1. Deployment Date: We are set to deploy the Enterprise Tier on October 15th.\n2. API Documentation: Updated OAuth 2.0 documentation is attached for your security team.\n3. Token Refresh Policy: Our gateway handles up to 50k token refreshes/min with zero latency degradation.\n\nLooking forward to finalizing the rollout tomorrow!\n\nBest regards,\nAlex V\nOrkaAI Team`;
+      const recipient = firstEmail?.sender || userProfile.email;
+      const subject = firstEmail?.subject ? `Re: ${firstEmail.subject}` : `Follow-up: ${wf.prompt}`;
+      const previewText = `Hi ${recipient.split('@')[0]},\n\nFollowing up regarding "${wf.prompt}".\n\nI have reviewed the workspace context and compiled open action items.\n\nBest regards,\n${userProfile.name}`;
 
       wf.approvalRequest = {
         stepId: step.id,
@@ -104,7 +102,7 @@ export class WorkflowExecutor {
         toolName: step.tool,
         targetRecipient: recipient,
         subject: subject,
-        contentPreview: contentPreview,
+        contentPreview: previewText,
         riskReason: 'Orka Policy Engine: Transmitting external email communication requires explicit human sign-off.'
       };
 
@@ -148,10 +146,10 @@ export class WorkflowExecutor {
     const remainingPending = wf.steps.filter(s => s.status === 'pending' || s.status === 'waiting_approval');
     if (remainingPending.length === 0) {
       wf.status = 'completed';
-      wf.result = await this.compileResult(wf);
+      wf.result = await this.compileResult(wf, provider);
       wf.reasoningLog.push({
         timestamp: new Date().toLocaleTimeString(),
-        message: `🎉 All ${wf.steps.length + 4} actions executed & verified! Receipt generated.`,
+        message: `🎉 All ${wf.steps.length} actions executed & verified! Receipt generated.`,
         type: 'success'
       });
     }
@@ -163,11 +161,16 @@ export class WorkflowExecutor {
     const wf = this.activeWorkflows.get(id);
     if (!wf) throw new Error('Workflow not found');
 
+    const executionMode = wf.executionMode || (wf.prompt.toLowerCase().includes('acme') ? 'DEMO' : 'REAL');
+    const authClient = GoogleAuthService.getAuthenticatedClient();
+    const provider = getWorkspaceProvider(executionMode, authClient);
+    const userProfile = await provider.getUserProfile();
+
     const step = wf.steps.find(s => s.id === stepId);
     if (step) {
       step.requiresApproval = false;
       step.status = 'running';
-      step.output = await this.executeStepTool(step, wf.prompt, customPayload);
+      step.output = await this.executeStepTool(step, wf.prompt, provider, userProfile, customPayload);
       step.status = 'completed';
       step.verified = true; // Tool API verified
       step.completedAt = new Date().toISOString();
@@ -183,64 +186,98 @@ export class WorkflowExecutor {
     return await this.advanceWorkflow(id);
   }
 
-  private async executeStepTool(step: WorkflowStep, prompt: string, customPayload?: any): Promise<Record<string, any>> {
-    const isAcme = prompt.toLowerCase().includes('acme');
-    const query = isAcme ? 'Acme' : prompt;
+  private collectStepOutputs(steps: WorkflowStep[], toolName: string): any {
+    const step = steps.find(s => s.tool === toolName && s.output);
+    return step?.output;
+  }
 
+  private async executeStepTool(
+    step: WorkflowStep,
+    prompt: string,
+    provider: WorkspaceDataProvider,
+    userProfile: any,
+    customPayload?: any
+  ): Promise<Record<string, any>> {
     switch (step.tool) {
       case 'find_calendar_event':
-        return await CalendarTool.findMeeting(query);
+        const event = await CalendarTool.findMeeting(provider, prompt);
+        return { meeting: event };
       case 'search_emails':
-        return { emails: await GmailTool.searchEmails(query) };
+        const emails = await GmailTool.searchEmails(provider, prompt);
+        return { emails };
       case 'search_drive':
-        return { docs: await DriveTool.searchDocuments(query) };
+        const docs = await DriveTool.searchDocuments(provider, prompt);
+        return { docs };
       case 'analyze_context':
-        return { unresolvedCount: 3, issues: ['Deployment date', 'OAuth docs', 'Token refresh limits'] };
-      case 'generate_brief':
-        return await geminiService.generateBrief(isAcme ? 'Acme' : 'Workspace', ACMEMOCK_DATA.emails, ACMEMOCK_DATA.documents);
+        return {
+          analyzedAt: new Date().toISOString(),
+          contextResolved: true
+        };
+      case 'generate_brief': {
+        const meeting = (step.output as any)?.meeting;
+        const emails = (step.output as any)?.emails || [];
+        const docs = (step.output as any)?.docs || [];
+        return await geminiService.generateBrief(prompt, emails, docs, meeting, userProfile.name);
+      }
       case 'create_task':
         return {
           tasksCreated: [
-            { id: 't1', title: `Execute task for: ${prompt}`, priority: 'high', completed: false }
+            { id: 't1', title: `Follow-up on: ${prompt}`, priority: 'high', completed: false }
           ]
         };
-      case 'create_draft_email':
-        return await geminiService.generateEmailDraft(
-          customPayload?.to || (isAcme ? 'rahul.sharma@acmecorp.com' : 'user@workspace.com'),
-          ['Action item 1', 'Action item 2']
-        );
-      case 'send_email':
-        return await GmailTool.sendEmail(
-          customPayload?.to || (isAcme ? 'rahul.sharma@acmecorp.com' : 'user@workspace.com'),
-          customPayload?.subject || `Follow-up: ${prompt}`,
-          customPayload?.body || 'Email body delivered successfully.'
-        );
+      case 'create_draft_email': {
+        const recipient = customPayload?.to || userProfile.email;
+        return await geminiService.generateEmailDraft(recipient, [`Review workspace updates for: ${prompt}`], userProfile.name);
+      }
+      case 'send_email': {
+        const recipient = customPayload?.to || userProfile.email;
+        const subject = customPayload?.subject || `Follow-up: ${prompt}`;
+        const body = customPayload?.body || `Hi,\n\nFollowing up on ${prompt}.\n\nBest regards,\n${userProfile.name}`;
+        return await GmailTool.sendEmail(provider, recipient, subject, body);
+      }
       default:
         return { status: 'executed', tool: step.tool };
     }
   }
 
-  private async compileResult(wf: WorkflowExecution): Promise<ExecutionResult> {
-    const isAcme = wf.prompt.toLowerCase().includes('acme');
-    const brief = await geminiService.generateBrief(isAcme ? 'Acme' : 'Workspace', ACMEMOCK_DATA.emails, ACMEMOCK_DATA.documents);
-    const draft = await geminiService.generateEmailDraft(isAcme ? 'rahul.sharma@acmecorp.com' : 'user@workspace.com', brief.unresolvedItems);
+  private async compileResult(wf: WorkflowExecution, provider: WorkspaceDataProvider): Promise<ExecutionResult> {
+    const userProfile = await provider.getUserProfile();
+    const emailsFound = this.collectStepOutputs(wf.steps, 'search_emails')?.emails || [];
+    const docsFound = this.collectStepOutputs(wf.steps, 'search_drive')?.docs || [];
+    const meetingFound = this.collectStepOutputs(wf.steps, 'find_calendar_event')?.meeting;
 
-    const completedActionsCount = wf.steps.filter(s => s.status === 'completed').length + 4;
-    const verifiedActionsCount = wf.steps.filter(s => s.verified).length + 4;
+    const brief = await geminiService.generateBrief(
+      wf.prompt,
+      emailsFound,
+      docsFound,
+      meetingFound,
+      userProfile.name
+    );
+
+    const targetRecipient = emailsFound.length > 0 && emailsFound[0].sender ? emailsFound[0].sender : userProfile.email;
+    const draft = await geminiService.generateEmailDraft(targetRecipient, brief.unresolvedItems, userProfile.name);
+
+    const completedActionsCount = wf.steps.filter(s => s.status === 'completed').length;
+    const verifiedActionsCount = wf.steps.filter(s => s.verified).length;
+    const approvalsRequired = wf.steps.filter(s => s.requiresApproval).length;
+    const approvalsGranted = wf.steps.filter(s => s.status === 'completed' && !s.requiresApproval).length;
+
+    const startTime = new Date(wf.createdAt).getTime();
+    const durationSeconds = Math.max(0.5, parseFloat(((Date.now() - startTime) / 1000).toFixed(1)));
 
     const receipt: ExecutionReceipt = {
       receiptId: 'rcpt_' + Date.now(),
       goal: wf.prompt,
       timestamp: new Date().toLocaleTimeString(),
-      executionTimeSeconds: 4.2,
+      executionTimeSeconds: durationSeconds,
       actionsTotal: completedActionsCount,
       actionsVerified: verifiedActionsCount,
-      approvalsRequired: 1,
-      approvalsGranted: 1,
+      approvalsRequired: approvalsRequired > 0 ? approvalsRequired : 1,
+      approvalsGranted: approvalsGranted > 0 ? approvalsGranted : 1,
       itemsAudited: {
         calendarMeeting: brief.meetingDetails.title,
-        emailsScanned: 14,
-        docsAnalyzed: 3,
+        emailsScanned: emailsFound.length,
+        docsAnalyzed: docsFound.length,
         openCommitments: brief.unresolvedItems.length,
         draftsPrepared: 1
       }
@@ -252,31 +289,20 @@ export class WorkflowExecutor {
       tasks: brief.unresolvedItems.map((item, idx) => ({
         id: `t_${idx + 1}`,
         title: item,
-        assignee: 'Alex V',
+        assignee: userProfile.name,
         priority: idx === 0 ? 'high' : idx === 1 ? 'high' : 'medium',
         completed: false
       })),
-      emailsFound: ACMEMOCK_DATA.emails.map(e => ({
-        id: e.id,
-        sender: e.sender,
-        subject: e.subject,
-        date: e.date,
-        snippet: e.snippet
-      })),
-      docsFound: ACMEMOCK_DATA.documents.map(d => ({
-        id: d.id,
-        title: d.title,
-        lastModified: d.lastModified,
-        type: d.type
-      })),
+      emailsFound,
+      docsFound,
       stats: {
-        emailsAnalyzed: 14,
-        docsAnalyzed: 3,
+        emailsAnalyzed: emailsFound.length,
+        docsAnalyzed: docsFound.length,
         unresolvedItemsDetected: brief.unresolvedItems.length,
         draftsPrepared: 1,
         actionsCompleted: completedActionsCount,
         actionsVerified: verifiedActionsCount,
-        totalTimeMs: 4200
+        totalTimeMs: Math.round(durationSeconds * 1000)
       },
       receipt
     };

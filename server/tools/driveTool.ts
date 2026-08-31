@@ -1,16 +1,11 @@
-import { ACMEMOCK_DATA } from '../data/demoStore';
+import { WorkspaceDataProvider } from '../providers/workspaceProvider';
 
 export class DriveTool {
-  static async searchDocuments(query: string) {
-    return ACMEMOCK_DATA.documents;
+  static async searchDocuments(provider: WorkspaceDataProvider, query: string) {
+    return await provider.searchDrive(query);
   }
 
-  static async getDocumentContent(docId: string) {
-    const doc = ACMEMOCK_DATA.documents.find(d => d.id === docId) || ACMEMOCK_DATA.documents[0];
-    return {
-      docId: doc.id,
-      title: doc.title,
-      summary: doc.summary
-    };
+  static async getDocumentContent(provider: WorkspaceDataProvider, docId: string) {
+    return await provider.getDriveDocument(docId);
   }
 }

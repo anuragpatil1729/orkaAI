@@ -9,23 +9,26 @@ const router = Router();
 // Start new workflow execution
 router.post('/execute', async (req, res) => {
   try {
-    const { prompt, mode = 'COPILOT' } = req.body;
+    const { prompt, mode = 'COPILOT', executionMode: inputMode } = req.body;
     if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
       return res.status(400).json({ error: 'Prompt string is required' });
     }
 
+    const isDemoScenario = inputMode === 'DEMO' || req.body.isDemoScenario || prompt.toLowerCase().includes('acme');
+    const executionMode: 'REAL' | 'DEMO' = isDemoScenario ? 'DEMO' : 'REAL';
+
     const intent = await parseUserIntent(prompt.trim());
     const steps = await createExecutionPlan(intent);
-    const workflow = workflowExecutor.createWorkflow(prompt.trim(), mode, steps);
+    const workflow = workflowExecutor.createWorkflow(prompt.trim(), mode, steps, executionMode);
 
-    // Save to initial activity log
+    // Save to activity log
     INITIAL_ACTIVITIES.unshift({
       id: 'act_' + Date.now(),
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       timeFormatted: 'Just now',
       dateGroup: 'Today',
       goal: intent.goal,
-      actionsCount: steps.length + 4,
+      actionsCount: steps.length,
       status: 'In Progress',
       execution: workflow
     });

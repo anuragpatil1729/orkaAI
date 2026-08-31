@@ -75,6 +75,7 @@ class WorkflowExecution {
   final String id;
   final String prompt;
   final String mode;
+  final String executionMode;
   final String status; // 'idle', 'running', 'waiting_approval', 'completed', 'failed'
   final String? currentStepId;
   final List<WorkflowStep> steps;
@@ -84,6 +85,7 @@ class WorkflowExecution {
     required this.id,
     required this.prompt,
     required this.mode,
+    this.executionMode = 'REAL',
     required this.status,
     this.currentStepId,
     required this.steps,
@@ -95,6 +97,7 @@ class WorkflowExecution {
       id: json['id'] ?? '',
       prompt: json['prompt'] ?? '',
       mode: json['mode'] ?? 'COPILOT',
+      executionMode: json['executionMode'] ?? 'REAL',
       status: json['status'] ?? 'idle',
       currentStepId: json['currentStepId'],
       steps: (json['steps'] as List? ?? [])

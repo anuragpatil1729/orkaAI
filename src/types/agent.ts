@@ -116,6 +116,7 @@ export interface WorkflowExecution {
   id: string;
   prompt: string;
   mode: 'COPILOT' | 'AUTOPILOT';
+  executionMode?: 'REAL' | 'DEMO';
   status: 'idle' | 'running' | 'waiting_approval' | 'completed' | 'failed';
   currentStepId?: string;
   steps: WorkflowStep[];

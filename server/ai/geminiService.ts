@@ -2,7 +2,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { INTENT_PARSER_SYSTEM_PROMPT, PLANNER_SYSTEM_PROMPT, BRIEF_GENERATION_PROMPT, EMAIL_DRAFT_PROMPT } from './prompts';
 import { IntentParseResult, WorkflowStep, ExecutiveBrief, EmailDraft } from '../../src/types/agent';
 import { isValidTool } from '../tools/registry';
-import { ACMEMOCK_DATA } from '../data/demoStore';
 
 const getApiKey = (): string | undefined => {
   return process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim() !== ''
@@ -54,24 +53,20 @@ export class GeminiService {
         return {
           rawPrompt: prompt,
           goal: parsed.goal || `Execute outcome for: ${prompt}`,
-          entity: parsed.entity || (prompt.toLowerCase().includes('acme') ? 'Acme' : 'Workspace'),
+          entity: parsed.entity || undefined,
           timeframe: parsed.timeframe || 'today',
           targetActions: validActions.length > 0 ? validActions : ['find_calendar_event', 'search_emails', 'search_drive'],
-          isDemoScenario: prompt.toLowerCase().includes('acme')
+          isDemoScenario: false
         };
       } catch (err: any) {
-        console.warn('[GeminiService] Error during intent parsing (using safe fallback):', err.message || err);
+        console.warn('[GeminiService] Error during intent parsing:', err.message || err);
       }
     }
 
-    // Dynamic fallback parser
-    const isAcme = prompt.toLowerCase().includes('acme');
+    // Dynamic structural intent parsing fallback (no fictional Acme branching)
     return {
       rawPrompt: prompt,
-      goal: isAcme
-        ? 'Prepare comprehensive meeting package, brief, open items analysis, and follow-up draft for Acme meeting'
-        : `Execute autonomous workflow for: ${prompt}`,
-      entity: isAcme ? 'Acme' : 'Workspace',
+      goal: `Execute autonomous workflow for: ${prompt}`,
       timeframe: 'today',
       targetActions: [
         'find_calendar_event',
@@ -83,7 +78,7 @@ export class GeminiService {
         'create_draft_email',
         'send_email'
       ],
-      isDemoScenario: isAcme
+      isDemoScenario: false
     };
   }
 
@@ -105,17 +100,21 @@ export class GeminiService {
 
           for (let idx = 0; idx < rawSteps.length; idx++) {
             const s = rawSteps[idx];
-            const toolId = isValidTool(s.tool) ? s.tool : 'analyze_context';
+            // Reject unknown tools strictly
+            if (!isValidTool(s.tool)) {
+              console.warn(`[GeminiService] Rejecting unknown tool ID "${s.tool}" requested by LLM`);
+              continue;
+            }
             
             validatedSteps.push({
               id: s.id || `step_${idx + 1}`,
               name: s.name || `Action ${idx + 1}`,
-              tool: toolId,
+              tool: s.tool,
               description: s.description || 'Executing step',
-              risk: s.risk || (toolId === 'send_email' ? 'HIGH_RISK_WRITE' : 'READ'),
-              requiresApproval: s.requiresApproval ?? (toolId === 'send_email'),
+              risk: s.risk || (s.tool === 'send_email' ? 'HIGH_RISK_WRITE' : 'READ'),
+              requiresApproval: s.requiresApproval ?? (s.tool === 'send_email'),
               status: 'pending',
-              reasoningSnippet: s.reasoningSnippet || `Executing tool [${toolId}]`
+              reasoningSnippet: s.reasoningSnippet || `Executing tool [${s.tool}]`
             });
           }
 
@@ -124,172 +123,36 @@ export class GeminiService {
           }
         }
       } catch (err: any) {
-        console.warn('[GeminiService] Error during plan generation (using safe fallback):', err.message || err);
+        console.warn('[GeminiService] Error during plan generation:', err.message || err);
       }
     }
 
-    const isAcme = intent.goal.toLowerCase().includes('acme');
-    if (!isAcme) {
-      return [
-        {
-          id: 'step_1',
-          name: 'Search Gmail Inbox',
-          tool: 'search_emails',
-          description: 'Search user Gmail inbox for unread messages and thread context',
-          risk: 'READ',
-          requiresApproval: false,
-          status: 'pending',
-          reasoningSnippet: 'Scanning user Gmail inbox for unread messages'
-        },
-        {
-          id: 'step_2',
-          name: 'Search Drive Documents',
-          tool: 'search_drive',
-          description: 'Search Google Drive for related document context',
-          risk: 'READ',
-          requiresApproval: false,
-          status: 'pending',
-          reasoningSnippet: 'Searching user Google Drive documents'
-        },
-        {
-          id: 'step_3',
-          name: 'Analyze Context & Questions',
-          tool: 'analyze_context',
-          description: 'Cross-reference unread emails with drive context',
-          risk: 'READ',
-          requiresApproval: false,
-          status: 'pending',
-          reasoningSnippet: 'Analyzing email threads for open items and pending responses'
-        },
-        {
-          id: 'step_4',
-          name: 'Generate Brief Summary',
-          tool: 'generate_brief',
-          description: 'Compile concise executive summary of unread messages',
-          risk: 'LOW_RISK_WRITE',
-          requiresApproval: false,
-          status: 'pending',
-          reasoningSnippet: 'Synthesizing inbox summary for user'
-        },
-        {
-          id: 'step_5',
-          name: 'Create Action Task',
-          tool: 'create_task',
-          description: 'Queue action items into task queue',
-          risk: 'LOW_RISK_WRITE',
-          requiresApproval: false,
-          status: 'pending',
-          reasoningSnippet: 'Auto-queuing action item tasks'
-        },
-        {
-          id: 'step_6',
-          name: 'Draft Response Email',
-          tool: 'create_draft_email',
-          description: 'Prepare pre-meeting response email draft',
-          risk: 'LOW_RISK_WRITE',
-          requiresApproval: false,
-          status: 'pending',
-          reasoningSnippet: 'Drafting response email to unread threads'
-        },
-        {
-          id: 'step_7',
-          name: 'Send Response Email',
-          tool: 'send_email',
-          description: 'Transmit summary response email',
-          risk: 'HIGH_RISK_WRITE',
-          requiresApproval: true,
-          status: 'pending',
-          reasoningSnippet: 'High-risk action: Transmitting email requires explicit sign-off'
-        }
-      ];
-    }
+    // Generic execution plan based on targetActions
+    const steps: WorkflowStep[] = [];
+    const actions = intent.targetActions || ['search_emails', 'search_drive', 'analyze_context', 'generate_brief', 'send_email'];
 
-    return [
-      {
-        id: 'step_1',
-        name: 'Find Calendar Event',
-        tool: 'find_calendar_event',
-        description: 'Locate upcoming Acme sync meeting & attendees on Google Calendar',
-        risk: 'READ',
-        requiresApproval: false,
-        status: 'pending',
-        reasoningSnippet: 'Searching upcoming calendar events for Acme Corp sync tomorrow'
-      },
-      {
-        id: 'step_2',
-        name: 'Search Gmail History',
-        tool: 'search_emails',
-        description: 'Scan recent email threads for Acme commitment updates',
-        risk: 'READ',
-        requiresApproval: false,
-        status: 'pending',
-        reasoningSnippet: 'Scanning recent Acme Corp conversation threads for unresolved questions'
-      },
-      {
-        id: 'step_3',
-        name: 'Search Drive Documents',
-        tool: 'search_drive',
-        description: 'Retrieve Acme specs, term sheets, & compliance docs from Google Drive',
-        risk: 'READ',
-        requiresApproval: false,
-        status: 'pending',
-        reasoningSnippet: 'Locating modified integration specs and pricing sheets in Google Drive'
-      },
-      {
-        id: 'step_4',
-        name: 'Analyze Commitments & Gaps',
-        tool: 'analyze_context',
-        description: 'Synthesize email threads & documents to detect unresolved items',
-        risk: 'READ',
-        requiresApproval: false,
-        status: 'pending',
-        reasoningSnippet: 'Cross-referencing email threads with Drive specs to detect open commitments'
-      },
-      {
-        id: 'step_5',
-        name: 'Generate Executive Brief',
-        tool: 'generate_brief',
-        description: 'Compile structured meeting briefing with agenda and background',
-        risk: 'LOW_RISK_WRITE',
-        requiresApproval: false,
-        status: 'pending',
-        reasoningSnippet: 'Building executive meeting brief with summary and key insights'
-      },
-      {
-        id: 'step_6',
-        name: 'Create Action Tasks',
-        tool: 'create_task',
-        description: 'Queue outstanding action items into task manager',
-        risk: 'LOW_RISK_WRITE',
-        requiresApproval: false,
-        status: 'pending',
-        reasoningSnippet: 'Auto-creating structured action tasks for open commitments'
-      },
-      {
-        id: 'step_7',
-        name: 'Draft Follow-Up Email',
-        tool: 'create_draft_email',
-        description: 'Prepare pre-meeting alignment email for Acme VP of Product',
-        risk: 'LOW_RISK_WRITE',
-        requiresApproval: false,
-        status: 'pending',
-        reasoningSnippet: 'Drafting clear follow-up email addressing unresolved questions for Rahul Sharma'
-      },
-      {
-        id: 'step_8',
-        name: 'Send Follow-Up Email',
-        tool: 'send_email',
-        description: 'Transmit confirmation email to Rahul Sharma at Acme Corp',
-        risk: 'HIGH_RISK_WRITE',
-        requiresApproval: true,
-        status: 'pending',
-        reasoningSnippet: 'High-risk action: Sending external email requires explicit human sign-off'
+    actions.forEach((tool, idx) => {
+      if (isValidTool(tool)) {
+        steps.push({
+          id: `step_${idx + 1}`,
+          name: tool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          tool: tool,
+          description: `Execute tool [${tool}] for goal: ${intent.goal}`,
+          risk: tool === 'send_email' ? 'HIGH_RISK_WRITE' : 'READ',
+          requiresApproval: tool === 'send_email',
+          status: 'pending',
+          reasoningSnippet: `Running tool [${tool}]`
+        });
       }
-    ];
+    });
+
+    return steps;
   }
 
-  async generateBrief(entity: string, emailContext: any[], docContext: any[]): Promise<ExecutiveBrief> {
-    const isAcme = entity.toLowerCase().includes('acme');
+  async generateBrief(entity: string | undefined, emailContext: any[], docContext: any[], meetingData?: any, userName?: string): Promise<ExecutiveBrief> {
+    const emailsCount = Array.isArray(emailContext) ? emailContext.length : 0;
+    const docsCount = Array.isArray(docContext) ? docContext.length : 0;
+
     const apiKey = getApiKey();
     if (apiKey && this.genAI) {
       try {
@@ -297,92 +160,65 @@ export class GeminiService {
           model: getModelName(),
           generationConfig: { responseMimeType: 'application/json' }
         });
-        const prompt = `${BRIEF_GENERATION_PROMPT}\n\nEntity: ${entity}\nEmails Payload: ${JSON.stringify(emailContext)}\nDocs Payload: ${JSON.stringify(docContext)}`;
+        const prompt = `${BRIEF_GENERATION_PROMPT}\n\nEntity: ${entity || 'Workspace'}\nMeeting Data: ${JSON.stringify(meetingData || {})}\nEmails Payload: ${JSON.stringify(emailContext)}\nDocs Payload: ${JSON.stringify(docContext)}`;
         const response = await model.generateContent(prompt);
         const parsed = JSON.parse(response.response.text());
 
         return {
-          title: parsed.title || (isAcme ? 'Acme Corp Executive Briefing' : 'Anurag Patil — Workspace Briefing'),
+          title: parsed.title || `Executive Briefing: ${entity || 'Workspace Context'}`,
           meetingDetails: {
-            title: isAcme ? ACMEMOCK_DATA.meeting.title : 'Unread Inbox & Task Review',
-            time: isAcme ? ACMEMOCK_DATA.meeting.startTime : 'Today',
-            participants: isAcme ? ACMEMOCK_DATA.meeting.attendees : ['Anurag Patil (You)', 'OrkaAI Assistant'],
-            location: isAcme ? ACMEMOCK_DATA.meeting.location : 'Google Workspace'
+            title: meetingData?.title || 'Workspace Overview',
+            time: meetingData?.startTime || 'Today',
+            participants: meetingData?.attendees || [userName || 'Authenticated User'],
+            location: meetingData?.location || 'Google Workspace'
           },
-          summary: parsed.summary || (isAcme ? 'Acme Corp integration is progressing smoothly.' : 'Reviewed unread inbox messages and workspace tasks for Anurag Patil.'),
+          summary: parsed.summary || `Analyzed ${emailsCount} emails and ${docsCount} documents for ${entity || 'workspace context'}.`,
           keyInsights: Array.isArray(parsed.keyInsights) && parsed.keyInsights.length > 0
             ? parsed.keyInsights
-            : (isAcme ? ['Pricing $48k signed.', 'SOC2 completed.'] : ['Unread inbox messages scanned.', 'No critical blockers found.']),
+            : [`Scanned ${emailsCount} email threads.`, `Analyzed ${docsCount} documents.`],
           unresolvedItems: Array.isArray(parsed.unresolvedItems) && parsed.unresolvedItems.length > 0
             ? parsed.unresolvedItems
-            : (isAcme ? ['Confirm target deployment date.'] : ['Review unread messages.', 'Confirm response status.']),
+            : (emailsCount > 0 ? ['Review recent conversation details.', 'Confirm follow-up items.'] : ['No unresolved items identified.']),
           recommendedActions: Array.isArray(parsed.recommendedActions) && parsed.recommendedActions.length > 0
             ? parsed.recommendedActions
-            : (isAcme ? ['Share deployment roadmap.'] : ['Send summary email response.']),
-          emailsAnalyzedCount: emailContext.length || (isAcme ? 14 : 5),
-          docsAnalyzedCount: docContext.length || (isAcme ? 3 : 2)
+            : ['Send status update email.'],
+          emailsAnalyzedCount: emailsCount,
+          docsAnalyzedCount: docsCount
         };
       } catch (err: any) {
         console.warn('[GeminiService] Error during brief generation:', err.message || err);
       }
     }
 
-    if (!isAcme) {
-      return {
-        title: 'Anurag Patil — Workspace Briefing',
-        meetingDetails: {
-          title: 'Unread Inbox & Workspace Review',
-          time: 'Today',
-          participants: ['Anurag Patil (You)', 'OrkaAI Assistant'],
-          location: 'Google Workspace'
-        },
-        summary: 'Reviewed unread inbox messages and workspace documents for Anurag Patil.',
-        keyInsights: [
-          'Inbox messages scanned and summarized.',
-          'OAuth 2.0 Google Workspace connection verified.',
-          'OrkaAI execution engine ready for automated response.'
-        ],
-        unresolvedItems: [
-          'Review unread message thread details.',
-          'Confirm outgoing response summary.'
-        ],
-        recommendedActions: [
-          'Approve outgoing summary email response.'
-        ],
-        emailsAnalyzedCount: emailContext.length || 5,
-        docsAnalyzedCount: docContext.length || 2
-      };
-    }
-
+    // Honest structural fallback (strictly dynamic counts, zero fabricated Acme business context)
     return {
-      title: 'Acme Corp Executive Briefing',
+      title: entity ? `${entity} Executive Briefing` : 'Workspace Executive Briefing',
       meetingDetails: {
-        title: ACMEMOCK_DATA.meeting.title,
-        time: ACMEMOCK_DATA.meeting.startTime,
-        participants: ACMEMOCK_DATA.meeting.attendees,
-        location: ACMEMOCK_DATA.meeting.location
+        title: meetingData?.title || 'Workspace Briefing',
+        time: meetingData?.startTime || 'Today',
+        participants: meetingData?.attendees || [userName || 'Authenticated User'],
+        location: meetingData?.location || 'Google Workspace'
       },
-      summary: 'Acme Corp is waiting for final API integration deployment confirmation.',
-      keyInsights: [
-        'Commercial pricing agreement signed ($48k/yr enterprise tier).',
-        'Engineering team reviewed integration spec v2.4.'
-      ],
-      unresolvedItems: [
-        'Confirm enterprise tier deployment date.',
-        'Send updated OAuth 2.0 API documentation.'
-      ],
-      recommendedActions: [
-        'Send pre-meeting alignment email to VP Rahul Sharma.'
-      ],
-      emailsAnalyzedCount: 14,
-      docsAnalyzedCount: 3
+      summary: emailsCount > 0 || docsCount > 0
+        ? `Analyzed ${emailsCount} emails and ${docsCount} documents for ${entity || 'workspace'}.`
+        : 'No emails or documents were found matching this search query.',
+      keyInsights: emailsCount > 0
+        ? [`Scanned ${emailsCount} relevant email threads.`, `Verified ${docsCount} attached Drive documents.`]
+        : ['Workspace search completed with 0 results.'],
+      unresolvedItems: emailsCount > 0
+        ? ['Review recent conversation details.', 'Confirm follow-up summary.']
+        : ['No open commitments found.'],
+      recommendedActions: emailsCount > 0
+        ? ['Send follow-up response email.']
+        : ['Check search query parameters.'],
+      emailsAnalyzedCount: emailsCount,
+      docsAnalyzedCount: docsCount
     };
   }
 
-  async generateEmailDraft(recipient: string, unresolvedItems: string[]): Promise<EmailDraft> {
-    const isAcme = recipient.toLowerCase().includes('acme') || recipient.toLowerCase().includes('rahul');
-    const targetTo = isAcme ? 'rahul.sharma@acmecorp.com' : (recipient || 'anurag151006@gmail.com');
-    const name = isAcme ? 'Rahul' : 'Anurag';
+  async generateEmailDraft(recipient: string, unresolvedItems: string[], userName?: string): Promise<EmailDraft> {
+    const targetRecipient = recipient || 'user@workspace.com';
+    const senderName = userName || 'OrkaAI Agent';
 
     const apiKey = getApiKey();
     if (apiKey && this.genAI) {
@@ -391,14 +227,14 @@ export class GeminiService {
           model: getModelName(),
           generationConfig: { responseMimeType: 'application/json' }
         });
-        const prompt = `${EMAIL_DRAFT_PROMPT}\n\nRecipient: ${targetTo}\nUnresolved Items: ${JSON.stringify(unresolvedItems)}`;
+        const prompt = `${EMAIL_DRAFT_PROMPT}\n\nRecipient: ${targetRecipient}\nSender Name: ${senderName}\nUnresolved Items: ${JSON.stringify(unresolvedItems)}`;
         const response = await model.generateContent(prompt);
         const parsed = JSON.parse(response.response.text());
         return {
           id: 'draft_' + Date.now(),
-          to: parsed.to || targetTo,
-          subject: parsed.subject || (isAcme ? 'Acme Integration Sync - Pre-Meeting Brief & OAuth Docs' : 'Workspace Summary & Unread Email Updates'),
-          body: parsed.body || `Hi ${name},\n\nFollowing up with a summary of your workspace updates and unread messages.\n\nBest regards,\nOrkaAI Agent`,
+          to: parsed.to || targetRecipient,
+          subject: parsed.subject || 'Workspace Updates & Follow-up',
+          body: parsed.body || `Hi,\n\nFollowing up with a summary of recent workspace updates.\n\nBest regards,\n${senderName}`,
           rationale: parsed.rationale || 'Addresses outstanding workspace updates.',
           requiresApproval: true,
           status: 'draft'
@@ -408,49 +244,26 @@ export class GeminiService {
       }
     }
 
-    if (!isAcme) {
-      return {
-        id: 'draft_user_' + Date.now(),
-        to: targetTo,
-        subject: 'Workspace Summary & Unread Email Updates',
-        body: `Hi ${name},
-
-Here is a quick summary of your unread messages and workspace items:
-
-1. Inbox Status: Unread messages scanned and verified via Google Workspace API.
-2. Open Items: Workspace context analyzed with zero critical blockers.
-3. Action Plan: Execution plan verified by Orka Policy Engine.
-
-Please let me know if you would like me to process further updates!
-
-Best regards,
-OrkaAI Agent`,
-        rationale: 'Summarizes unread inbox messages for the user.',
-        requiresApproval: true,
-        status: 'draft'
-      };
-    }
+    const recipientName = targetRecipient.includes('@') ? targetRecipient.split('@')[0] : 'there';
+    const formattedItems = Array.isArray(unresolvedItems) && unresolvedItems.length > 0
+      ? unresolvedItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n')
+      : '1. Review workspace updates.';
 
     return {
-      id: 'draft_acme_101',
-      to: 'rahul.sharma@acmecorp.com',
-      subject: 'Acme Integration Sync - Pre-Meeting Alignment & Docs',
-      body: `Hi Rahul,
+      id: 'draft_' + Date.now(),
+      to: targetRecipient,
+      subject: 'Workspace Status Update & Follow-up',
+      body: `Hi ${recipientName},
 
-Following up ahead of our sync tomorrow at 11:00 AM. 
+Following up on our recent workspace conversation. Here is a summary of open items:
 
-I've reviewed your team's feedback regarding our integration specs. Here is where we stand on your three core questions:
+${formattedItems}
 
-1. Deployment Date: We are set to deploy the Enterprise Tier on October 15th.
-2. API Documentation: Updated OAuth 2.0 documentation is attached for your security team.
-3. Token Refresh Policy: Our gateway handles up to 50k token refreshes/min with zero latency degradation.
-
-Looking forward to finalizing the rollout tomorrow!
+Please let me know if you have any questions or updates!
 
 Best regards,
-Alex V
-OrkaAI Team`,
-      rationale: 'Addresses all unresolved items identified in previous email threads before the meeting.',
+${senderName}`,
+      rationale: 'Summarizes workspace context and unresolved items for recipient.',
       requiresApproval: true,
       status: 'draft'
     };
