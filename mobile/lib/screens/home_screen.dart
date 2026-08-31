@@ -40,11 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: OrkaTheme.primary.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(16),
+                          color: OrkaTheme.primary.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(18),
                           border: Border.all(color: OrkaTheme.primary.withValues(alpha: 0.4)),
                           boxShadow: const [
-                            BoxShadow(color: Color(0x303B82F6), blurRadius: 12),
+                            BoxShadow(color: Color(0x403B82F6), blurRadius: 15),
                           ],
                         ),
                         child: const Icon(Icons.auto_awesome, color: OrkaTheme.cyanGlow, size: 22),
@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('OrkaAI', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
+                          Text('OrkaAI', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
                           Text('AI Execution OS', style: TextStyle(color: OrkaTheme.cyanGlow, fontSize: 11, fontWeight: FontWeight.w600)),
                         ],
                       ),
@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: OrkaTheme.cyanGlow.withValues(alpha: 0.4)),
                       boxShadow: const [
-                        BoxShadow(color: Color(0x2522D3EE), blurRadius: 10),
+                        BoxShadow(color: Color(0x3042DFF5), blurRadius: 12),
                       ],
                     ),
                     child: Text(
@@ -76,28 +76,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
-              // Hero Heading
+              // Hero Heading (Target Image 2 Typography)
               const Text(
-                'Tell it the outcome.\nIt handles the work.',
+                'Prepare me\nfor tomorrow.',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 26,
+                  fontSize: 32,
                   fontWeight: FontWeight.w900,
-                  height: 1.25,
+                  height: 1.15,
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Neo-Tactile Command Center Box
+              // Command Center Glass Surface
               GlassCardWidget(
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
                     TextField(
                       controller: _inputController,
-                      style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                      style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
                       maxLines: 3,
                       decoration: const InputDecoration(
                         hintText: 'What outcome should I take care of?',
@@ -105,17 +105,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         border: InputBorder.none,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
                           decoration: BoxDecoration(
-                            color: provider.isListening ? OrkaTheme.cyanGlow.withValues(alpha: 0.2) : const Color(0x1AFFFFFF),
+                            color: provider.isListening ? OrkaTheme.cyanGlow.withValues(alpha: 0.25) : const Color(0x20FFFFFF),
                             shape: BoxShape.circle,
-                            border: Border.all(color: provider.isListening ? OrkaTheme.cyanGlow : const Color(0x20FFFFFF)),
+                            border: Border.all(color: provider.isListening ? OrkaTheme.cyanGlow : const Color(0x30FFFFFF)),
                             boxShadow: provider.isListening
-                                ? [BoxShadow(color: OrkaTheme.cyanGlow.withValues(alpha: 0.6), blurRadius: 12)]
+                                ? [BoxShadow(color: OrkaTheme.cyanGlow.withValues(alpha: 0.7), blurRadius: 15)]
                                 : null,
                           ),
                           child: IconButton(
@@ -141,9 +141,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
-              // Quick Suggested Outcome Chips
+              // Active Workflow Progress Gauge Card (Image 2 Radial Arc Gauge)
+              GlassCardWidget(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('ACTIVE WORKFLOW', style: TextStyle(color: OrkaTheme.cyanGlow, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
+                          SizedBox(height: 6),
+                          Text('Prepare me for tomorrow\'s sync', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                          SizedBox(height: 4),
+                          Text('Gmail ✓ • Calendar ✓ • Drive ●', style: TextStyle(color: OrkaTheme.textSecondary, fontSize: 11)),
+                        ],
+                      ),
+                    ),
+                    const ProgressGaugeWidget(progress: 0.68, title: 'Progress'),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Suggested Outcome Chips
               const Text('SUGGESTED OUTCOMES', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
               const SizedBox(height: 14),
               Wrap(
@@ -155,34 +178,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildChip('Find what needs my attention today', Icons.notification_important_outlined),
                   _buildChip('Follow up with people waiting on me', Icons.mark_email_unread_outlined),
                 ],
-              ),
-              const SizedBox(height: 28),
-
-              // How Orka Works Card (Neo-Tactile Glass)
-              GlassCardWidget(
-                padding: const EdgeInsets.all(18),
-                child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.layers_outlined, color: OrkaTheme.cyanGlow, size: 18),
-                        SizedBox(width: 8),
-                        Text('HOW ORKA WORKS', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'GOAL → CONTEXT → PLAN → EXECUTE → VERIFY',
-                      style: TextStyle(color: OrkaTheme.success, fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Decomposes natural intent, scans Gmail & Drive context, executes tools, and verifies outcomes.',
-                      style: TextStyle(color: OrkaTheme.textSecondary, fontSize: 11),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
@@ -197,13 +192,13 @@ class _HomeScreenState extends State<HomeScreen> {
         _inputController.text = text;
         _submitGoal(text);
       },
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(24),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0x12FFFFFF),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0x25FFFFFF)),
+          color: const Color(0x20FFFFFF),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0x30FFFFFF)),
           boxShadow: const [
             BoxShadow(color: Color(0x20000000), blurRadius: 10, offset: Offset(0, 4)),
           ],
@@ -211,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 15, color: OrkaTheme.primary),
+            Icon(icon, size: 16, color: OrkaTheme.primaryBright),
             const SizedBox(width: 8),
             Text(text, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
           ],

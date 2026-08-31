@@ -6,7 +6,7 @@ import { AIReasoningCard } from '../components/workflow/AIReasoningCard';
 import { ApprovalModal } from '../components/workflow/ApprovalModal';
 import { ResultView } from '../components/result/ResultView';
 import { Sparkles, ArrowLeft } from 'lucide-react';
-import { GlassCard, TactileButton, StatusPill } from '../components/ui/NeoTactileSystem';
+import { GlassPanel, GlassCard, TactileButton, StatusPill, ExecutionDialGauge } from '../components/ui/NeoTactileSystem';
 
 export const ExecutionPage: React.FC = () => {
   const { currentWorkflow, resetWorkflow } = useWorkflow();
@@ -33,6 +33,9 @@ export const ExecutionPage: React.FC = () => {
   }
 
   const isCompleted = currentWorkflow.status === 'completed' && currentWorkflow.result;
+  const completedStepsCount = currentWorkflow.steps.filter(s => s.status === 'completed').length;
+  const totalStepsCount = currentWorkflow.steps.length || 1;
+  const progressPercent = Math.min(100, Math.round((completedStepsCount / totalStepsCount) * 100));
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -61,6 +64,26 @@ export const ExecutionPage: React.FC = () => {
           />
         </div>
       </div>
+
+      {/* Hero Execution Control Card with Radial Dial Gauge (Target Image 2) */}
+      <GlassPanel glowEdge={true} className="p-8 flex flex-col md:flex-row items-center justify-between gap-8 border border-blue-500/40">
+        <div className="space-y-3 max-w-lg">
+          <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30">
+            LIVE AI CONTROL SCREEN
+          </span>
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-tight">
+            {currentWorkflow.prompt}
+          </h2>
+          <p className="text-xs text-slate-300 font-mono">
+            {completedStepsCount} of {totalStepsCount} tool actions completed • {currentWorkflow.status.toUpperCase()}
+          </p>
+        </div>
+
+        {/* Circular Progress Arc Gauge */}
+        <div className="shrink-0">
+          <ExecutionDialGauge progress={progressPercent} title="Progress" subtitle="Track Record" size={190} />
+        </div>
+      </GlassPanel>
 
       {/* Interactive Execution Graph */}
       <WorkflowGraph steps={currentWorkflow.steps} currentStepId={currentWorkflow.currentStepId} />

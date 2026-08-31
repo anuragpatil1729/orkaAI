@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 
@@ -24,12 +25,112 @@ class GlassCardWidget extends StatelessWidget {
     if (onTap != null) {
       return InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(28),
         child: card,
       );
     }
     return card;
   }
+}
+
+class ProgressGaugeWidget extends StatelessWidget {
+  final double progress; // 0.0 to 1.0
+  final String title;
+
+  const ProgressGaugeWidget({
+    super.key,
+    required this.progress,
+    this.title = 'Progress',
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          width: 160,
+          height: 90,
+          child: CustomPaint(
+            painter: GaugePainter(progress: progress),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 25),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${(progress * 100).toInt()}%',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: OrkaTheme.cyanGlow,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'monospace',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class GaugePainter extends CustomPainter {
+  final double progress;
+
+  GaugePainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height);
+    final radius = size.width / 2 - 10;
+
+    final bgPaint = Paint()
+      ..color = const Color(0x30FFFFFF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10
+      ..strokeCap = StrokeCap.round;
+
+    final activePaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [OrkaTheme.primary, OrkaTheme.cyanGlow],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10
+      ..strokeCap = StrokeCap.round;
+
+    // Draw background semi-circle arc
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      math.pi,
+      math.pi,
+      false,
+      bgPaint,
+    );
+
+    // Draw active progress semi-circle arc
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      math.pi,
+      math.pi * progress,
+      false,
+      activePaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
 class TactileButtonWidget extends StatelessWidget {
@@ -51,7 +152,7 @@ class TactileButtonWidget extends StatelessWidget {
     return GestureDetector(
       onTap: isLoading ? null : onPressed,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         decoration: OrkaTheme.neoPrimaryButton,
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -104,9 +205,9 @@ class TactileToggleSwitchWidget extends StatelessWidget {
         height: 28,
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
-          color: value ? OrkaTheme.primary : const Color(0x20FFFFFF),
+          color: value ? OrkaTheme.primary : const Color(0x30FFFFFF),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0x30FFFFFF)),
+          border: Border.all(color: const Color(0x40FFFFFF)),
           boxShadow: value
               ? [
                   BoxShadow(

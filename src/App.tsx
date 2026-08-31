@@ -1,4 +1,5 @@
 import React from 'react';
+import { ThemeProvider } from './context/ThemeContext';
 import { WorkflowProvider, useWorkflow } from './context/WorkflowContext';
 import { Layout } from './components/layout/Layout';
 import { DashboardPage } from './pages/DashboardPage';
@@ -32,9 +33,11 @@ const AppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <WorkflowProvider>
-      <AppContent />
-    </WorkflowProvider>
+    <ThemeProvider>
+      <WorkflowProvider>
+        <AppContent />
+      </WorkflowProvider>
+    </ThemeProvider>
   );
 };
 

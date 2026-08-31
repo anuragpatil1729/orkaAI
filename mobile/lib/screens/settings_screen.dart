@@ -14,6 +14,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   late Future<Map<String, dynamic>> _statusFuture;
+  bool _isDarkMode = true;
 
   @override
   void initState() {
@@ -39,6 +40,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
           return ListView(
             padding: const EdgeInsets.all(20),
             children: [
+              // Theme Mode Toggle (Image 2 Aesthetic)
+              GlassCardWidget(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('UI THEME MODE', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
+                        Text(_isDarkMode ? 'Dark Blue Atmosphere' : 'Light Atmospheric Glass', style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 2),
+                        const Text('Atmospheric glass design system', style: TextStyle(color: OrkaTheme.textSecondary, fontSize: 11)),
+                      ],
+                    ),
+                    TactileToggleSwitchWidget(
+                      value: _isDarkMode,
+                      onChanged: (val) {
+                        setState(() {
+                          _isDarkMode = val;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // Policy Mode Switcher
               GlassCardWidget(
                 padding: const EdgeInsets.all(18),
@@ -95,7 +124,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: OrkaTheme.glassSurface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: OrkaTheme.glassBorder),
       ),
       child: Row(
