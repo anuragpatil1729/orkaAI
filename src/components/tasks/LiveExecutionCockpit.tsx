@@ -172,15 +172,15 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
             <div className="flex items-center justify-end gap-3 pt-1">
               <a
                 href={
-                  receipt.prUrl && !receipt.prUrl.includes('/pull/')
+                  receipt.prUrl && receipt.prUrl.includes('/pull/')
                     ? receipt.prUrl
-                    : `https://github.com/${receipt.repository.includes('/') ? receipt.repository : 'sarthakpatil6636/atestproject'}/compare/main...${encodeURIComponent(receipt.branch || 'main')}?expand=1`
+                    : `https://github.com/${receipt.repository.includes('/') ? receipt.repository : 'sarthakpatil6636/atestproject'}`
                 }
                 target="_blank"
                 rel="noreferrer"
                 className="px-4 py-2 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-all"
               >
-                <span>View Pull Request</span>
+                <span>{receipt.prUrl?.includes('/pull/') ? 'View Pull Request' : 'View Target Repository'}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
 

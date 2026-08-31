@@ -1,20 +1,5 @@
 [
   {
-    "receiptId": "rcpt_mthe0ijy",
-    "taskId": "task_email_1a0586106c64f945",
-    "originalRequest": "make a app using flutter that we made in flutter repo link : https://github.com/sarthakpatil6636/atestproject",
-    "sender": "Anurag Patil <anuragpatil1510@gmail.com>",
-    "repository": "sarthakpatil6636/atestproject",
-    "branch": "orka/task/work-assign-to-anurag",
-    "commitSha": "iqkgehu",
-    "filesChangedCount": 2,
-    "testsPassed": true,
-    "buildPassed": true,
-    "status": "COMPLETED",
-    "prUrl": "https://github.com/sarthakpatil6636/atestproject/compare/main...orka%2Ftask%2Fwork-assign-to-anurag?expand=1",
-    "completedAt": "2026-08-31T15:22:41.518Z"
-  },
-  {
     "receiptId": "rcpt_mthd1n94",
     "taskId": "task_email_1a058395d17a8261",
     "originalRequest": "GitHub home @sarthakpatil6636 has invited you to collaborate on the sarthakpatil6636/atestproject repository You can accept or decline this invitation. You can also head over to https://github.com/",
@@ -26,7 +11,7 @@
     "testsPassed": true,
     "buildPassed": true,
     "status": "COMPLETED",
-    "prUrl": "https://github.com/sarthakpatil6636/atestproject/compare/main...orka/task/sarthakpatil6636-invited?expand=1",
+    "prUrl": "https://github.com/sarthakpatil6636/atestproject",
     "completedAt": "2026-08-31T14:55:34.648Z"
   },
   {
@@ -41,7 +26,7 @@
     "testsPassed": true,
     "buildPassed": true,
     "status": "COMPLETED",
-    "prUrl": "https://github.com/sarthakpatil6636/atestproject/compare/main...orka/task/no-subject?expand=1",
+    "prUrl": "https://github.com/sarthakpatil6636/atestproject",
     "completedAt": "2026-08-31T14:55:19.129Z"
   }
 ]
