@@ -1,5 +1,35 @@
 [
   {
+    "receiptId": "rcpt_mthidsdq",
+    "taskId": "task_email_1a058d9914a1e5f9",
+    "originalRequest": "make a colorful design for cli github repo link : https://github.com/sarthakpatil6636/atestproject",
+    "sender": "Anurag Patil <anuragpatil1510@gmail.com>",
+    "repository": "sarthakpatil6636/atestproject",
+    "branch": "orka/task/no-subject-mthidpzs",
+    "commitSha": "6e25bc9",
+    "filesChangedCount": 1,
+    "testsPassed": true,
+    "buildPassed": true,
+    "status": "COMPLETED",
+    "prUrl": "https://github.com/sarthakpatil6636/atestproject/pull/1",
+    "completedAt": "2026-08-31T17:24:59.246Z"
+  },
+  {
+    "receiptId": "rcpt_mthi9umj",
+    "taskId": "task_email_1a0583dccf80e5e3",
+    "originalRequest": "Good Morning anurag , I have a share a repo with you and added you as a collaborator , it a calculator project , i have done with cli can you make the remaining gui for the same , github repo link :",
+    "sender": "Anurag Patil <anuragpatil1510@gmail.com>",
+    "repository": "orkaaidemo/targetproject",
+    "branch": "orka/task/no-subject-mthi9h2e",
+    "commitSha": "634df97",
+    "filesChangedCount": 1,
+    "testsPassed": false,
+    "buildPassed": true,
+    "status": "COMPLETED",
+    "prUrl": "https://github.com/orkaaidemo/targetproject",
+    "completedAt": "2026-08-31T17:21:55.531Z"
+  },
+  {
     "receiptId": "rcpt_mthi91i3",
     "taskId": "task_email_1a0583dccf80e5e3",
     "originalRequest": "Good Morning anurag , I have a share a repo with you and added you as a collaborator , it a calculator project , i have done with cli can you make the remaining gui for the same , github repo link :",
