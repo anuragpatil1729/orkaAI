@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 import { useWorkflow } from '../../context/WorkflowContext';
-import { Sparkles, ArrowRight, CornerDownLeft, Play } from 'lucide-react';
+import { Sparkles, ArrowRight, Play } from 'lucide-react';
 
 export const CommandInput: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const { startWorkflow, isExecuting, launchDemoScenario } = useWorkflow();
+
+  const suggestions = [
+    "Prepare me for my Acme meeting tomorrow",
+    "Clean up my inbox",
+    "Summarize today's work",
+    "Find everything I need for tomorrow",
+    "Follow up with everyone waiting on me",
+    "Prepare my daily brief"
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,7 +22,7 @@ export const CommandInput: React.FC = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-4">
       <form onSubmit={handleSubmit} className="relative group">
         {/* Glow border background */}
         <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 via-cyan-500 to-violet-600 rounded-2xl blur opacity-30 group-hover:opacity-75 transition duration-500 group-focus-within:opacity-100" />
@@ -33,7 +42,7 @@ export const CommandInput: React.FC = () => {
                   handleSubmit(e);
                 }
               }}
-              placeholder='What do you want me to take care of? e.g. "Prepare me for my Acme meeting tomorrow."'
+              placeholder="What outcome should I handle?"
               rows={2}
               className="w-full bg-transparent text-slate-100 placeholder-slate-500 text-lg font-medium outline-none resize-none"
             />
@@ -42,7 +51,7 @@ export const CommandInput: React.FC = () => {
           <div className="flex items-center justify-between pt-3 border-t border-white/5">
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 font-mono text-[10px]">Press Enter ↵</span>
-              <span>ActionOS will plan, run tools, and request approval if sensitive.</span>
+              <span>OrkaAI plans, executes tools, and asks approval for sensitive writes.</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -67,6 +76,22 @@ export const CommandInput: React.FC = () => {
           </div>
         </div>
       </form>
+
+      {/* Suggestion Chips */}
+      <div className="flex flex-wrap gap-2">
+        {suggestions.map((s, idx) => (
+          <button
+            key={idx}
+            onClick={() => {
+              setPrompt(s);
+              startWorkflow(s);
+            }}
+            className="text-xs px-3 py-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 text-slate-300 hover:text-indigo-300 transition-all text-left"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

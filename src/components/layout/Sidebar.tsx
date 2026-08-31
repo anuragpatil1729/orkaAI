@@ -5,11 +5,9 @@ import {
   Zap, 
   Activity, 
   Grid, 
-  Settings, 
   PlusCircle, 
   Sparkles,
-  Layers,
-  CheckSquare
+  Layers
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
@@ -33,7 +31,7 @@ export const Sidebar: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-lg tracking-tight text-white">Action<span className="text-indigo-400">OS</span></span>
+              <span className="font-extrabold text-lg tracking-tight text-white">Orka<span className="text-indigo-400">AI</span></span>
               <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">MVP</span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium leading-none">AI Execution Layer</p>
@@ -90,8 +88,8 @@ export const Sidebar: React.FC = () => {
         </div>
         
         <div className="px-3 text-[11px] text-slate-500 flex items-center justify-between">
-          <span>ActionOS v1.0</span>
-          <span>Google Gemini 1.5</span>
+          <span>OrkaAI v1.0</span>
+          <span>Google Gemini API</span>
         </div>
       </div>
     </aside>

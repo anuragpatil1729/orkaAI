@@ -77,7 +77,7 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     id: 'create_task',
     name: 'Create Task Item',
     category: 'tasks',
-    description: 'Adds an outstanding task item to user task queue.',
+    description: 'Adds an outstanding task item to user task manager.',
     riskLevel: 'LOW_RISK_WRITE',
     parameters: {
       title: { type: 'string', description: 'Task title', required: true },
@@ -109,3 +109,15 @@ export const TOOL_REGISTRY: Record<string, ToolDefinition> = {
     }
   }
 };
+
+export function isValidTool(toolId: string): boolean {
+  return toolId in TOOL_REGISTRY;
+}
+
+export function validateToolParams(toolId: string, params?: Record<string, any>): { valid: boolean; reason?: string } {
+  const tool = TOOL_REGISTRY[toolId];
+  if (!tool) {
+    return { valid: false, reason: `Tool [${toolId}] is not registered in allowlist.` };
+  }
+  return { valid: true };
+}

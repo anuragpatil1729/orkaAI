@@ -7,13 +7,13 @@ export const Header: React.FC = () => {
 
   return (
     <header className="h-16 border-b border-white/5 bg-[#090a0f]/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30 select-none">
-      {/* Left: Tagline & Status */}
+      {/* Left: Workspace Mode & Gemini Status */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-400">STATUS:</span>
+          <span className="text-xs font-semibold text-slate-400">WORKSPACE:</span>
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-medium">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Workspace Connected</span>
+            <span>{(workspaceStatus.userEmail || '').includes('Demo') ? 'DEMO WORKSPACE' : 'CONNECTED WORKSPACE'}</span>
           </div>
         </div>
 

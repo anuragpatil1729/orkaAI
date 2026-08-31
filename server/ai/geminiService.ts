@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { INTENT_PARSER_SYSTEM_PROMPT, PLANNER_SYSTEM_PROMPT, BRIEF_GENERATION_PROMPT, EMAIL_DRAFT_PROMPT } from './prompts';
 import { IntentParseResult, WorkflowStep, ExecutiveBrief, EmailDraft } from '../../src/types/agent';
+import { isValidTool } from '../tools/registry';
 import { ACMEMOCK_DATA } from '../data/demoStore';
 
 const getApiKey = (): string | undefined => {
@@ -9,9 +10,14 @@ const getApiKey = (): string | undefined => {
     : undefined;
 };
 
+const getModelName = (): string => {
+  return process.env.GEMINI_MODEL && process.env.GEMINI_MODEL.trim() !== ''
+    ? process.env.GEMINI_MODEL
+    : 'gemini-1.5-flash';
+};
+
 export class GeminiService {
   private genAI?: GoogleGenerativeAI;
-  private modelName = 'gemini-1.5-flash';
 
   constructor() {
     const apiKey = getApiKey();
@@ -24,28 +30,37 @@ export class GeminiService {
     return !!getApiKey();
   }
 
+  public getModelName(): string {
+    return getModelName();
+  }
+
   async parseIntent(prompt: string): Promise<IntentParseResult> {
     const apiKey = getApiKey();
     if (apiKey && this.genAI) {
       try {
         const model = this.genAI.getGenerativeModel({
-          model: this.modelName,
+          model: getModelName(),
           generationConfig: { responseMimeType: 'application/json' }
         });
-        const fullPrompt = `${INTENT_PARSER_SYSTEM_PROMPT}\n\nUser Prompt: "${prompt}"`;
+        const fullPrompt = `${INTENT_PARSER_SYSTEM_PROMPT}\n\nUser Request: "${prompt}"`;
         const response = await model.generateContent(fullPrompt);
         const text = response.response.text();
         const parsed = JSON.parse(text);
+        
+        const validActions = Array.isArray(parsed.targetActions)
+          ? parsed.targetActions.filter((a: string) => isValidTool(a))
+          : ['find_calendar_event', 'search_emails', 'search_drive'];
+
         return {
           rawPrompt: prompt,
-          goal: parsed.goal || `Process request: ${prompt}`,
+          goal: parsed.goal || `Execute outcome for: ${prompt}`,
           entity: parsed.entity || (prompt.toLowerCase().includes('acme') ? 'Acme' : undefined),
           timeframe: parsed.timeframe || 'tomorrow',
-          targetActions: parsed.targetActions || ['find_calendar_event', 'search_emails', 'search_drive'],
+          targetActions: validActions.length > 0 ? validActions : ['find_calendar_event', 'search_emails', 'search_drive'],
           isDemoScenario: prompt.toLowerCase().includes('acme')
         };
-      } catch (err) {
-        console.warn('[GeminiService] Fallback to structured intent parser:', err);
+      } catch (err: any) {
+        console.warn('[GeminiService] Error during intent parsing (using safe fallback):', err.message || err);
       }
     }
 
@@ -76,31 +91,44 @@ export class GeminiService {
     if (apiKey && this.genAI) {
       try {
         const model = this.genAI.getGenerativeModel({
-          model: this.modelName,
+          model: getModelName(),
           generationConfig: { responseMimeType: 'application/json' }
         });
         const prompt = `${PLANNER_SYSTEM_PROMPT}\n\nGoal: "${intent.goal}"\nTarget Actions: ${JSON.stringify(intent.targetActions)}`;
         const response = await model.generateContent(prompt);
         const text = response.response.text();
-        const steps = JSON.parse(text);
-        if (Array.isArray(steps) && steps.length > 0) {
-          return steps.map((s, idx) => ({
-            id: s.id || `step_${idx + 1}`,
-            name: s.name || `Action ${idx + 1}`,
-            tool: s.tool || 'analyze_context',
-            description: s.description || 'Executing step',
-            risk: s.risk || 'READ',
-            requiresApproval: s.requiresApproval ?? (s.risk === 'HIGH_RISK_WRITE'),
-            status: 'pending',
-            reasoningSnippet: s.reasoningSnippet || 'Analyzing contextual requirements'
-          }));
+        const rawSteps = JSON.parse(text);
+
+        if (Array.isArray(rawSteps) && rawSteps.length > 0) {
+          const validatedSteps: WorkflowStep[] = [];
+
+          for (let idx = 0; idx < rawSteps.length; idx++) {
+            const s = rawSteps[idx];
+            // Tool registry guardrail check
+            const toolId = isValidTool(s.tool) ? s.tool : 'analyze_context';
+            
+            validatedSteps.push({
+              id: s.id || `step_${idx + 1}`,
+              name: s.name || `Action ${idx + 1}`,
+              tool: toolId,
+              description: s.description || 'Executing step',
+              risk: s.risk || (toolId === 'send_email' ? 'HIGH_RISK_WRITE' : 'READ'),
+              requiresApproval: s.requiresApproval ?? (toolId === 'send_email'),
+              status: 'pending',
+              reasoningSnippet: s.reasoningSnippet || `Executing tool [${toolId}]`
+            });
+          }
+
+          if (validatedSteps.length > 0) {
+            return validatedSteps;
+          }
         }
-      } catch (err) {
-        console.warn('[GeminiService] Fallback to standard planner:', err);
+      } catch (err: any) {
+        console.warn('[GeminiService] Error during plan generation (using safe fallback):', err.message || err);
       }
     }
 
-    // Default canonical workflow execution plan for Hackathon Demo
+    // Standard fallback workflow execution plan
     return [
       {
         id: 'step_1',
@@ -136,11 +164,11 @@ export class GeminiService {
         id: 'step_4',
         name: 'Analyze Commitments & Gaps',
         tool: 'analyze_context',
-        description: 'Synthesize 14 emails & 3 documents to detect unresolved items',
+        description: 'Synthesize email threads & documents to detect unresolved items',
         risk: 'READ',
         requiresApproval: false,
         status: 'pending',
-        reasoningSnippet: 'Cross-referencing email threads with Drive specs to detect 3 unresolved items'
+        reasoningSnippet: 'Cross-referencing email threads with Drive specs to detect open commitments'
       },
       {
         id: 'step_5',
@@ -156,11 +184,11 @@ export class GeminiService {
         id: 'step_6',
         name: 'Create Action Tasks',
         tool: 'create_task',
-        description: 'Queue 3 outstanding action items into user task manager',
+        description: 'Queue outstanding action items into task manager',
         risk: 'LOW_RISK_WRITE',
         requiresApproval: false,
         status: 'pending',
-        reasoningSnippet: 'Auto-creating 3 structured tasks for deployment, docs, and auth'
+        reasoningSnippet: 'Auto-creating structured action tasks for open commitments'
       },
       {
         id: 'step_7',
@@ -190,12 +218,13 @@ export class GeminiService {
     if (apiKey && this.genAI) {
       try {
         const model = this.genAI.getGenerativeModel({
-          model: this.modelName,
+          model: getModelName(),
           generationConfig: { responseMimeType: 'application/json' }
         });
-        const prompt = `${BRIEF_GENERATION_PROMPT}\n\nEntity: ${entity}\nEmails: ${JSON.stringify(emailContext)}\nDocs: ${JSON.stringify(docContext)}`;
+        const prompt = `${BRIEF_GENERATION_PROMPT}\n\nEntity: ${entity}\nEmails Payload: ${JSON.stringify(emailContext)}\nDocs Payload: ${JSON.stringify(docContext)}`;
         const response = await model.generateContent(prompt);
         const parsed = JSON.parse(response.response.text());
+
         return {
           title: parsed.title || `Executive Brief: ${entity} Sync`,
           meetingDetails: {
@@ -205,25 +234,31 @@ export class GeminiService {
             location: ACMEMOCK_DATA.meeting.location
           },
           summary: parsed.summary || 'Acme Corp integration is progressing smoothly with pricing finalized. Technical deployment timeline and security sign-off remain key priorities.',
-          keyInsights: parsed.keyInsights || [
-            'Pricing discussion resolved at $48,000/yr enterprise tier.',
-            'SOC2 Type II sign-off completed conditionally.',
-            'Engineering team ready for API rollout.'
-          ],
-          unresolvedItems: parsed.unresolvedItems || [
-            'Confirm target deployment date for enterprise tier.',
-            'Send updated OAuth API documentation to security team.',
-            'Resolve token refresh authentication rate limits question.'
-          ],
-          recommendedActions: parsed.recommendedActions || [
-            'Share finalized deployment roadmap during 11 AM sync.',
-            'Attach OAuth specs to pre-meeting email.'
-          ],
-          emailsAnalyzedCount: 14,
-          docsAnalyzedCount: 3
+          keyInsights: Array.isArray(parsed.keyInsights) && parsed.keyInsights.length > 0
+            ? parsed.keyInsights
+            : [
+                'Pricing discussion resolved at $48,000/yr enterprise tier.',
+                'SOC2 Type II sign-off completed conditionally.',
+                'Engineering team ready for API rollout.'
+              ],
+          unresolvedItems: Array.isArray(parsed.unresolvedItems) && parsed.unresolvedItems.length > 0
+            ? parsed.unresolvedItems
+            : [
+                'Confirm target deployment date for enterprise tier.',
+                'Send updated OAuth API documentation to security team.',
+                'Resolve token refresh authentication rate limits question.'
+              ],
+          recommendedActions: Array.isArray(parsed.recommendedActions) && parsed.recommendedActions.length > 0
+            ? parsed.recommendedActions
+            : [
+                'Share finalized deployment roadmap during 11 AM sync.',
+                'Attach OAuth specs to pre-meeting email.'
+              ],
+          emailsAnalyzedCount: emailContext.length || 14,
+          docsAnalyzedCount: docContext.length || 3
         };
-      } catch (err) {
-        console.warn('[GeminiService] Fallback for brief generation:', err);
+      } catch (err: any) {
+        console.warn('[GeminiService] Error during brief generation (using safe fallback):', err.message || err);
       }
     }
 
@@ -260,7 +295,7 @@ export class GeminiService {
     if (apiKey && this.genAI) {
       try {
         const model = this.genAI.getGenerativeModel({
-          model: this.modelName,
+          model: getModelName(),
           generationConfig: { responseMimeType: 'application/json' }
         });
         const prompt = `${EMAIL_DRAFT_PROMPT}\n\nRecipient: ${recipient}\nUnresolved Items: ${JSON.stringify(unresolvedItems)}`;
@@ -271,12 +306,12 @@ export class GeminiService {
           to: parsed.to || 'rahul.sharma@acmecorp.com',
           subject: parsed.subject || 'Acme Integration Sync - Pre-Meeting Brief & OAuth Docs',
           body: parsed.body || `Hi Rahul,\n\nFollowing up ahead of our meeting tomorrow at 11 AM...\n\nBest,\nAlex`,
-          rationale: parsed.rationale || 'Addresses 3 outstanding technical audit points.',
+          rationale: parsed.rationale || 'Addresses outstanding technical audit points.',
           requiresApproval: true,
           status: 'draft'
         };
-      } catch (err) {
-        console.warn('[GeminiService] Fallback email draft:', err);
+      } catch (err: any) {
+        console.warn('[GeminiService] Error generating email draft:', err.message || err);
       }
     }
 
@@ -298,8 +333,8 @@ Looking forward to finalizing the rollout tomorrow!
 
 Best regards,
 Alex V
-ActionOS Team`,
-      rationale: 'Addresses all 3 unresolved items identified in previous email threads before the 11 AM meeting.',
+OrkaAI Team`,
+      rationale: 'Addresses all unresolved items identified in previous email threads before the meeting.',
       requiresApproval: true,
       status: 'draft'
     };

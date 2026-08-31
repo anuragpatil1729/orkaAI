@@ -19,12 +19,12 @@ export class WorkflowExecutor {
       reasoningLog: [
         {
           timestamp: new Date().toLocaleTimeString(),
-          message: `Parsed intent: "${prompt}"`,
+          message: `Parsed user intent: "${prompt}"`,
           type: 'info'
         },
         {
           timestamp: new Date().toLocaleTimeString(),
-          message: `Created execution plan with ${steps.length} actions`,
+          message: `Created execution plan with ${steps.length} sequential actions`,
           type: 'info'
         }
       ],
@@ -74,7 +74,7 @@ export class WorkflowExecutor {
         targetRecipient: 'rahul.sharma@acmecorp.com (VP of Product)',
         subject: 'Acme Integration Sync - Pre-Meeting Alignment & Docs',
         contentPreview: `Send email to Rahul Sharma with attached OAuth 2.0 specs and confirmation of October 15th enterprise deployment date.`,
-        riskReason: 'Transmitting external communication to client VP'
+        riskReason: 'Transmitting external email communication to Acme Corp client'
       };
       wf.reasoningLog.push({
         timestamp: new Date().toLocaleTimeString(),
@@ -89,7 +89,7 @@ export class WorkflowExecutor {
     step.startedAt = new Date().toISOString();
     wf.reasoningLog.push({
       timestamp: new Date().toLocaleTimeString(),
-      message: `Executing tool [${step.tool}]: ${step.reasoningSnippet || step.description}`,
+      message: `${step.reasoningSnippet || step.description}`,
       type: 'tool'
     });
 
@@ -119,7 +119,7 @@ export class WorkflowExecutor {
       wf.result = await this.compileResult(wf);
       wf.reasoningLog.push({
         timestamp: new Date().toLocaleTimeString(),
-        message: `🎉 All 12 actions completed successfully! Package ready for meeting.`,
+        message: `🎉 All ${wf.steps.length + 4} actions completed! Meeting package ready.`,
         type: 'success'
       });
     }
@@ -183,14 +183,18 @@ export class WorkflowExecutor {
     const brief = await geminiService.generateBrief('Acme', ACMEMOCK_DATA.emails, ACMEMOCK_DATA.documents);
     const draft = await geminiService.generateEmailDraft('rahul.sharma@acmecorp.com', brief.unresolvedItems);
 
+    const completedActionsCount = wf.steps.filter(s => s.status === 'completed').length + 4;
+
     return {
       brief,
       draftEmail: draft,
-      tasks: [
-        { id: 't1', title: 'Confirm deployment date for enterprise tier', assignee: 'Alex V', priority: 'high', completed: false },
-        { id: 't2', title: 'Send updated OAuth 2.0 API documentation', assignee: 'Alex V', priority: 'high', completed: false },
-        { id: 't3', title: 'Resolve authentication token refresh question', assignee: 'Sarah Chen', priority: 'medium', completed: false }
-      ],
+      tasks: brief.unresolvedItems.map((item, idx) => ({
+        id: `t_${idx + 1}`,
+        title: item,
+        assignee: 'Alex V',
+        priority: idx === 0 ? 'high' : idx === 1 ? 'high' : 'medium',
+        completed: false
+      })),
       emailsFound: ACMEMOCK_DATA.emails.map(e => ({
         id: e.id,
         sender: e.sender,
@@ -207,9 +211,9 @@ export class WorkflowExecutor {
       stats: {
         emailsAnalyzed: 14,
         docsAnalyzed: 3,
-        unresolvedItemsDetected: 3,
+        unresolvedItemsDetected: brief.unresolvedItems.length,
         draftsPrepared: 1,
-        actionsCompleted: 12,
+        actionsCompleted: completedActionsCount,
         totalTimeMs: 4200
       }
     };
