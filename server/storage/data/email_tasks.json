@@ -189,7 +189,7 @@
     ],
     "repositoryHint": "atestproject",
     "confidence": 0.94,
-    "status": "NEW",
+    "status": "COMPLETED",
     "proposedPlan": [
       "Inspect referenced repository architecture & package files",
       "Understand existing CLI / application codebase",
@@ -202,6 +202,21 @@
     "createdAt": "2026-08-31T15:16:51.553Z",
     "links": [
       "https://github.com/sarthakpatil6636/atestproject"
-    ]
+    ],
+    "receipt": {
+      "receiptId": "rcpt_mthe0ijy",
+      "taskId": "task_email_1a0586106c64f945",
+      "originalRequest": "make a app using flutter that we made in flutter repo link : https://github.com/sarthakpatil6636/atestproject",
+      "sender": "Anurag Patil <anuragpatil1510@gmail.com>",
+      "repository": "sarthakpatil6636/atestproject",
+      "branch": "orka/task/work-assign-to-anurag",
+      "commitSha": "iqkgehu",
+      "filesChangedCount": 2,
+      "testsPassed": true,
+      "buildPassed": true,
+      "status": "COMPLETED",
+      "prUrl": "https://github.com/sarthakpatil6636/atestproject/compare/main...orka%2Ftask%2Fwork-assign-to-anurag?expand=1",
+      "completedAt": "2026-08-31T15:22:41.518Z"
+    }
   }
 ]

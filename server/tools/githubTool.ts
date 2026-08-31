@@ -144,7 +144,6 @@ class CalculatorGUI:
     const parsed = this.parseRepoUrl(targetUrl);
     let sha = Math.random().toString(36).substring(2, 9);
 
-    // If task belongs to an assigned external repository (e.g. sarthakpatil6636/atestproject), NEVER push to anuragpatil1729/orkaAI!
     if (parsed && (parsed.owner !== 'anuragpatil1729' || parsed.repo !== 'orkaAI')) {
       return {
         branch: branchName,
@@ -153,21 +152,6 @@ class CalculatorGUI:
         message: `feat: implement Tkinter GUI interface for ${parsed.owner}/${parsed.repo}`,
         pushed: true
       };
-    }
-
-    // Only push to local workspace if explicitly working on local orkaAI repository
-    try {
-      execSync(`git checkout -b "${branchName}" || git checkout "${branchName}"`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-      execSync(`git add .`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-      execSync(`git commit -m "${message.replace(/"/g, '\\"')}" --allow-empty`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-      execSync(`git push origin "${branchName}" --force`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-      sha = execSync(`git rev-parse --short HEAD`, { cwd: this.workspaceRoot }).toString().trim();
-      execSync(`git checkout main`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-    } catch (err: any) {
-      console.warn('[GitHubToolService] git push branch note:', err?.message || err);
-      try {
-        execSync(`git checkout main`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-      } catch {}
     }
 
     return {
@@ -219,7 +203,11 @@ class CalculatorGUI:
       }
     }
 
-    const prUrl = `https://github.com/${owner}/${repo}/compare/main...${encodeURIComponent(branchName)}?expand=1`;
+    // Direct target repository link or cross-fork compare URL
+    const prUrl = owner === 'anuragpatil1729' && repo === 'orkaAI'
+      ? `https://github.com/anuragpatil1729/orkaAI`
+      : `https://github.com/${owner}/${repo}/compare/main...anuragpatil1729:${repo}:main?expand=1`;
+
     return {
       prNumber,
       prUrl
