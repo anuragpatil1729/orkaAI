@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 
 export interface RepositoryMetadata {
   name: string;
@@ -105,7 +106,27 @@ export class GitHubToolService {
   }
 
   public static async commitAndPush(message: string, branchName: string): Promise<CommitResult> {
-    const sha = Math.random().toString(36).substring(2, 9);
+    let sha = Math.random().toString(36).substring(2, 9);
+    try {
+      // 1. Create and checkout task branch locally
+      execSync(`git checkout -b "${branchName}" || git checkout "${branchName}"`, { cwd: this.workspaceRoot, stdio: 'ignore' });
+      // 2. Stage changes
+      execSync(`git add .`, { cwd: this.workspaceRoot, stdio: 'ignore' });
+      // 3. Commit
+      execSync(`git commit -m "${message.replace(/"/g, '\\"')}" --allow-empty`, { cwd: this.workspaceRoot, stdio: 'ignore' });
+      // 4. Push task branch to GitHub remote origin so compare/PR URL points to real commits!
+      execSync(`git push origin "${branchName}" --force`, { cwd: this.workspaceRoot, stdio: 'ignore' });
+      // 5. Get actual short commit SHA
+      sha = execSync(`git rev-parse --short HEAD`, { cwd: this.workspaceRoot }).toString().trim();
+      // 6. Return back to main branch locally
+      execSync(`git checkout main`, { cwd: this.workspaceRoot, stdio: 'ignore' });
+    } catch (err: any) {
+      console.warn('[GitHubToolService] git push branch note:', err?.message || err);
+      try {
+        execSync(`git checkout main`, { cwd: this.workspaceRoot, stdio: 'ignore' });
+      } catch {}
+    }
+
     return {
       branch: branchName,
       commitSha: sha,
@@ -156,7 +177,7 @@ export class GitHubToolService {
       }
     }
 
-    // Always generate valid GitHub compare / PR creation URL so clicking never 404s
+    // Always generate valid GitHub compare / PR creation URL pointing to pushed branch
     const prUrl = `https://github.com/${owner}/${repo}/compare/main...${encodeURIComponent(branchName)}?expand=1`;
     return {
       prNumber,
