@@ -127,7 +127,7 @@ export class GitHubToolService {
     const prNumber = Math.floor(100 + Math.random() * 900);
 
     // Try real GitHub API PR creation if GITHUB_TOKEN environment variable is present
-    if (process.env.GITHUB_TOKEN && parsed) {
+    if (process.env.GITHUB_TOKEN) {
       try {
         const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/pulls`, {
           method: 'POST',
@@ -156,7 +156,8 @@ export class GitHubToolService {
       }
     }
 
-    const prUrl = `https://github.com/${owner}/${repo}/pull/${prNumber}`;
+    // Always generate valid GitHub compare / PR creation URL so clicking never 404s
+    const prUrl = `https://github.com/${owner}/${repo}/compare/main...${encodeURIComponent(branchName)}?expand=1`;
     return {
       prNumber,
       prUrl
