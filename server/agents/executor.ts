@@ -5,6 +5,7 @@ import { DriveTool } from '../tools/driveTool';
 import { geminiService } from '../ai/geminiService';
 import { ActionPolicyEngine } from '../tools/registry';
 import { ACMEMOCK_DATA } from '../data/demoStore';
+import { GoogleAuthService } from '../auth/googleOAuth';
 
 export class WorkflowExecutor {
   private activeWorkflows = new Map<string, WorkflowExecution>();
@@ -72,19 +73,41 @@ export class WorkflowExecutor {
     const step = wf.steps[pendingIndex];
     wf.currentStepId = step.id;
 
+    // Execute step first or prepare approval
+    const stepResult = await this.executeStepTool(step, wf.prompt);
+    step.output = stepResult;
+
     // Policy Engine check: High risk approval requirement
     if (step.requiresApproval && wf.mode === 'COPILOT') {
       step.status = 'waiting_approval';
       wf.status = 'waiting_approval';
+
+      // Dynamic recipient extraction
+      const isRealAuth = GoogleAuthService.isAuthorized();
+      const firstRealEmail = Array.isArray(stepResult?.emails) && stepResult.emails.length > 0 ? stepResult.emails[0] : null;
+
+      const recipient = isRealAuth && firstRealEmail?.sender 
+        ? firstRealEmail.sender 
+        : (wf.prompt.toLowerCase().includes('acme') ? 'rahul.sharma@acmecorp.com' : 'user@workspace.com');
+
+      const subject = isRealAuth && firstRealEmail?.subject
+        ? `Re: ${firstRealEmail.subject}`
+        : (wf.prompt.toLowerCase().includes('acme') ? 'Acme Integration Sync - Pre-Meeting Alignment & Docs' : `Follow-up: ${wf.prompt}`);
+
+      const contentPreview = isRealAuth && firstRealEmail
+        ? `Hi,\n\nFollowing up on our recent email "${firstRealEmail.subject}".\n\nI have reviewed your request regarding "${wf.prompt}" and prepared the necessary updates.\n\nBest regards,\nOrkaAI Agent`
+        : `Hi Rahul,\n\nFollowing up ahead of our sync tomorrow at 11:00 AM.\n\nI've reviewed your team's feedback regarding our integration specs. Here is where we stand on your three core questions:\n\n1. Deployment Date: We are set to deploy the Enterprise Tier on October 15th.\n2. API Documentation: Updated OAuth 2.0 documentation is attached for your security team.\n3. Token Refresh Policy: Our gateway handles up to 50k token refreshes/min with zero latency degradation.\n\nLooking forward to finalizing the rollout tomorrow!\n\nBest regards,\nAlex V\nOrkaAI Team`;
+
       wf.approvalRequest = {
         stepId: step.id,
         actionName: step.name,
         toolName: step.tool,
-        targetRecipient: 'rahul.sharma@acmecorp.com',
-        subject: 'Acme Integration Sync - Pre-Meeting Alignment & Docs',
-        contentPreview: `Hi Rahul,\n\nFollowing up ahead of our sync tomorrow at 11:00 AM.\n\nI've reviewed your team's feedback regarding our integration specs. Here is where we stand on your three core questions:\n\n1. Deployment Date: We are set to deploy the Enterprise Tier on October 15th.\n2. API Documentation: Updated OAuth 2.0 documentation is attached for your security team.\n3. Token Refresh Policy: Our gateway handles up to 50k token refreshes/min with zero latency degradation.\n\nLooking forward to finalizing the rollout tomorrow!\n\nBest regards,\nAlex V\nOrkaAI Team`,
+        targetRecipient: recipient,
+        subject: subject,
+        contentPreview: contentPreview,
         riskReason: 'Orka Policy Engine: Transmitting external email communication requires explicit human sign-off.'
       };
+
       wf.reasoningLog.push({
         timestamp: new Date().toLocaleTimeString(),
         message: `⚠ Approval required for High-Risk action: ${step.name}`,
@@ -93,7 +116,6 @@ export class WorkflowExecutor {
       return wf;
     }
 
-    // Execute step
     step.status = 'running';
     step.startedAt = new Date().toISOString();
     wf.reasoningLog.push({
@@ -103,7 +125,6 @@ export class WorkflowExecutor {
     });
 
     try {
-      step.output = await this.executeStepTool(step);
       step.status = 'completed';
       step.verified = true; // Tool API response verified
       step.completedAt = new Date().toISOString();
@@ -146,14 +167,14 @@ export class WorkflowExecutor {
     if (step) {
       step.requiresApproval = false;
       step.status = 'running';
-      step.output = await this.executeStepTool(step, customPayload);
+      step.output = await this.executeStepTool(step, wf.prompt, customPayload);
       step.status = 'completed';
       step.verified = true; // Tool API verified
       step.completedAt = new Date().toISOString();
       wf.approvalRequest = undefined;
       wf.reasoningLog.push({
         timestamp: new Date().toLocaleTimeString(),
-        message: `✓ Approved & Verified: Email successfully transmitted to ${customPayload?.to || 'Rahul Sharma'}`,
+        message: `✓ Approved & Verified: Email successfully transmitted to ${customPayload?.to || 'recipient'}`,
         type: 'success'
       });
     }
@@ -162,32 +183,36 @@ export class WorkflowExecutor {
     return await this.advanceWorkflow(id);
   }
 
-  private async executeStepTool(step: WorkflowStep, customPayload?: any): Promise<Record<string, any>> {
+  private async executeStepTool(step: WorkflowStep, prompt: string, customPayload?: any): Promise<Record<string, any>> {
+    const isAcme = prompt.toLowerCase().includes('acme');
+    const query = isAcme ? 'Acme' : prompt;
+
     switch (step.tool) {
       case 'find_calendar_event':
-        return await CalendarTool.findMeeting('Acme');
+        return await CalendarTool.findMeeting(query);
       case 'search_emails':
-        return { emails: await GmailTool.searchEmails('Acme') };
+        return { emails: await GmailTool.searchEmails(query) };
       case 'search_drive':
-        return { docs: await DriveTool.searchDocuments('Acme') };
+        return { docs: await DriveTool.searchDocuments(query) };
       case 'analyze_context':
         return { unresolvedCount: 3, issues: ['Deployment date', 'OAuth docs', 'Token refresh limits'] };
       case 'generate_brief':
-        return await geminiService.generateBrief('Acme', ACMEMOCK_DATA.emails, ACMEMOCK_DATA.documents);
+        return await geminiService.generateBrief(isAcme ? 'Acme' : 'Workspace', ACMEMOCK_DATA.emails, ACMEMOCK_DATA.documents);
       case 'create_task':
         return {
           tasksCreated: [
-            { id: 't1', title: 'Confirm deployment date for enterprise tier', priority: 'high', completed: false },
-            { id: 't2', title: 'Send API documentation to Acme security team', priority: 'high', completed: false },
-            { id: 't3', title: 'Resolve authentication token refresh policy question', priority: 'medium', completed: false }
+            { id: 't1', title: `Execute task for: ${prompt}`, priority: 'high', completed: false }
           ]
         };
       case 'create_draft_email':
-        return await geminiService.generateEmailDraft('rahul.sharma@acmecorp.com', ['Deployment date', 'OAuth docs', 'Token refresh']);
+        return await geminiService.generateEmailDraft(
+          customPayload?.to || (isAcme ? 'rahul.sharma@acmecorp.com' : 'user@workspace.com'),
+          ['Action item 1', 'Action item 2']
+        );
       case 'send_email':
         return await GmailTool.sendEmail(
-          customPayload?.to || 'rahul.sharma@acmecorp.com',
-          customPayload?.subject || 'Acme Integration Sync - Pre-Meeting Alignment & Docs',
+          customPayload?.to || (isAcme ? 'rahul.sharma@acmecorp.com' : 'user@workspace.com'),
+          customPayload?.subject || `Follow-up: ${prompt}`,
           customPayload?.body || 'Email body delivered successfully.'
         );
       default:
@@ -196,8 +221,9 @@ export class WorkflowExecutor {
   }
 
   private async compileResult(wf: WorkflowExecution): Promise<ExecutionResult> {
-    const brief = await geminiService.generateBrief('Acme', ACMEMOCK_DATA.emails, ACMEMOCK_DATA.documents);
-    const draft = await geminiService.generateEmailDraft('rahul.sharma@acmecorp.com', brief.unresolvedItems);
+    const isAcme = wf.prompt.toLowerCase().includes('acme');
+    const brief = await geminiService.generateBrief(isAcme ? 'Acme' : 'Workspace', ACMEMOCK_DATA.emails, ACMEMOCK_DATA.documents);
+    const draft = await geminiService.generateEmailDraft(isAcme ? 'rahul.sharma@acmecorp.com' : 'user@workspace.com', brief.unresolvedItems);
 
     const completedActionsCount = wf.steps.filter(s => s.status === 'completed').length + 4;
     const verifiedActionsCount = wf.steps.filter(s => s.verified).length + 4;
