@@ -10,7 +10,9 @@
 
 OrkaAI is an autonomous **AI execution layer** designed to transform natural language outcomes into structured, auditable, and verified work execution across productivity tools (Gmail, Google Calendar, Google Drive).
 
-Unlike standard chatbots that provide static text responses, OrkaAI parses user intent, constructs a live Directed Acyclic Graph (DAG) execution plan, interacts with real workspace APIs, enforces human-in-the-loop policy guardrails for high-risk actions, and produces an auditable **Execution Receipt**.
+OrkaAI features **two unified interfaces** powered by the exact same backend engine, Gemini AI model, and policy engine:
+1. 🌐 **Web UI Workspace** (`http://localhost:5173`)
+2. 💻 **Terminal CLI Agent** (`orka`)
 
 ---
 
@@ -30,7 +32,8 @@ ORKAAI AGENT ENGINE:   USER GOAL → INTENT → DYNAMIC PLAN → TOOL EXECUTION 
 - **🧠 Google Gemini API Brain:** Uses official `@google/generative-ai` SDK for dynamic goal decomposition, intent parsing, contextual reasoning, executive brief synthesis, and email drafting.
 - **📊 Live Execution DAG Graph:** Visualizes real-time tool orchestration steps with node states (`○ Pending`, `◉ Running`, `✓ Completed & Verified`, `⚠ Approval Required`, `✕ Failed`).
 - **🛡️ Deterministic Action Policy Engine:** Security rules are enforced strictly by backend policy code, **not** LLM recommendations. High-risk write actions (`send_email`) strictly require human approval in Copilot mode.
-- **❓ "Why Orka Did This" Explanations:** Hover tooltips on every DAG node explain *why* the AI selected a specific tool.
+- **💻 Terminal-Native CLI (`orka`):** Full-featured terminal interface sharing the backend API, interactive approval gate, live step rendering, and execution receipts.
+- **❓ "Why Orka Did This" Explanations:** Hover tooltips (Web) and line annotations (CLI) explain *why* the AI selected a specific tool.
 - **🧾 Orka Execution Receipt:** Generates an auditable execution receipt detailing total actions executed, API-verified actions, granted approvals, audited items, and execution duration in seconds.
 - **🔐 Google Workspace OAuth 2.0:** Integrates with real Gmail, Calendar, and Drive scopes (`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`).
 - **🎭 Dual Engine (Real vs Demo Mode):** Includes an embedded Acme Corp dataset (14 emails, 3 docs, meeting invite) enabling a rock-solid, 100% reliable 90-second demo out-of-the-box.
@@ -44,27 +47,74 @@ ORKAAI AGENT ENGINE:   USER GOAL → INTENT → DYNAMIC PLAN → TOOL EXECUTION 
 ## 🏗️ Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                      Frontend Client (Vite + React)              │
-│   - Command Control Center ("What outcome should I handle?")     │
-│   - Live DAG Execution Graph & Step Timeline                     │
-│   - High-Risk Approval Gate Modal (With Inline Draft Editor)     │
-│   - "YOU'RE READY." Result Screen & Execution Receipt Modal     │
-└────────────────────────────────┌────────────────────────────────┘
-                                 │ HTTP / REST API
-┌────────────────────────────────▼────────────────────────────────┐
-│                   Express Backend API Server                    │
-│   - Agent Pipeline: IntentParser → Planner → Executor           │
-│   - ActionPolicyEngine (Deterministic Risk & Permission Gates)   │
-│   - Strict Allowlisted Tool Registry                            │
-│   - Google OAuth 2.0 Client & Fallback Demo Store               │
-└───────────────────┬─────────────────────────┬───────────────────┘
-                    │                         │
-┌───────────────────▼───────────┐ ┌───────────▼───────────────────┐
-│   Google Gemini API Provider  │ │ Google Workspace APIs         │
-│   (Intent, Briefs, Drafts)    │ │ (Gmail, Calendar, Drive)      │
-└───────────────────────────────┘ └───────────────────────────────┘
+                    ORKA CORE
+                       │
+             ┌─────────┴─────────┐
+             ↓                   ↓
+          WEB APP              CLI
+             ↓                   ↓
+          Backend API      Backend API
+             │                   │
+             └─────────┬─────────┘
+                       ↓
+                  ORKA AGENT
+                       ↓
+                    GEMINI
+                       ↓
+              TOOL REGISTRY
+              /     |      \
+          Gmail  Calendar  Drive
 ```
+
+---
+
+## 💻 Orka Terminal CLI (`orka`)
+
+OrkaAI includes a standalone terminal CLI binary powered by `commander`, `inquirer`, `chalk`, and `cli-table3`.
+
+### CLI Installation & Symlink
+
+```bash
+# Link the CLI binary globally to use the 'orka' command anywhere:
+npm link
+
+# Alternatively, run via npm:
+npm run cli -- "prepare me for my Acme meeting tomorrow"
+```
+
+### CLI Commands Reference
+
+| Command | Description |
+| :--- | :--- |
+| `orka "<goal>"` | Execute natural language outcome goal directly in terminal |
+| `orka` | Launch interactive terminal shell |
+| `orka demo` | Run centerpiece Acme meeting scenario in Demo Mode |
+| `orka auth login` | Check Google Workspace OAuth connection status |
+| `orka status` | Display system status, Gemini model, and active accounts |
+| `orka activity` | View recent auditable workflow executions and receipts |
+| `orka automations` | View active automation rules and AI discovered patterns |
+| `orka config mode [copilot\|autopilot]` | View or update Orka policy operating mode |
+| `orka --help` | Display CLI help menu |
+
+### CLI Approval Gate & Draft Editing
+When executing high-risk write actions (`send_email`) in Copilot mode, the CLI pauses and prompts:
+
+```text
+⚠ APPROVAL REQUIRED
+────────────────────────────────────────────────────────────
+Action:  Send Email
+To:      rahul.sharma@acmecorp.com
+Subject: Acme Integration Sync - Pre-Meeting Alignment & Docs
+Why:     Orka Policy Engine: Transmitting external email communication requires human sign-off.
+────────────────────────────────────────────────────────────
+
+Select action for this sensitive operation:
+❯ ✓  [a] Approve & Send Email
+  ✏️   [e] Edit Email Draft
+  ✕  [r] Reject Action
+```
+
+Selecting `[e] Edit Email Draft` allows interactive inline editing of recipient, subject line, and body before approval.
 
 ---
 
@@ -127,20 +177,20 @@ NODE_ENV=development
 # Install all dependencies
 npm install
 
-# Run TypeScript type check (0 errors)
+# Run TypeScript type check (0 errors across Web & CLI)
 npm run typecheck
 
-# Build for production
+# Build web production bundle
 npm run build
 
-# Start backend server & frontend client concurrently in development mode
+# Start backend server & frontend client concurrently
 npm run dev
 
-# Start backend API server only
-npm run dev:server
+# Start Orka CLI in natural language mode
+npm run cli -- "prepare me for my Acme meeting tomorrow"
 
-# Start frontend client only
-npm run dev:client
+# Start Orka CLI in interactive shell mode
+npm run cli
 ```
 
 - **Frontend Application:** `http://localhost:5173`
@@ -151,23 +201,17 @@ npm run dev:client
 
 ## 🎬 90-Second Hackathon Demo Scenario
 
-1. **Launch App:** Open `http://localhost:5173`.
-2. **Submit Outcome Goal:** Click **"Launch Acme Demo"** or enter:
-   ```text
-   Prepare me for my Acme meeting tomorrow.
-   ```
-3. **Observe Agent Execution:**
-   - Watch the text transform into the **DAG Execution Graph**.
-   - See steps execute in real time (`Calendar → Gmail → Drive → Analysis → Brief → Tasks → Draft`).
-   - Hover over nodes to inspect **"Why Orka Did This"**.
-4. **Human-in-the-Loop Approval:**
-   - When the **Approval Modal** pops up for `Send Email`, review the policy warning and recipient details.
-   - Edit the recipient, subject, or body text if desired.
-   - Click **Approve & Send Email**.
-5. **Verified Outcome:**
-   - Transition to the **"YOU'RE READY."** screen.
-   - Review Executive Summary, Key Decisions, Open Commitments, Created Tasks, Relevant Email/Document Cards, and Follow-Up Draft.
-   - Click **"View Execution Receipt"** to open the official audit trail modal.
+### Web Demo:
+1. Open `http://localhost:5173`.
+2. Click **"Launch Acme Demo"** or enter `"Prepare me for my Acme meeting tomorrow."`
+3. Watch the text transform into the **DAG Execution Graph**.
+4. On the Approval Modal, edit draft fields if desired and click **Approve & Send Email**.
+5. Review the **"YOU'RE READY."** outcome package and click **"View Execution Receipt"**.
+
+### CLI Demo:
+```bash
+npm run cli -- demo
+```
 
 ---
 

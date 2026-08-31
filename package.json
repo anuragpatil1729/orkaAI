@@ -1,26 +1,36 @@
 {
-  "name": "actionos",
+  "name": "orkaai",
   "version": "1.0.0",
-  "description": "ActionOS - AI Execution Layer for Productivity",
+  "description": "OrkaAI - AI Autonomous Execution Layer for Productivity",
   "main": "server/index.ts",
+  "bin": {
+    "orka": "cli/index.ts"
+  },
   "type": "module",
   "scripts": {
     "dev": "concurrently -n \"server,client\" -c \"cyan,magenta\" \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "vite",
     "dev:server": "tsx watch server/index.ts",
+    "cli": "tsx cli/index.ts",
+    "cli:dev": "tsx cli/index.ts",
+    "cli:build": "tsc",
     "build": "tsc && vite build",
     "start": "tsx server/index.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "chalk": "^5.6.2",
+    "cli-table3": "^0.6.5",
     "clsx": "^2.1.1",
+    "commander": "^13.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "framer-motion": "^12.4.10",
     "google-auth-library": "^9.15.0",
     "googleapis": "^144.0.0",
+    "inquirer": "^12.11.1",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -29,6 +39,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/inquirer": "^9.0.10",
     "@types/node": "^22.20.1",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
