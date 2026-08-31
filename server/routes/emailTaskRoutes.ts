@@ -46,9 +46,14 @@ const handleExecuteTask = async (req: AuthenticatedRequest, res: Response) => {
 
     emailTaskStore.updateTaskStatus(taskId, 'EXECUTING');
 
+    const targetRepo = (task.repositoryUrls && task.repositoryUrls.length > 0)
+      ? task.repositoryUrls[0]
+      : undefined;
+
     // Run Sandboxed Coding Agent
     const codingResult = await CodingAgent.executeCodingTask(
       task.requestedAction || task.subject,
+      targetRepo,
       [],
       `feat: ${task.requestedAction || task.subject}`
     );

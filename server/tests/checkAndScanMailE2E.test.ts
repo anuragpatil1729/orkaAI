@@ -78,6 +78,7 @@ async function runCheckAndScanMailE2E() {
 
   const codingResult = await CodingAgent.executeCodingTask(
     approvedTask.requestedAction || approvedTask.subject,
+    approvedTask.repositoryUrls?.[0],
     [],
     `feat: ${approvedTask.requestedAction}`
   );

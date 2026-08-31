@@ -26,24 +26,24 @@
       "Commit changes & push branch orka/task/<task_id>",
       "Open GitHub Pull Request & generate completion receipt"
     ],
-    "createdAt": "2026-08-31T14:43:41.613Z",
+    "createdAt": "2026-08-31T14:54:12.293Z",
     "links": [
       "https://github.com/sarthakpatil6636/atestproject"
     ],
     "receipt": {
-      "receiptId": "rcpt_e2e_mthcmi20",
+      "receiptId": "rcpt_e2e_mthd02vo",
       "taskId": "task_e2e_msg_test_collaborator_001",
       "originalRequest": "I have shared a repo with you and added you as a collaborator, it is a calculator project, I have done with CLI can you make the remaining GUI for the same.",
       "sender": "sarthakpatil6636@gmail.com",
-      "repository": "anuragpatil1729/orkaai",
+      "repository": "sarthakpatil6636/atestproject",
       "branch": "orka/task/calculator-project-gui-i",
-      "commitSha": "nh4ykez",
+      "commitSha": "mv5951g",
       "filesChangedCount": 2,
       "testsPassed": true,
       "buildPassed": true,
       "status": "COMPLETED",
-      "prUrl": "https://github.com/anuragpatil1729/orkaAI/pull/738",
-      "completedAt": "2026-08-31T14:43:48.072Z"
+      "prUrl": "https://github.com/sarthakpatil6636/atestproject/pull/613",
+      "completedAt": "2026-08-31T14:54:21.588Z"
     }
   }
 ]

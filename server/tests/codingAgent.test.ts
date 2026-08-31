@@ -15,6 +15,7 @@ async function runCodingAgentTests() {
   // Test 2: Execute coding task pipeline
   const result = await CodingAgent.executeCodingTask(
     'Implement authentication session handling',
+    undefined,
     [],
     'test: verify coding agent pipeline'
   );

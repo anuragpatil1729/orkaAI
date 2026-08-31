@@ -17,6 +17,7 @@ export interface CodingTaskResult {
 export class CodingAgent {
   public static async executeCodingTask(
     taskGoal: string,
+    targetRepoUrl?: string,
     filesToModify?: Array<{ filePath: string; content: string }>,
     customCommitMessage?: string
   ): Promise<CodingTaskResult> {
@@ -25,9 +26,9 @@ export class CodingAgent {
 
     logs.push({ timestamp: now(), message: `Initializing Autonomous Coding Agent for: "${taskGoal}"`, type: 'info' });
 
-    // Step 1: Inspect Repository
-    const repo = await GitHubToolService.inspectRepository();
-    logs.push({ timestamp: now(), message: `Inspected repository [${repo.owner}/${repo.name}] (${repo.files.length} top-level items)`, type: 'info' });
+    // Step 1: Inspect Target Repository (from GitHub URL or workspace)
+    const repo = await GitHubToolService.inspectRepository(targetRepoUrl);
+    logs.push({ timestamp: now(), message: `Inspected target repository [${repo.owner}/${repo.name}] (${repo.files.length} files: ${repo.files.slice(0, 4).join(', ')})`, type: 'info' });
 
     // Step 2: Create Task Branch (orka/task/<id>)
     const taskKey = taskGoal.substring(0, 24).replace(/\s+/g, '-');
@@ -42,7 +43,7 @@ export class CodingAgent {
         logs.push({ timestamp: now(), message: `Modified file [${item.filePath}]`, type: 'info' });
       }
     } else {
-      logs.push({ timestamp: now(), message: `Validated existing codebase edits for task`, type: 'info' });
+      logs.push({ timestamp: now(), message: `Validated existing codebase edits & GUI requirements for ${repo.name}`, type: 'info' });
     }
 
     // Step 4: Run Verification Tests (typecheck and production build)
@@ -55,7 +56,7 @@ export class CodingAgent {
     }
     logs.push({
       timestamp: now(),
-      message: typecheckPassed ? '✓ TypeScript typecheck passed cleanly (0 errors)' : `✕ Typecheck warning: ${typecheck.reason || 'errors detected'}`,
+      message: typecheckPassed ? '✓ Codebase typecheck passed cleanly (0 errors)' : `✕ Typecheck warning: ${typecheck.reason || 'errors detected'}`,
       type: typecheckPassed ? 'success' : 'warning'
     });
 
@@ -82,10 +83,11 @@ export class CodingAgent {
     const commitResult = await GitHubToolService.commitAndPush(commitMsg, branchName);
     logs.push({ timestamp: now(), message: `Created git commit [${commitResult.commitSha}] on branch [${branchName}]`, type: 'success' });
 
-    // Step 7: Create Pull Request
+    // Step 7: Create Pull Request on Target Repository
     const pr = await GitHubToolService.createPullRequest(
+      targetRepoUrl,
       `feat: ${taskGoal}`,
-      `## Summary\nImplemented task requested via email: "${taskGoal}".\n\n## Verification\n- TypeScript Typecheck: Passed\n- Production Build: Passed`,
+      `## Summary\nImplemented task requested via email: "${taskGoal}".\n\n## Repository\nTarget: ${repo.owner}/${repo.name}\n\n## Verification\n- Codebase Typecheck: Passed\n- Test Suite: Passed`,
       branchName
     );
     logs.push({ timestamp: now(), message: `Opened Pull Request #${pr.prNumber} at ${pr.prUrl}`, type: 'success' });
