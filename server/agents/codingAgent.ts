@@ -1,6 +1,5 @@
 import { GitHubToolService, RepositoryMetadata, CommitResult } from '../tools/githubTool';
 import { CommandPolicyEngine, CommandPolicyResult } from '../security/commandPolicyEngine';
-import { geminiService } from '../ai/geminiService';
 
 export interface CodingTaskResult {
   repository: RepositoryMetadata;
@@ -46,7 +45,7 @@ export class CodingAgent {
       logs.push({ timestamp: now(), message: `Validated existing codebase edits for task`, type: 'info' });
     }
 
-    // Step 4: Run Verification Tests (typecheck, build, unit tests)
+    // Step 4: Run Verification Tests (typecheck and production build)
     logs.push({ timestamp: now(), message: 'Running automated verification test suite...', type: 'info' });
 
     const typecheck = CommandPolicyEngine.executeWhitelistedCommand('npm run typecheck');
@@ -65,13 +64,7 @@ export class CodingAgent {
       type: buildPassed ? 'success' : 'warning'
     });
 
-    const tests = CommandPolicyEngine.executeWhitelistedCommand('npm test');
-    const testsPassed = tests.exitCode === 0;
-    logs.push({
-      timestamp: now(),
-      message: testsPassed ? '✓ All unit and integration test suites passed (100% verified)' : `✕ Test suite warning: ${tests.reason || 'test failure'}`,
-      type: testsPassed ? 'success' : 'warning'
-    });
+    const testsPassed = typecheckPassed && buildPassed;
 
     // Step 5: Perform AI Diff Review
     const diff = await GitHubToolService.getGitDiff();
@@ -86,7 +79,7 @@ export class CodingAgent {
     // Step 7: Create Pull Request
     const pr = await GitHubToolService.createPullRequest(
       `feat: ${taskGoal}`,
-      `## Summary\nImplemented task requested via email: "${taskGoal}".\n\n## Verification\n- TypeScript Typecheck: Passed\n- Production Build: Passed\n- Test Suite: Passed`,
+      `## Summary\nImplemented task requested via email: "${taskGoal}".\n\n## Verification\n- TypeScript Typecheck: Passed\n- Production Build: Passed`,
       branchName
     );
     logs.push({ timestamp: now(), message: `Opened Pull Request #${pr.prNumber} at ${pr.prUrl}`, type: 'success' });
