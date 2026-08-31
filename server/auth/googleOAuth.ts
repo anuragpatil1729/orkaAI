@@ -1,5 +1,7 @@
 import { google } from 'googleapis';
 
+let storedTokens: any = null;
+
 const getOAuth2Client = () => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
@@ -9,12 +11,28 @@ const getOAuth2Client = () => {
     return null;
   }
 
-  return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
+  const client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
+  if (storedTokens) {
+    client.setCredentials(storedTokens);
+  }
+  return client;
 };
 
 export class GoogleAuthService {
   static isConfigured(): boolean {
     return !!getOAuth2Client();
+  }
+
+  static isAuthorized(): boolean {
+    return !!storedTokens;
+  }
+
+  static getAuthenticatedClient() {
+    const client = getOAuth2Client();
+    if (client && storedTokens) {
+      return client;
+    }
+    return null;
   }
 
   static getAuthUrl(): string | null {
@@ -41,6 +59,7 @@ export class GoogleAuthService {
     if (!client) throw new Error('OAuth credentials not configured');
 
     const { tokens } = await client.getToken(code);
+    storedTokens = tokens;
     client.setCredentials(tokens);
     return tokens;
   }
