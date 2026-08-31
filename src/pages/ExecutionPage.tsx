@@ -5,27 +5,29 @@ import { ExecutionTimeline } from '../components/workflow/ExecutionTimeline';
 import { AIReasoningCard } from '../components/workflow/AIReasoningCard';
 import { ApprovalModal } from '../components/workflow/ApprovalModal';
 import { ResultView } from '../components/result/ResultView';
-import { Sparkles, ArrowLeft, RefreshCw, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Sparkles, ArrowLeft } from 'lucide-react';
+import { GlassCard, TactileButton, StatusPill } from '../components/ui/NeoTactileSystem';
 
 export const ExecutionPage: React.FC = () => {
-  const { currentWorkflow, resetWorkflow, isExecuting } = useWorkflow();
+  const { currentWorkflow, resetWorkflow } = useWorkflow();
 
   if (!currentWorkflow) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 text-center">
-        <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
-          <Sparkles className="w-8 h-8" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-5 text-center">
+        <div className="w-16 h-16 rounded-3xl bg-blue-500/20 text-blue-300 border border-blue-400/40 flex items-center justify-center shadow-[0_0_25px_rgba(59,130,246,0.3)]">
+          <Sparkles className="w-8 h-8 animate-pulse" />
         </div>
-        <h3 className="text-xl font-extrabold text-slate-200">No Execution Currently Active</h3>
-        <p className="text-sm text-slate-400 max-w-md">
-          Start a new task from the home dashboard or click "Launch Acme Demo" in the top bar to run the centerpiece scenario.
+        <h3 className="text-xl font-extrabold text-white">No Execution Currently Active</h3>
+        <p className="text-sm text-slate-400 max-w-md leading-relaxed">
+          Start a new outcome goal in the Command Control Center to run autonomous workflow tool execution.
         </p>
-        <button
+        <TactileButton
           onClick={resetWorkflow}
-          className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all"
+          variant="primary"
+          size="md"
         >
           Go to Home Control Center
-        </button>
+        </TactileButton>
       </div>
     );
   }
@@ -38,26 +40,25 @@ export const ExecutionPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <button
           onClick={resetWorkflow}
-          className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors"
+          className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Control Center</span>
         </button>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400 font-medium">Goal:</span>
-          <span className="text-xs font-bold text-indigo-300 max-w-xs truncate">{currentWorkflow.prompt}</span>
-          <span
-            className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full border ${
+          <span className="text-xs text-slate-400 font-mono font-medium">Goal:</span>
+          <span className="text-xs font-bold text-cyan-300 max-w-xs truncate font-mono">{currentWorkflow.prompt}</span>
+          <StatusPill
+            status={
               currentWorkflow.status === 'completed'
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                ? 'completed'
                 : currentWorkflow.status === 'waiting_approval'
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30 animate-pulse'
-                : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
-            }`}
-          >
-            {currentWorkflow.status}
-          </span>
+                ? 'waiting_approval'
+                : 'running'
+            }
+            text={currentWorkflow.status}
+          />
         </div>
       </div>
 

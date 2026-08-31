@@ -1,7 +1,7 @@
 import React from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { Mail, Calendar, HardDrive, CheckCircle2, ShieldCheck, Key, Grid } from 'lucide-react';
-import { GlassCard, StatusIndicator } from '../components/ui/TactilePrimitives';
+import { Mail, Calendar, HardDrive, ShieldCheck, Key, Grid } from 'lucide-react';
+import { GlassCard, StatusPill } from '../components/ui/NeoTactileSystem';
 
 export const IntegrationsPage: React.FC = () => {
   const { workspaceStatus, geminiConfigured } = useWorkflow();
@@ -30,7 +30,7 @@ export const IntegrationsPage: React.FC = () => {
   return (
     <div className="space-y-8 animate-fadeIn">
       <div>
-        <h1 className="text-2xl font-extrabold text-white flex items-center gap-2 font-mono">
+        <h1 className="text-2xl font-extrabold text-white flex items-center gap-2.5 font-mono">
           <Grid className="w-6 h-6 text-blue-400" />
           <span>Connected Workspace & APIs</span>
         </h1>
@@ -40,9 +40,9 @@ export const IntegrationsPage: React.FC = () => {
       </div>
 
       {/* Account Info Banner */}
-      <GlassCard className="p-6 flex items-center justify-between">
+      <GlassCard className="p-7 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+          <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.25)]">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
@@ -51,7 +51,7 @@ export const IntegrationsPage: React.FC = () => {
           </div>
         </div>
 
-        <StatusIndicator status={workspaceStatus.connected ? 'connected' : 'disconnected'} text={workspaceStatus.connected ? 'Google OAuth Connected' : 'Setup Required'} />
+        <StatusPill status={workspaceStatus.connected ? 'connected' : 'disconnected'} text={workspaceStatus.connected ? 'Google OAuth Connected' : 'Setup Required'} />
       </GlassCard>
 
       {/* Services List */}
@@ -61,14 +61,14 @@ export const IntegrationsPage: React.FC = () => {
           return (
             <GlassCard key={i} className="p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-blue-400">
-                  <Icon className="w-5 h-5" />
+                <div className="w-11 h-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center text-blue-400 shadow-inner">
+                  <Icon className="w-5.5 h-5.5" />
                 </div>
-                <StatusIndicator status={s.connected ? 'connected' : 'disconnected'} text={s.connected ? 'Connected' : 'Offline'} />
+                <StatusPill status={s.connected ? 'connected' : 'disconnected'} text={s.connected ? 'Connected' : 'Offline'} />
               </div>
 
               <div>
-                <h3 className="font-bold text-slate-100 text-base">{s.name}</h3>
+                <h3 className="font-extrabold text-slate-100 text-base">{s.name}</h3>
                 <p className="text-xs text-slate-400 mt-1 leading-relaxed">{s.description}</p>
               </div>
             </GlassCard>
@@ -77,7 +77,7 @@ export const IntegrationsPage: React.FC = () => {
       </div>
 
       {/* Gemini Engine Banner */}
-      <GlassCard className="p-6 space-y-3">
+      <GlassCard className="p-7 space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Key className="w-5 h-5 text-blue-400" />

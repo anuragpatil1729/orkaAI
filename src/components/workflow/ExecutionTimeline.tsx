@@ -1,7 +1,7 @@
 import React from 'react';
 import { WorkflowStep } from '../../types/agent';
 import { CheckCircle2, Clock, ShieldAlert, Sparkles } from 'lucide-react';
-import { GlassCard } from '../ui/TactilePrimitives';
+import { GlassCard } from '../ui/NeoTactileSystem';
 
 export const ExecutionTimeline: React.FC<{ steps: WorkflowStep[] }> = ({ steps }) => {
   return (
@@ -11,7 +11,7 @@ export const ExecutionTimeline: React.FC<{ steps: WorkflowStep[] }> = ({ steps }
         <span>Live Execution Timeline</span>
       </h3>
 
-      <div className="space-y-3.5 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-white/10">
+      <div className="space-y-4 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-white/10">
         {steps.map((s) => {
           let statusColor = 'bg-slate-800 text-slate-400 border-white/10';
           let StatusIcon = Clock;
@@ -33,7 +33,7 @@ export const ExecutionTimeline: React.FC<{ steps: WorkflowStep[] }> = ({ steps }
                 <StatusIcon className="w-4 h-4" />
               </div>
 
-              <div className="flex-1 p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 group-hover:bg-white/[0.08] transition-all">
+              <div className="flex-1 p-4 rounded-2xl bg-white/[0.04] border border-white/10 group-hover:bg-white/[0.08] transition-all">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-slate-100">{s.name}</h4>
                   <span className="text-[10px] text-cyan-300 font-mono font-semibold">{s.tool}</span>

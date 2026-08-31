@@ -1,7 +1,7 @@
 import React from 'react';
 import { ExecutionReceipt } from '../../types/agent';
 import { ShieldCheck, X } from 'lucide-react';
-import { TactileButton } from '../ui/TactilePrimitives';
+import { GlassPanel, TactileButton } from '../ui/NeoTactileSystem';
 
 interface ExecutionReceiptModalProps {
   receipt: ExecutionReceipt;
@@ -10,12 +10,12 @@ interface ExecutionReceiptModalProps {
 
 export const ExecutionReceiptModal: React.FC<ExecutionReceiptModalProps> = ({ receipt, onClose }) => {
   return (
-    <div className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-xl flex items-center justify-center p-4 animate-fadeIn select-none">
-      <div className="w-full max-w-lg neo-glass-panel border border-emerald-500/40 rounded-[32px] p-7 shadow-2xl space-y-6 relative overflow-hidden font-sans">
+    <div className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-2xl flex items-center justify-center p-4 animate-fadeIn select-none">
+      <GlassPanel glowEdge={true} className="w-full max-w-lg border border-emerald-500/40 p-8 shadow-2xl space-y-6 relative overflow-hidden font-sans">
         {/* Receipt header banner */}
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.35)]">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
@@ -28,14 +28,14 @@ export const ExecutionReceiptModal: React.FC<ExecutionReceiptModalProps> = ({ re
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-white/10 transition-colors"
+            className="text-slate-400 hover:text-white p-2 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Monospaced System Audit Report */}
-        <div className="p-5 rounded-2xl bg-[#0B0F15]/90 border border-white/10 space-y-4 font-mono text-xs text-slate-200">
+        {/* Monospaced Diagnostic System Audit Report */}
+        <div className="p-5 rounded-2xl bg-[#0B0F15]/95 border border-white/10 space-y-4 font-mono text-xs text-slate-200 shadow-inner">
           <div className="flex items-center justify-between border-b border-white/10 pb-2.5 text-[11px]">
             <span className="text-slate-500 font-mono">ID: {receipt.receiptId}</span>
             <span className="text-emerald-400 font-bold font-mono">VERIFIED BY POLICY ENGINE</span>
@@ -74,19 +74,19 @@ export const ExecutionReceiptModal: React.FC<ExecutionReceiptModalProps> = ({ re
           <div className="space-y-2 pt-3 border-t border-white/10 text-[11px]">
             <span className="text-slate-500 uppercase text-[10px]">COMPONENT VERIFICATION:</span>
             <div className="space-y-1.5 text-slate-300">
-              <div className="flex items-center justify-between p-2 rounded-xl bg-white/5">
+              <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white/5 border border-white/5">
                 <span className="font-bold">CALENDAR</span>
                 <span className="text-emerald-400 font-bold">✓ Verified ({receipt.itemsAudited.calendarMeeting})</span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-xl bg-white/5">
+              <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white/5 border border-white/5">
                 <span className="font-bold">GMAIL</span>
                 <span className="text-emerald-400 font-bold">✓ Verified ({receipt.itemsAudited.emailsScanned} scanned)</span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-xl bg-white/5">
+              <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white/5 border border-white/5">
                 <span className="font-bold">DRIVE</span>
                 <span className="text-emerald-400 font-bold">✓ Verified ({receipt.itemsAudited.docsAnalyzed} analyzed)</span>
               </div>
-              <div className="flex items-center justify-between p-2 rounded-xl bg-white/5">
+              <div className="flex items-center justify-between p-2.5 rounded-2xl bg-white/5 border border-white/5">
                 <span className="font-bold">EMAIL DRAFT</span>
                 <span className="text-cyan-300 font-bold">✓ Approved & Prepared</span>
               </div>
@@ -100,11 +100,11 @@ export const ExecutionReceiptModal: React.FC<ExecutionReceiptModalProps> = ({ re
             Accountable • Auditable • Verified
           </span>
 
-          <TactileButton onClick={onClose} variant="primary" className="px-5 py-2 text-xs">
+          <TactileButton onClick={onClose} variant="primary" size="md">
             Close Receipt
           </TactileButton>
         </div>
-      </div>
+      </GlassPanel>
     </div>
   );
 };

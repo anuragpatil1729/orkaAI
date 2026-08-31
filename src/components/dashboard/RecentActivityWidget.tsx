@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useWorkflow } from '../../context/WorkflowContext';
 import { ActivityLogItem } from '../../types/activity';
 import { Clock, ChevronRight, Zap } from 'lucide-react';
-import { GlassCard, StatusIndicator } from '../ui/TactilePrimitives';
+import { GlassCard, StatusPill } from '../ui/NeoTactileSystem';
 
 export const RecentActivityWidget: React.FC = () => {
   const [activities, setActivities] = useState<ActivityLogItem[]>([]);
@@ -27,23 +27,23 @@ export const RecentActivityWidget: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('activity')}
-          className="text-xs text-blue-400 hover:text-cyan-300 font-bold flex items-center gap-1 transition-colors"
+          className="text-xs text-blue-400 hover:text-cyan-300 font-bold flex items-center gap-1 transition-colors cursor-pointer"
         >
           <span>View All</span>
           <ChevronRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {activities.slice(0, 3).map((act) => (
           <div
             key={act.id}
             onClick={() => setActiveTab('activity')}
-            className="p-3.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 flex items-center justify-between cursor-pointer transition-all group"
+            className="p-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 flex items-center justify-between cursor-pointer transition-all group"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-9 h-9 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                <Zap className="w-4 h-4" />
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20 shadow-[0_0_12px_rgba(52,211,153,0.2)]">
+                <Zap className="w-4.5 h-4.5" />
               </div>
               <div>
                 <h4 className="text-xs font-bold text-slate-200 group-hover:text-blue-300 transition-colors">
@@ -59,7 +59,7 @@ export const RecentActivityWidget: React.FC = () => {
               </div>
             </div>
 
-            <StatusIndicator
+            <StatusPill
               status={
                 act.status === 'Completed'
                   ? 'completed'

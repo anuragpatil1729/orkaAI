@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityLogItem } from '../types/activity';
 import { Activity, CheckCircle2, Zap, ExternalLink, Inbox } from 'lucide-react';
-import { GlassCard, StatusIndicator } from '../components/ui/TactilePrimitives';
+import { GlassCard, StatusPill } from '../components/ui/NeoTactileSystem';
 
 export const ActivityPage: React.FC = () => {
   const [activities, setActivities] = useState<ActivityLogItem[]>([]);
@@ -18,7 +18,7 @@ export const ActivityPage: React.FC = () => {
   return (
     <div className="space-y-8 animate-fadeIn">
       <div>
-        <h1 className="text-2xl font-extrabold text-white flex items-center gap-2 font-mono">
+        <h1 className="text-2xl font-extrabold text-white flex items-center gap-2.5 font-mono">
           <Activity className="w-6 h-6 text-blue-400" />
           <span>Autonomous Activity Log</span>
         </h1>
@@ -33,7 +33,7 @@ export const ActivityPage: React.FC = () => {
             <Inbox className="w-6 h-6" />
           </div>
           <h3 className="text-sm font-bold text-slate-200">No executions recorded yet</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
             Enter an outcome goal in the Command Control Center to begin executing autonomous AI workflows.
           </p>
         </GlassCard>
@@ -45,18 +45,18 @@ export const ActivityPage: React.FC = () => {
               className="p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 group"
             >
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(52,211,153,0.2)]">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-slate-100 group-hover:text-blue-300 transition-colors">
+                  <h3 className="text-sm font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">
                     {act.goal}
                   </h3>
                   <div className="flex items-center gap-3 text-xs text-slate-400 font-medium">
                     <span className="font-mono">{act.timeFormatted}</span>
                     <span>•</span>
-                    <span className="text-cyan-300 font-semibold flex items-center gap-1">
+                    <span className="text-cyan-300 font-semibold flex items-center gap-1 font-mono">
                       <Zap className="w-3.5 h-3.5 text-blue-400" />
                       {act.actionsCount} verified actions
                     </span>
@@ -65,8 +65,17 @@ export const ActivityPage: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <StatusIndicator status="completed" text={act.status} />
-                <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-cyan-300 transition-colors" />
+                <StatusPill
+                  status={
+                    act.status === 'Completed'
+                      ? 'completed'
+                      : act.status === 'In Progress'
+                      ? 'running'
+                      : 'failed'
+                  }
+                  text={act.status}
+                />
+                <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-cyan-300 transition-colors cursor-pointer" />
               </div>
             </GlassCard>
           ))}

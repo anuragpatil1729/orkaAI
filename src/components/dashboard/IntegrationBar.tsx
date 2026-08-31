@@ -1,7 +1,7 @@
 import React from 'react';
 import { useWorkflow } from '../../context/WorkflowContext';
 import { Mail, Calendar, HardDrive, CheckCircle2, ShieldCheck } from 'lucide-react';
-import { GlassCard } from '../ui/TactilePrimitives';
+import { GlassCard } from '../ui/NeoTactileSystem';
 
 export const IntegrationBar: React.FC = () => {
   const { workspaceStatus, setActiveTab } = useWorkflow();
@@ -13,10 +13,10 @@ export const IntegrationBar: React.FC = () => {
   ];
 
   return (
-    <GlassCard className="p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div className="flex items-center gap-3.5">
-        <div className="w-10 h-10 rounded-2xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
-          <ShieldCheck className="w-5 h-5" />
+    <GlassCard className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="flex items-center gap-4">
+        <div className="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.25)]">
+          <ShieldCheck className="w-5.5 h-5.5" />
         </div>
         <div>
           <h4 className="text-sm font-bold text-slate-100">Google Workspace Integrations</h4>
@@ -28,8 +28,8 @@ export const IntegrationBar: React.FC = () => {
         {services.map((s, idx) => {
           const Icon = s.icon;
           return (
-            <div key={idx} className="flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-white/5 border border-white/10 text-xs font-medium">
-              <Icon className="w-3.5 h-3.5 text-slate-400" />
+            <div key={idx} className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/[0.04] border border-white/10 text-xs font-semibold">
+              <Icon className="w-4 h-4 text-blue-400" />
               <span className="text-slate-200">{s.name}</span>
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-1" />
             </div>
@@ -38,7 +38,7 @@ export const IntegrationBar: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('connected')}
-          className="text-xs text-blue-400 hover:text-cyan-300 font-bold px-3 py-1.5 rounded-xl hover:bg-white/5 transition-all"
+          className="text-xs text-blue-400 hover:text-cyan-300 font-extrabold px-3 py-1.5 rounded-xl hover:bg-white/5 transition-all cursor-pointer"
         >
           Manage →
         </button>

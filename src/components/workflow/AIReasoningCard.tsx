@@ -1,6 +1,6 @@
 import React from 'react';
-import { Bot, Cpu } from 'lucide-react';
-import { AIActivityIndicator, GlassCard } from '../ui/TactilePrimitives';
+import { Cpu } from 'lucide-react';
+import { GlassCard, AIIndicator } from '../ui/NeoTactileSystem';
 
 interface ExecutionActivityCardProps {
   logs: Array<{
@@ -19,7 +19,7 @@ export const AIReasoningCard: React.FC<ExecutionActivityCardProps> = ({ logs }) 
           <span className="font-bold text-slate-100 text-sm">Execution Activity Stream</span>
         </div>
         <div className="flex items-center gap-2">
-          <AIActivityIndicator size="sm" active={true} />
+          <AIIndicator size="sm" active={true} />
           <span className="text-[10px] text-cyan-300 font-mono font-bold tracking-wider">REAL-TIME EVENT STREAM</span>
         </div>
       </div>
@@ -35,7 +35,7 @@ export const AIReasoningCard: React.FC<ExecutionActivityCardProps> = ({ logs }) 
                   : log.type === 'warning'
                   ? 'text-amber-300 font-bold'
                   : log.type === 'tool'
-                  ? 'text-blue-300'
+                  ? 'text-blue-300 font-semibold'
                   : 'text-slate-300'
               }
             >
