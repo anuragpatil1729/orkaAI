@@ -50,6 +50,9 @@ export class CodingAgent {
 
     const typecheck = CommandPolicyEngine.executeWhitelistedCommand('npm run typecheck');
     const typecheckPassed = typecheck.exitCode === 0;
+    if (!typecheckPassed) {
+      console.warn('[CodingAgent] Typecheck failed:', typecheck.output || typecheck.reason);
+    }
     logs.push({
       timestamp: now(),
       message: typecheckPassed ? '✓ TypeScript typecheck passed cleanly (0 errors)' : `✕ Typecheck warning: ${typecheck.reason || 'errors detected'}`,
@@ -58,6 +61,9 @@ export class CodingAgent {
 
     const build = CommandPolicyEngine.executeWhitelistedCommand('npm run build');
     const buildPassed = build.exitCode === 0;
+    if (!buildPassed) {
+      console.warn('[CodingAgent] Build failed:', build.output || build.reason);
+    }
     logs.push({
       timestamp: now(),
       message: buildPassed ? '✓ Production build compiled cleanly' : `✕ Build warning: ${build.reason || 'build error'}`,
