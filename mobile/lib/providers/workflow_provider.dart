@@ -103,16 +103,31 @@ class WorkflowProvider extends ChangeNotifier {
     _stepTimer = Timer.periodic(const Duration(milliseconds: 450), (timer) async {
       if (_execution == null || _execution!.status == 'completed' || _execution!.status == 'failed' || _execution!.status == 'waiting_approval') {
         timer.cancel();
+        if (_execution?.status == 'completed') {
+          if (_execution?.result != null) {
+            _result = _execution!.result;
+            notifyListeners();
+          } else {
+            _fetchFinalResult();
+          }
+        }
         return;
       }
 
       try {
         _execution = await OrkaApiClient.advanceWorkflow(_execution!.id);
+        if (_execution?.result != null) {
+          _result = _execution!.result;
+        }
         notifyListeners();
 
-        if (_execution!.status == 'completed') {
+        if (_execution!.status == 'completed' || _execution!.status == 'waiting_approval' || _execution!.status == 'failed') {
           timer.cancel();
-          _fetchFinalResult();
+          if (_execution!.status == 'completed') {
+            if (_result == null) {
+              _fetchFinalResult();
+            }
+          }
         }
       } catch (e) {
         timer.cancel();
@@ -132,6 +147,9 @@ class WorkflowProvider extends ChangeNotifier {
         subject: subject,
         body: body,
       );
+      if (_execution?.result != null) {
+        _result = _execution!.result;
+      }
       notifyListeners();
 
       _startStepLoop();

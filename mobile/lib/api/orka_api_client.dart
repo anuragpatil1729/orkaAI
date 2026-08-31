@@ -44,6 +44,18 @@ class OrkaApiClient {
     throw Exception('Failed to advance step: ${response.body}');
   }
 
+  static Future<WorkflowExecution?> getWorkflow(String workflowId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/agent/workflow/$workflowId'),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return WorkflowExecution.fromJson(data['workflow']);
+    }
+    return null;
+  }
+
   static Future<WorkflowExecution> approveStep(
     String workflowId,
     String stepId, {
@@ -70,13 +82,12 @@ class OrkaApiClient {
   }
 
   static Future<ExecutionResult?> getResult(String workflowId) async {
-    // For demo/real parity, fetching execution state brings full result payload
-    final response = await http.post(
-      Uri.parse('$_baseUrl/api/agent/workflow/$workflowId/advance'),
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/agent/workflow/$workflowId'),
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      if (data['workflow']['result'] != null) {
+      if (data['workflow'] != null && data['workflow']['result'] != null) {
         return ExecutionResult.fromJson(data['workflow']['result']);
       }
     }

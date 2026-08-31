@@ -35,7 +35,7 @@ router.post('/workflow/:id/advance', async (req, res) => {
       return res.status(404).json({ error: `Workflow [${id}] not found` });
     }
     if (existing.status === 'completed' || existing.status === 'failed') {
-      return res.status(409).json({ error: `Workflow [${id}] is already ${existing.status}`, workflow: existing });
+      return res.json({ workflow: existing });
     }
 
     const workflow = await workflowExecutor.advanceWorkflow(id);
@@ -68,7 +68,7 @@ router.post('/workflow/:id/approve', async (req, res) => {
       return res.status(400).json({ error: 'stepId is required for approval' });
     }
     if (existing.status === 'completed' || existing.status === 'failed') {
-      return res.status(409).json({ error: `Workflow [${id}] is already ${existing.status}` });
+      return res.json({ workflow: existing });
     }
 
     const workflow = await workflowExecutor.approveStep(id, stepId, { to, subject, body });

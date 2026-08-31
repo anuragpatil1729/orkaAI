@@ -1,3 +1,5 @@
+import 'result.dart';
+
 class WorkflowStep {
   final String id;
   final String name;
@@ -80,6 +82,7 @@ class WorkflowExecution {
   final String? currentStepId;
   final List<WorkflowStep> steps;
   final ApprovalRequest? approvalRequest;
+  final ExecutionResult? result;
 
   WorkflowExecution({
     required this.id,
@@ -90,6 +93,7 @@ class WorkflowExecution {
     this.currentStepId,
     required this.steps,
     this.approvalRequest,
+    this.result,
   });
 
   factory WorkflowExecution.fromJson(Map<String, dynamic> json) {
@@ -105,6 +109,9 @@ class WorkflowExecution {
           .toList(),
       approvalRequest: json['approvalRequest'] != null
           ? ApprovalRequest.fromJson(json['approvalRequest'])
+          : null,
+      result: json['result'] != null
+          ? ExecutionResult.fromJson(json['result'])
           : null,
     );
   }
