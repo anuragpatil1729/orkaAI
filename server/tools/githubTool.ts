@@ -140,28 +140,7 @@ index 0000000..f9821ab
     return 'Clean sandboxed git diff. Verification passed.';
   }
 
-  public static async commitAndPush(message: string, branchName: string, targetUrl?: string): Promise<CommitResult> {
-    const parsed = this.parseRepoUrl(targetUrl);
-    let sha = Math.random().toString(36).substring(2, 9);
 
-    if (parsed) {
-      // For external target repos (e.g. sarthakpatil6636/atestproject)
-      return {
-        branch: branchName,
-        commitSha: sha,
-        filesChanged: ['gui.py', 'calc.py', 'test_calculator.py'],
-        message: `feat: implement Tkinter GUI interface for ${parsed.repo}`,
-        pushed: true
-      };
-    }
-
-    // For local OrkaAI workspace
-    try {
-      execSync(`git checkout -b "${branchName}" || git checkout "${branchName}"`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-      execSync(`git add .`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-      execSync(`git commit -m "${message.replace(/"/g, '\\"')}" --allow-empty`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-      execSync(`git push origin "${branchName}" --force`, { cwd: this.workspaceRoot, stdio: 'ignore' });
-      sha = execSync(`git rev-parse --short HEAD`, { cwd: this.workspaceRoot }).toString().trim();
       execSync(`git checkout main`, { cwd: this.workspaceRoot, stdio: 'ignore' });
     } catch (err: any) {
       console.warn('[GitHubToolService] git push branch note:', err?.message || err);
@@ -218,6 +197,7 @@ index 0000000..f9821ab
         console.warn('[GitHubToolService] Error creating PR via GitHub API:', err);
       }
     }
+
 
     const prUrl = `https://github.com/${owner}/${repo}/compare/main...${encodeURIComponent(branchName)}?expand=1`;
     return {
