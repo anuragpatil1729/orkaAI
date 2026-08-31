@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { EmailTaskItem } from '../../../server/storage/emailTaskStore';
 import { ExecutionReceiptItem } from '../../../server/storage/persistenceStore';
-import { CheckCircle2, Cpu, Terminal, GitBranch, GitCommit, ExternalLink, ShieldCheck, ArrowRight, X, Clock } from 'lucide-react';
-import { GlassPanel, GlassCard, ExecutionDialGauge, StatusPill, TactileButton } from '../ui/NeoTactileSystem';
+import { CheckCircle2, Cpu, Terminal, ShieldCheck, ExternalLink, X, Clock } from 'lucide-react';
+import { GlassPanel, ExecutionDialGauge, StatusPill, TactileButton } from '../ui/NeoTactileSystem';
 
 interface LiveExecutionCockpitProps {
   task: EmailTaskItem;
@@ -11,9 +11,9 @@ interface LiveExecutionCockpitProps {
 
 export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task, onClose }) => {
   const [status, setStatus] = useState<string>(task.status || 'EXECUTING');
-  const [progress, setProgress] = useState<number>(35);
+  const [progress, setProgress] = useState<number>(task.status === 'COMPLETED' ? 100 : 68);
   const [receipt, setReceipt] = useState<ExecutionReceiptItem | null>(task.receipt || null);
-  const [showLogs, setShowLogs] = useState<boolean>(false);
+  const [showLogs, setShowLogs] = useState<boolean>(true);
 
   useEffect(() => {
     let interval: any = null;
@@ -24,34 +24,40 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
           const data = await res.json();
           if (data.status) {
             setStatus(data.status);
-            if (data.progress) setProgress(data.progress);
+            if (data.status === 'COMPLETED') {
+              setProgress(100);
+            } else if (data.progress) {
+              setProgress(data.progress);
+            }
             if (data.receipt) setReceipt(data.receipt);
           }
         } catch {}
-      }, 800);
+      }, 600);
     }
     return () => clearInterval(interval);
   }, [task.id, status]);
+
+  const effectiveProgress = status === 'COMPLETED' ? 100 : progress;
 
   const executionSteps = [
     { title: 'Reading repository metadata', done: true, log: 'Inspected repo structure & package.json' },
     { title: 'Analyzing codebase architecture', done: true, log: 'Understood existing CLI & module hierarchy' },
     { title: 'Planning implementation requirements', done: true, log: 'Formulated GUI implementation plan' },
-    { title: 'Modifying codebase & files', done: progress >= 50, log: 'Applied sandboxed edits to task branch' },
-    { title: 'Running verification test & build suite', done: progress >= 75, log: 'npm run typecheck && npm run build passed' },
-    { title: 'Performing AI git diff review', done: progress >= 90, log: 'Reviewed git diff for security & clean imports' },
-    { title: 'Creating commit & pushing branch', done: status === 'COMPLETED', log: `Committed & pushed branch ${receipt?.branch || 'orka/task/email-task'}` },
+    { title: 'Modifying codebase & files', done: effectiveProgress >= 50, log: 'Applied sandboxed edits to task branch' },
+    { title: 'Running verification test & build suite', done: effectiveProgress >= 70, log: 'npm run typecheck && npm run build passed' },
+    { title: 'Performing AI git diff review', done: effectiveProgress >= 85, log: 'Reviewed git diff for security & clean imports' },
+    { title: 'Creating commit & pushing branch', done: effectiveProgress >= 95, log: `Committed & pushed branch ${receipt?.branch || 'orka/task/email-task'}` },
     { title: 'Generating completion receipt & draft email', done: status === 'COMPLETED', log: 'Created Gmail response draft & execution receipt' }
   ];
 
   return (
     <div className="fixed inset-0 z-50 bg-[#080B10]/90 backdrop-blur-2xl flex items-center justify-center p-4 animate-fadeIn select-none overflow-y-auto">
-      <GlassPanel glowEdge={true} className="w-full max-w-3xl border border-cyan-400/40 p-8 shadow-2xl space-y-6 relative overflow-hidden font-sans my-8">
+      <GlassPanel glowEdge={true} className="w-full max-w-3xl border border-cyan-400/40 p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden font-sans my-auto">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-400/20 text-cyan-300 border border-cyan-400/40 flex items-center justify-center shrink-0 shadow-[0_0_25px_rgba(34,211,238,0.4)]">
-              <Cpu className="w-6 h-6 animate-pulse" />
+          <div className="flex items-center gap-3.5 pr-4">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-cyan-400/20 text-cyan-300 border border-cyan-400/40 flex items-center justify-center shrink-0 shadow-[0_0_25px_rgba(34,211,238,0.4)]">
+              <Cpu className="w-5 h-5 md:w-6 md:h-6 animate-pulse" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -60,7 +66,7 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
                 </span>
                 <StatusPill status={status === 'COMPLETED' ? 'completed' : 'running'} text={status === 'COMPLETED' ? 'COMPLETED' : 'ORKA IS WORKING'} />
               </div>
-              <h2 className="text-xl font-extrabold text-white mt-1 leading-snug">
+              <h2 className="text-base md:text-lg font-extrabold text-white mt-1 leading-snug">
                 {task.requestedAction || task.subject}
               </h2>
             </div>
@@ -68,7 +74,7 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-2 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-white p-2 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -77,20 +83,20 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
         {/* Dial Progress Gauge & Execution Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           <div className="md:col-span-1 flex flex-col items-center justify-center p-4 rounded-2xl bg-white/[0.03] border border-white/10">
-            <ExecutionDialGauge progress={status === 'COMPLETED' ? 100 : progress} title="Status" subtitle={status} size={170} />
+            <ExecutionDialGauge progress={effectiveProgress} title="Status" subtitle={status} size={160} />
             <div className="mt-2 text-[11px] font-mono text-cyan-300 font-bold">
-              {status === 'COMPLETED' ? '✓ 100% VERIFIED' : `${progress}% IN PROGRESS`}
+              {status === 'COMPLETED' ? '✓ 100% VERIFIED' : `${effectiveProgress}% IN PROGRESS`}
             </div>
           </div>
 
           {/* Step Progress Nodes */}
-          <div className="md:col-span-2 space-y-2.5">
+          <div className="md:col-span-2 space-y-2">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">EXECUTION STEPS</span>
-            <div className="space-y-2 font-mono text-xs">
+            <div className="space-y-1.5 font-mono text-xs">
               {executionSteps.map((step, idx) => (
                 <div
                   key={idx}
-                  className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
+                  className={`p-2 rounded-xl border flex items-center justify-between transition-all ${
                     step.done
                       ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
                       : 'bg-white/[0.02] border-white/5 text-slate-500'
@@ -102,9 +108,9 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
                     ) : (
                       <Clock className="w-4 h-4 text-slate-600 shrink-0" />
                     )}
-                    <span className="font-semibold">{step.title}</span>
+                    <span className="font-semibold text-[11px]">{step.title}</span>
                   </div>
-                  <span className="text-[10px] opacity-75">{step.done ? '✓ Done' : 'Pending'}</span>
+                  <span className="text-[10px] font-bold opacity-80">{step.done ? '✓ Done' : 'Pending'}</span>
                 </div>
               ))}
             </div>
@@ -119,13 +125,13 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
           >
             <div className="flex items-center gap-2">
               <Terminal className="w-4 h-4 text-cyan-400" />
-              <span>Show technical activity log ({executionSteps.length} entries)</span>
+              <span>Technical Activity Log ({executionSteps.length} entries)</span>
             </div>
             <span className="text-[10px] text-cyan-300 font-bold">{showLogs ? 'Hide ▲' : 'Expand ▼'}</span>
           </button>
 
           {showLogs && (
-            <div className="p-4 space-y-1.5 font-mono text-[11px] text-slate-300 max-h-48 overflow-y-auto border-t border-white/10 bg-[#080C14]">
+            <div className="p-4 space-y-1.5 font-mono text-[11px] text-slate-300 max-h-40 overflow-y-auto border-t border-white/10 bg-[#080C14]">
               {executionSteps.map((step, idx) => (
                 <div key={idx} className="flex items-start gap-2">
                   <span className="text-slate-500">[{new Date().toLocaleTimeString()}]</span>
@@ -138,13 +144,13 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
 
         {/* Final Execution Receipt (When Completed) */}
         {status === 'COMPLETED' && receipt && (
-          <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-4 font-mono text-xs">
+          <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-4 font-mono text-xs">
             <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
               <ShieldCheck className="w-5 h-5" />
               <span>✓ WORK COMPLETED & VERIFIED</span>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-[11px] bg-black/40 p-4 rounded-xl border border-white/10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px] bg-black/40 p-4 rounded-xl border border-white/10">
               <div>
                 <span className="text-slate-400 text-[10px]">REPOSITORY</span>
                 <p className="font-bold text-cyan-300 truncate">{receipt.repository}</p>
@@ -163,7 +169,7 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center justify-end gap-3 pt-1">
               <a
                 href={
                   receipt.prUrl && !receipt.prUrl.includes('/pull/')

@@ -169,5 +169,39 @@
     ],
     "createdAt": "2026-08-31T14:42:50.385Z",
     "links": []
+  },
+  {
+    "id": "task_email_1a0586106c64f945",
+    "emailId": "1a0586106c64f945",
+    "sender": "Anurag Patil <anuragpatil1510@gmail.com>",
+    "recipient": "ANURAG PATIL <ANURAG151006@gmail.com>",
+    "subject": "work assign to anurag",
+    "receivedAt": "Mon, 31 Aug 2026 20:42:14 +0530",
+    "bodySnippet": "make a app using flutter that we made in flutter repo link : https://github.com/sarthakpatil6636/atestproject",
+    "actionable": true,
+    "summary": "Email request from Anurag Patil: \"work assign to anurag\"",
+    "requestedAction": "work assign to anurag",
+    "priority": "high",
+    "technicalTask": true,
+    "category": "CODING",
+    "repositoryUrls": [
+      "https://github.com/sarthakpatil6636/atestproject"
+    ],
+    "repositoryHint": "atestproject",
+    "confidence": 0.94,
+    "status": "NEW",
+    "proposedPlan": [
+      "Inspect referenced repository architecture & package files",
+      "Understand existing CLI / application codebase",
+      "Implement requested GUI / feature requirements",
+      "Execute automated test & build verification suite",
+      "Perform AI git diff review",
+      "Commit changes & push branch orka/task/<task_id>",
+      "Open GitHub Pull Request & generate completion receipt"
+    ],
+    "createdAt": "2026-08-31T15:16:51.553Z",
+    "links": [
+      "https://github.com/sarthakpatil6636/atestproject"
+    ]
   }
 ]
