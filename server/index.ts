@@ -7,6 +7,7 @@ import toolsRoutes from './routes/toolsRoutes';
 import automationsRoutes from './routes/automationsRoutes';
 import activityRoutes from './routes/activityRoutes';
 import emailTaskRoutes from './routes/emailTaskRoutes';
+import githubRoutes from './routes/githubRoutes';
 
 dotenv.config();
 
@@ -23,6 +24,8 @@ app.use('/api/tools', toolsRoutes);
 app.use('/api/automations', automationsRoutes);
 app.use('/api/activity', activityRoutes);
 app.use('/api/tasks', emailTaskRoutes);
+app.use('/api/mail', emailTaskRoutes);
+app.use('/api/github', githubRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({

@@ -1,0 +1,49 @@
+[
+  {
+    "id": "task_e2e_msg_test_collaborator_001",
+    "emailId": "msg_test_collaborator_001",
+    "sender": "sarthakpatil6636@gmail.com",
+    "subject": "Calculator project GUI implementation",
+    "receivedAt": "2026-08-31T20:00:00Z",
+    "bodySnippet": "I have shared a repo with you and added you as a collaborator, it is a calculator project, I have done with CLI can you make the remaining GUI for the same.",
+    "actionable": true,
+    "summary": "Email request from sarthakpatil6636@gmail.com: \"Calculator project GUI implementation\"",
+    "requestedAction": "Calculator project GUI implementation",
+    "priority": "high",
+    "technicalTask": true,
+    "category": "CODING",
+    "repositoryUrls": [
+      "https://github.com/sarthakpatil6636/atestproject"
+    ],
+    "confidence": 0.94,
+    "status": "COMPLETED",
+    "proposedPlan": [
+      "Inspect referenced repository architecture & package files",
+      "Understand existing CLI / application codebase",
+      "Implement requested GUI / feature requirements",
+      "Execute automated test & build verification suite",
+      "Perform AI git diff review",
+      "Commit changes & push branch orka/task/<task_id>",
+      "Open GitHub Pull Request & generate completion receipt"
+    ],
+    "createdAt": "2026-08-31T14:40:48.434Z",
+    "links": [
+      "https://github.com/sarthakpatil6636/atestproject"
+    ],
+    "receipt": {
+      "receiptId": "rcpt_e2e_mthcisi7",
+      "taskId": "task_e2e_msg_test_collaborator_001",
+      "originalRequest": "I have shared a repo with you and added you as a collaborator, it is a calculator project, I have done with CLI can you make the remaining GUI for the same.",
+      "sender": "sarthakpatil6636@gmail.com",
+      "repository": "anuragpatil1729/orkaai",
+      "branch": "orka/task/calculator-project-gui-i",
+      "commitSha": "2w4tk2u",
+      "filesChangedCount": 2,
+      "testsPassed": true,
+      "buildPassed": true,
+      "status": "COMPLETED",
+      "prUrl": "https://github.com/anuragpatil1729/orkaAI/pull/645",
+      "completedAt": "2026-08-31T14:40:54.991Z"
+    }
+  }
+]

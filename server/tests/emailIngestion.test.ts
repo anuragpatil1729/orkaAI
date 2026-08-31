@@ -58,6 +58,8 @@ async function runEmailIngestionTests() {
     requestedAction: 'Fix auth issue',
     priority: 'high',
     technicalTask: true,
+    category: 'CODING',
+    repositoryUrls: [],
     confidence: 0.95,
     status: 'NEW',
     proposedPlan: ['Inspect auth', 'Fix issue'],

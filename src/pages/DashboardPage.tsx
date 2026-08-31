@@ -1,14 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CommandInput } from '../components/dashboard/CommandInput';
 import { IntegrationBar } from '../components/dashboard/IntegrationBar';
 import { RecentActivityWidget } from '../components/dashboard/RecentActivityWidget';
 import { IncomingWorkWidget } from '../components/tasks/IncomingWorkWidget';
+import { CheckScanMailButton } from '../components/dashboard/CheckScanMailButton';
+import { LiveExecutionCockpit } from '../components/tasks/LiveExecutionCockpit';
 import { Sparkles, Layers, Cpu } from 'lucide-react';
 import { GlassPanel, GlassCard, ExecutionDialGauge, StatusPill } from '../components/ui/NeoTactileSystem';
 import { useWorkflow } from '../context/WorkflowContext';
+import { EmailTaskItem } from '../../server/storage/emailTaskStore';
 
 export const DashboardPage: React.FC = () => {
   const { currentWorkflow } = useWorkflow();
+  const [activeExecutionTask, setActiveExecutionTask] = useState<EmailTaskItem | null>(null);
+
+  const handleScanComplete = (newTasks: EmailTaskItem[], allTasks: EmailTaskItem[]) => {
+    const executing = allTasks.find(t => t.status === 'EXECUTING');
+    if (executing) {
+      setActiveExecutionTask(executing);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-fadeIn max-w-6xl mx-auto">
@@ -30,6 +41,9 @@ export const DashboardPage: React.FC = () => {
           </p>
         </div>
       </GlassPanel>
+
+      {/* HERO HERO ACTION: CHECK & SCAN MY MAIL */}
+      <CheckScanMailButton onScanComplete={handleScanComplete} />
 
       {/* INCOMING WORK (EMAIL-TO-ACTION) TASK CENTER */}
       <IncomingWorkWidget />
@@ -103,6 +117,14 @@ export const DashboardPage: React.FC = () => {
 
       {/* Recent Executions */}
       <RecentActivityWidget />
+
+      {/* Live Execution Cockpit Overlay */}
+      {activeExecutionTask && (
+        <LiveExecutionCockpit
+          task={activeExecutionTask}
+          onClose={() => setActiveExecutionTask(null)}
+        />
+      )}
     </div>
   );
 };
