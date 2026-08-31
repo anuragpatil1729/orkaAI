@@ -66,6 +66,20 @@ export class GitHubToolService {
     return targetUrl.replace(/^https:\/\/github\.com\//i, `https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/`);
   }
 
+  private static gitIdentity(): { email: string; name: string } {
+    const actor = process.env.GITHUB_ACTOR?.trim();
+    return {
+      email: actor ? `${actor}@users.noreply.github.com` : 'orka-agent@orkaai.dev',
+      name: actor || 'OrkaAI Agent'
+    };
+  }
+
+  private static configureWorkspaceGitIdentity(workspace: string): void {
+    const identity = this.gitIdentity();
+    this.runGit(`config user.email ${JSON.stringify(identity.email)}`, workspace);
+    this.runGit(`config user.name ${JSON.stringify(identity.name)}`, workspace);
+  }
+
   private static ensureWorkspace(targetUrl?: string): string {
     if (!targetUrl) return this.workspaceRoot;
     const key = this.targetKey(targetUrl);
@@ -80,6 +94,7 @@ export class GitHubToolService {
     if (cloneUrl !== targetUrl) {
       this.runGit(`remote set-url origin ${JSON.stringify(cloneUrl)}`, clonePath);
     }
+    this.configureWorkspaceGitIdentity(clonePath);
     this.activeWorkspaceByTarget.set(key, clonePath);
     return clonePath;
   }
@@ -135,6 +150,7 @@ export class GitHubToolService {
 
   public static async commitAndPush(message: string, branchName: string, targetUrl?: string, push = true): Promise<CommitResult> {
     const workspace = this.ensureWorkspace(targetUrl);
+    this.configureWorkspaceGitIdentity(workspace);
     this.runGit('add -A', workspace);
     const filesChanged = this.runGit('diff --cached --name-only', workspace).split('\n').filter(Boolean);
     if (filesChanged.length === 0) throw new Error('No repository changes to commit.');

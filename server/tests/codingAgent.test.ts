@@ -34,12 +34,31 @@ async function runCodingAgentTests() {
   }
   console.log(`✓ Test 1 Passed: Scratch repository inspected at ${repo.workspacePath}.`);
 
-  const result = await CodingAgent.executeCodingTask(
-    'Update exported message to after',
-    repoDir,
-    [{ filePath: 'src/message.js', content: 'export const message = "after";\n' }],
-    'test: update scratch repo message'
-  );
+  const originalGlobalGitConfig = process.env.GIT_CONFIG_GLOBAL;
+  const originalGithubActor = process.env.GITHUB_ACTOR;
+  process.env.GIT_CONFIG_GLOBAL = os.platform() === 'win32' ? 'NUL' : '/dev/null';
+  delete process.env.GITHUB_ACTOR;
+
+  let result;
+  try {
+    result = await CodingAgent.executeCodingTask(
+      'Update exported message to after',
+      repoDir,
+      [{ filePath: 'src/message.js', content: 'export const message = "after";\n' }],
+      'test: update scratch repo message'
+    );
+  } finally {
+    if (originalGlobalGitConfig === undefined) {
+      delete process.env.GIT_CONFIG_GLOBAL;
+    } else {
+      process.env.GIT_CONFIG_GLOBAL = originalGlobalGitConfig;
+    }
+    if (originalGithubActor === undefined) {
+      delete process.env.GITHUB_ACTOR;
+    } else {
+      process.env.GITHUB_ACTOR = originalGithubActor;
+    }
+  }
 
   if (result.status !== 'COMPLETED' || !result.branchName.startsWith('orka/task/') || !result.commitResult) {
     console.error('✕ Test 2 Failed: Coding task did not create a real branch and commit.', result);
@@ -52,6 +71,12 @@ async function runCodingAgentTests() {
   const workspace = GitHubToolService.getWorkspacePath(repoDir);
   const headSha = sh('git rev-parse HEAD', workspace);
   const committedContent = sh(`git show ${headSha}:src/message.js`, workspace);
+  const workspaceEmail = sh('git config --local user.email', workspace);
+  const workspaceName = sh('git config --local user.name', workspace);
+  if (workspaceEmail !== 'orka-agent@orkaai.dev' || workspaceName !== 'OrkaAI Agent') {
+    console.error('✕ Test 2 Failed: Cloned workspace did not receive a local git identity.', { workspaceEmail, workspaceName });
+    process.exit(1);
+  }
   if (headSha !== result.commitResult.commitSha || !committedContent.includes('after')) {
     console.error('✕ Test 2 Failed: Reported commit SHA/content does not match git state.');
     process.exit(1);
