@@ -1,5 +1,20 @@
 [
   {
+    "receiptId": "rcpt_e2e_mthcmi20",
+    "taskId": "task_e2e_msg_test_collaborator_001",
+    "originalRequest": "I have shared a repo with you and added you as a collaborator, it is a calculator project, I have done with CLI can you make the remaining GUI for the same.",
+    "sender": "sarthakpatil6636@gmail.com",
+    "repository": "anuragpatil1729/orkaai",
+    "branch": "orka/task/calculator-project-gui-i",
+    "commitSha": "nh4ykez",
+    "filesChangedCount": 2,
+    "testsPassed": true,
+    "buildPassed": true,
+    "status": "COMPLETED",
+    "prUrl": "https://github.com/anuragpatil1729/orkaAI/pull/738",
+    "completedAt": "2026-08-31T14:43:48.072Z"
+  },
+  {
     "receiptId": "rcpt_e2e_mthcisi7",
     "taskId": "task_e2e_msg_test_collaborator_001",
     "originalRequest": "I have shared a repo with you and added you as a collaborator, it is a calculator project, I have done with CLI can you make the remaining GUI for the same.",

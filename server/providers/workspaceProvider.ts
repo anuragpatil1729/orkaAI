@@ -184,13 +184,24 @@ export class GoogleWorkspaceDataProvider implements WorkspaceDataProvider {
         const to = headers.find(h => h.name === 'To')?.value || undefined;
         const date = headers.find(h => h.name === 'Date')?.value || new Date().toISOString();
 
+        let fullBody = detail.data.snippet || '';
+        if (detail.data.payload?.body?.data) {
+          fullBody = Buffer.from(detail.data.payload.body.data, 'base64').toString('utf8');
+        } else if (detail.data.payload?.parts) {
+          const textPart = detail.data.payload.parts.find(p => p.mimeType === 'text/plain' || p.mimeType === 'text/html');
+          if (textPart?.body?.data) {
+            fullBody = Buffer.from(textPart.body.data, 'base64').toString('utf8');
+          }
+        }
+
         emailList.push({
           id: msg.id!,
           sender: from,
           recipient: to,
           subject: subject,
           date: date,
-          snippet: detail.data.snippet || 'No snippet content'
+          snippet: detail.data.snippet || 'No snippet content',
+          body: fullBody
         });
       }
 
