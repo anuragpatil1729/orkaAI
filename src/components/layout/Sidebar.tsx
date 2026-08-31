@@ -6,7 +6,6 @@ import {
   Activity, 
   Grid, 
   PlusCircle, 
-  Sparkles,
   Layers
 } from 'lucide-react';
 
@@ -26,9 +25,11 @@ export const Sidebar: React.FC = () => {
       <div>
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-3 py-4 mb-6">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="OrkaAI Logo" 
+            className="w-10 h-10 rounded-xl object-cover border border-cyan-500/30 shadow-lg shadow-cyan-500/20" 
+          />
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-lg tracking-tight text-white">Orka<span className="text-indigo-400">AI</span></span>
