@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../api/orka_api_client.dart';
 import '../models/automation.dart';
+import '../widgets/tactile_widgets.dart';
 import '../core/theme.dart';
 
 class AutomationsScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ACTIVE AUTOMATIONS', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text('ACTIVE AUTOMATIONS', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')),
       ),
       body: FutureBuilder<List<AutomationRule>>(
         future: _automationsFuture,
@@ -37,21 +38,16 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
             padding: const EdgeInsets.all(20),
             children: [
               // Pattern Discovery Card
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: OrkaTheme.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: OrkaTheme.primary.withOpacity(0.3)),
-                ),
+              GlassCardWidget(
+                padding: const EdgeInsets.all(18),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.auto_awesome, color: OrkaTheme.primary, size: 18),
+                        Icon(Icons.auto_awesome, color: OrkaTheme.cyanGlow, size: 18),
                         SizedBox(width: 8),
-                        Text('AI DISCOVERED PATTERN', style: TextStyle(color: OrkaTheme.primary, fontSize: 11, fontWeight: FontWeight.bold)),
+                        Text('AI DISCOVERED PATTERN', style: TextStyle(color: OrkaTheme.cyanGlow, fontSize: 11, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
                       ],
                     ),
                     SizedBox(height: 8),
@@ -71,9 +67,9 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: OrkaTheme.surface,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: OrkaTheme.surfaceBorder),
+                    color: OrkaTheme.glassSurface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: auto.active ? OrkaTheme.primary.withValues(alpha: 0.4) : OrkaTheme.glassBorder),
                   ),
                   child: Row(
                     children: [
@@ -93,15 +89,18 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
                           ],
                         ),
                       ),
-                      Switch(
+                      TactileToggleSwitchWidget(
                         value: auto.active,
-                        onChanged: (val) {},
-                        activeColor: OrkaTheme.primary,
+                        onChanged: (val) {
+                          setState(() {
+                            auto.active = val;
+                          });
+                        },
                       ),
                     ],
                   ),
                 );
-              }).toList(),
+              }),
             ],
           );
         },

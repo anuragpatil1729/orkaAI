@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/workflow_provider.dart';
 import '../api/orka_api_client.dart';
+import '../widgets/tactile_widgets.dart';
 import '../core/theme.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -26,7 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SETTINGS & CONNECTIONS', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text('SETTINGS & CONNECTIONS', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _statusFuture,
@@ -39,20 +40,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             padding: const EdgeInsets.all(20),
             children: [
               // Policy Mode Switcher
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: OrkaTheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: OrkaTheme.surfaceBorder),
-                ),
+              GlassCardWidget(
+                padding: const EdgeInsets.all(18),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('OPERATING POLICY MODE', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold)),
+                        const Text('OPERATING POLICY MODE', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
                         Text(provider.operatingMode, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 2),
                         Text(
@@ -63,10 +59,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ],
                     ),
-                    Switch(
+                    TactileToggleSwitchWidget(
                       value: provider.operatingMode == 'AUTOPILOT',
                       onChanged: (val) => provider.toggleOperatingMode(),
-                      activeColor: OrkaTheme.primary,
                     ),
                   ],
                 ),
@@ -84,8 +79,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const Text('SYSTEM & ENGINE INFO', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
               const SizedBox(height: 12),
 
-              _buildInfoTile('Workspace Mode', workspace['mode'] ?? 'DEMO WORKSPACE'),
-              _buildInfoTile('Account', workspace['userEmail'] ?? 'alex.v@orka.ai'),
+              _buildInfoTile('Workspace Mode', workspace['mode'] ?? 'REAL WORKSPACE'),
+              _buildInfoTile('Account', workspace['userEmail'] ?? 'not_connected@workspace.com'),
               _buildInfoTile('Gemini Model', gemini['model'] ?? 'gemini-1.5-flash'),
             ],
           );
@@ -96,12 +91,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildServiceTile(String name, bool connected) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: OrkaTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: OrkaTheme.surfaceBorder),
+        color: OrkaTheme.glassSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: OrkaTheme.glassBorder),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -124,14 +119,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.black26,
+        color: Colors.black38,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0x15FFFFFF)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: OrkaTheme.textMuted, fontSize: 12)),
-          Text(value, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+          Text(value, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
         ],
       ),
     );

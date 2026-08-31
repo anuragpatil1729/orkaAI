@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AutomationRule, DiscoveredPattern } from '../types/automations';
-import { Layers, Sparkles, CheckCircle2, Zap, ToggleLeft, ToggleRight, Plus, ArrowRight } from 'lucide-react';
+import { Layers, Sparkles, Plus } from 'lucide-react';
+import { GlassCard, TactileButton, TactileToggle } from '../components/ui/TactilePrimitives';
 
 export const AutomationsPage: React.FC = () => {
   const [automations, setAutomations] = useState<AutomationRule[]>([]);
@@ -44,25 +45,25 @@ export const AutomationsPage: React.FC = () => {
     <div className="space-y-8 animate-fadeIn">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-extrabold text-white flex items-center gap-2">
-          <Layers className="w-6 h-6 text-indigo-400" />
+        <h1 className="text-2xl font-extrabold text-white flex items-center gap-2 font-mono">
+          <Layers className="w-6 h-6 text-blue-400" />
           <span>Autonomous Workflows & Rules</span>
         </h1>
         <p className="text-xs text-slate-400 mt-1">
-          ActionOS monitors background triggers and autonomously executes safe repetitive routines.
+          OrkaAI monitors background triggers and autonomously executes repetitive routines.
         </p>
       </div>
 
-      {/* SECTION 13: "AI DISCOVERS AUTOMATION" FEATURE CARD */}
+      {/* AI DISCOVERS AUTOMATION PATTERN CARD */}
       {pattern && !patternCreated && (
-        <div className="p-6 rounded-3xl bg-gradient-to-r from-indigo-950/80 via-slate-900/90 to-cyan-950/80 border border-indigo-500/40 shadow-2xl space-y-4 relative overflow-hidden">
+        <GlassCard className="p-7 border border-blue-500/40 shadow-2xl space-y-4 relative overflow-hidden">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-2xl bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center justify-center">
                 <Sparkles className="w-5 h-5 animate-pulse" />
               </div>
               <div>
-                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="text-[10px] font-mono font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
                   AI PATTERN DISCOVERY DETECTED
                 </span>
                 <h3 className="text-lg font-bold text-white mt-1">{pattern.title}</h3>
@@ -74,17 +75,17 @@ export const AutomationsPage: React.FC = () => {
             </span>
           </div>
 
-          <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
+          <p className="text-xs text-slate-300 leading-relaxed max-w-2xl font-medium">
             {pattern.description}
           </p>
 
-          <div className="p-4 rounded-2xl bg-slate-950/80 border border-white/5 space-y-2 text-xs font-mono">
+          <div className="p-4 rounded-2xl bg-[#080B10]/90 border border-white/10 space-y-2 text-xs font-mono">
             <div className="flex items-center gap-2 text-slate-400">
-              <span className="text-indigo-400 font-bold">WHEN:</span>
+              <span className="text-blue-400 font-bold">WHEN:</span>
               <span>{pattern.suggestedWorkflow.when}</span>
             </div>
             <div className="flex items-center gap-2 text-slate-400">
-              <span className="text-indigo-400 font-bold">IF:</span>
+              <span className="text-blue-400 font-bold">IF:</span>
               <span>{pattern.suggestedWorkflow.if}</span>
             </div>
             <div className="flex items-start gap-2 text-slate-400">
@@ -98,58 +99,49 @@ export const AutomationsPage: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-end pt-2">
-            <button
-              onClick={handleCreatePattern}
-              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:opacity-90 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all active:scale-95"
-            >
+            <TactileButton onClick={handleCreatePattern} variant="primary" className="px-6 py-2.5 text-xs">
               <Plus className="w-4 h-4" />
               <span>Create Automation Rule</span>
-            </button>
+            </TactileButton>
           </div>
-        </div>
+        </GlassCard>
       )}
 
-      {/* Automations Grid */}
+      {/* Physical Automations Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {automations.map((auto) => (
-          <div
+          <GlassCard
             key={auto.id}
-            className={`p-6 rounded-3xl bg-[#12141d]/90 border transition-all flex flex-col justify-between h-64 shadow-xl ${
-              auto.active ? 'border-indigo-500/30' : 'border-white/5 opacity-60'
+            className={`p-6 transition-all flex flex-col justify-between h-64 ${
+              auto.active ? 'border-blue-500/40' : 'opacity-65'
             }`}
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">
+                <span className="text-[10px] font-mono font-bold uppercase px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/15">
                   {auto.category}
                 </span>
 
-                <button
-                  onClick={() => handleToggle(auto.id, auto.active)}
-                  className="text-slate-400 hover:text-white transition-colors"
-                >
-                  {auto.active ? (
-                    <ToggleRight className="w-7 h-7 text-emerald-400" />
-                  ) : (
-                    <ToggleLeft className="w-7 h-7 text-slate-600" />
-                  )}
-                </button>
+                <TactileToggle
+                  checked={auto.active}
+                  onChange={() => handleToggle(auto.id, auto.active)}
+                />
               </div>
 
               <h3 className="font-bold text-slate-100 text-base mb-1">{auto.title}</h3>
-              <p className="text-xs text-slate-400 line-clamp-2 mb-4">{auto.description}</p>
+              <p className="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">{auto.description}</p>
 
-              <div className="space-y-1 text-xs text-slate-300 font-mono bg-white/[0.02] p-2.5 rounded-xl border border-white/5">
-                <div><span className="text-slate-500">Trigger:</span> {auto.trigger}</div>
-                <div><span className="text-slate-500">Condition:</span> {auto.condition}</div>
+              <div className="space-y-1 text-xs text-slate-300 font-mono bg-white/[0.04] p-3 rounded-2xl border border-white/10">
+                <div><span className="text-slate-400">Trigger:</span> {auto.trigger}</div>
+                <div><span className="text-slate-400">Condition:</span> {auto.condition}</div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
+            <div className="pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-slate-400 font-mono">
               <span>{auto.executionsCount} executions</span>
-              <span className="text-emerald-400 font-semibold">{auto.approvalsRequiredCount} approvals required</span>
+              <span className="text-emerald-400 font-semibold">{auto.approvalsRequiredCount} approvals</span>
             </div>
-          </div>
+          </GlassCard>
         ))}
       </div>
     </div>

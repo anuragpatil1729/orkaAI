@@ -63,21 +63,34 @@ export class GeminiService {
       }
     }
 
-    // Dynamic structural intent parsing fallback (no fictional Acme branching)
-    return {
-      rawPrompt: prompt,
-      goal: `Execute autonomous workflow for: ${prompt}`,
-      timeframe: 'today',
-      targetActions: [
+    // Tailored intent parsing fallback based on prompt context
+    const lowerPrompt = prompt.toLowerCase();
+    let targetActions: string[] = [];
+
+    if (lowerPrompt.includes('weather') || lowerPrompt.includes('poem') || lowerPrompt.includes('joke') || lowerPrompt.includes('hello')) {
+      targetActions = ['analyze_context', 'generate_brief'];
+    } else if (lowerPrompt.includes('calendar') || lowerPrompt.includes('meeting') || lowerPrompt.includes('schedule') || lowerPrompt.includes('agenda')) {
+      targetActions = ['find_calendar_event', 'analyze_context', 'generate_brief', 'create_task'];
+    } else if (lowerPrompt.includes('email') || lowerPrompt.includes('mail') || lowerPrompt.includes('inbox') || lowerPrompt.includes('message')) {
+      targetActions = ['search_emails', 'analyze_context', 'generate_brief', 'create_draft_email', 'send_email'];
+    } else if (lowerPrompt.includes('doc') || lowerPrompt.includes('drive') || lowerPrompt.includes('spec') || lowerPrompt.includes('pdf')) {
+      targetActions = ['search_drive', 'get_drive_document', 'analyze_context', 'generate_brief', 'create_task'];
+    } else {
+      targetActions = [
         'find_calendar_event',
         'search_emails',
         'search_drive',
         'analyze_context',
         'generate_brief',
-        'create_task',
-        'create_draft_email',
-        'send_email'
-      ],
+        'create_task'
+      ];
+    }
+
+    return {
+      rawPrompt: prompt,
+      goal: `Execute autonomous workflow for: ${prompt}`,
+      timeframe: 'today',
+      targetActions,
       isDemoScenario: false
     };
   }

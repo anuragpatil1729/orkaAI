@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/workflow.dart';
 import '../core/theme.dart';
+import 'tactile_widgets.dart';
 
 class ApprovalBottomSheet extends StatefulWidget {
   final ApprovalRequest request;
@@ -45,9 +46,9 @@ class _ApprovalBottomSheetState extends State<ApprovalBottomSheet> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        color: Color(0xFF0F111A),
+        color: OrkaTheme.backgroundDarker,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border(top: BorderSide(color: OrkaTheme.warning, width: 1.5)),
+        border: Border(top: BorderSide(color: OrkaTheme.warning, width: 2)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -56,28 +57,33 @@ class _ApprovalBottomSheetState extends State<ApprovalBottomSheet> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: OrkaTheme.warning.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: OrkaTheme.warning.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: OrkaTheme.warning.withValues(alpha: 0.4)),
+                  boxShadow: [
+                    BoxShadow(color: OrkaTheme.warning.withValues(alpha: 0.3), blurRadius: 12),
+                  ],
                 ),
-                child: const Icon(Icons.shield_outlined, color: OrkaTheme.warning, size: 20),
+                child: const Icon(Icons.lock_outline, color: OrkaTheme.warning, size: 22),
               ),
               const SizedBox(width: 12),
               const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'APPROVAL REQUIRED',
+                    'ACTION REQUIRES APPROVAL',
                     style: TextStyle(
                       color: OrkaTheme.warning,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
+                      fontFamily: 'monospace',
                     ),
                   ),
                   Text(
-                    'Orka Policy Engine Guardrail',
+                    'Orka Security Guardrail',
                     style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ],
@@ -94,17 +100,17 @@ class _ApprovalBottomSheetState extends State<ApprovalBottomSheet> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.black45,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: OrkaTheme.surfaceBorder),
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: OrkaTheme.glassBorder),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      const Text('To: ', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 12)),
-                      Text(_toController.text, style: const TextStyle(color: OrkaTheme.secondary, fontSize: 12, fontWeight: FontWeight.bold)),
+                      const Text('To: ', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 12, fontFamily: 'monospace')),
+                      Text(_toController.text, style: const TextStyle(color: OrkaTheme.cyanGlow, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
                     ],
                   ),
                   const SizedBox(height: 6),
@@ -151,29 +157,24 @@ class _ApprovalBottomSheetState extends State<ApprovalBottomSheet> {
                     _isEditing = !_isEditing;
                   });
                 },
-                child: Text(_isEditing ? 'Save Edits' : 'Edit Email', style: const TextStyle(color: OrkaTheme.primary, fontSize: 12)),
+                child: Text(_isEditing ? 'Done Editing' : 'Edit Email', style: const TextStyle(color: OrkaTheme.primaryBright, fontSize: 12, fontWeight: FontWeight.bold)),
               ),
               const Spacer(),
               OutlinedButton(
                 onPressed: widget.onReject,
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: OrkaTheme.error),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 child: const Text('Reject', style: TextStyle(color: OrkaTheme.error, fontSize: 12)),
               ),
-              const SizedBox(width: 8),
-              ElevatedButton.icon(
+              const SizedBox(width: 10),
+              TactileButtonWidget(
+                label: 'Approve & Send',
+                icon: Icons.send_rounded,
                 onPressed: () {
                   widget.onApprove(_toController.text, _subjectController.text, _bodyController.text);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: OrkaTheme.success,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                icon: const Icon(Icons.send_rounded, size: 16),
-                label: const Text('Approve & Send', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
               ),
             ],
           ),

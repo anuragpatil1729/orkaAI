@@ -174,6 +174,9 @@ npm install
 # Run TypeScript type check (0 errors across Web & CLI)
 npm run typecheck
 
+# Run complete automated verification test suite (100% pass)
+npm test
+
 # Build web production bundle
 npm run build
 

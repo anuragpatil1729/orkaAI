@@ -1,6 +1,34 @@
 import { google } from 'googleapis';
+import fs from 'fs';
+import path from 'path';
 
-let storedTokens: any = null;
+const TOKENS_PATH = path.join(process.cwd(), 'server', 'storage', 'tokens.json');
+
+const loadStoredTokens = () => {
+  try {
+    if (fs.existsSync(TOKENS_PATH)) {
+      const data = fs.readFileSync(TOKENS_PATH, 'utf-8');
+      return JSON.parse(data);
+    }
+  } catch (err) {
+    console.warn('[GoogleAuthService] Error loading stored tokens:', err);
+  }
+  return null;
+};
+
+const saveStoredTokens = (tokens: any) => {
+  try {
+    const dir = path.dirname(TOKENS_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(TOKENS_PATH, JSON.stringify(tokens, null, 2));
+  } catch (err) {
+    console.warn('[GoogleAuthService] Error saving tokens to file:', err);
+  }
+};
+
+let storedTokens: any = loadStoredTokens();
 
 const getOAuth2Client = () => {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -40,6 +68,8 @@ export class GoogleAuthService {
     if (!client) return null;
 
     const scopes = [
+      'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/userinfo.profile',
       'https://www.googleapis.com/auth/gmail.readonly',
       'https://www.googleapis.com/auth/gmail.send',
       'https://www.googleapis.com/auth/gmail.compose',
@@ -60,6 +90,7 @@ export class GoogleAuthService {
 
     const { tokens } = await client.getToken(code);
     storedTokens = tokens;
+    saveStoredTokens(tokens);
     client.setCredentials(tokens);
     return tokens;
   }

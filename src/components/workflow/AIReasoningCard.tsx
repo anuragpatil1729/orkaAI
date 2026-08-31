@@ -1,5 +1,6 @@
 import React from 'react';
-import { Bot } from 'lucide-react';
+import { Bot, Cpu } from 'lucide-react';
+import { AIActivityIndicator, GlassCard } from '../ui/TactilePrimitives';
 
 interface ExecutionActivityCardProps {
   logs: Array<{
@@ -11,27 +12,30 @@ interface ExecutionActivityCardProps {
 
 export const AIReasoningCard: React.FC<ExecutionActivityCardProps> = ({ logs }) => {
   return (
-    <div className="p-5 rounded-2xl bg-[#0d0f17] border border-white/5 space-y-4 font-mono text-xs">
-      <div className="flex items-center justify-between font-sans border-b border-white/5 pb-3">
-        <div className="flex items-center gap-2">
-          <Bot className="w-4 h-4 text-indigo-400" />
-          <span className="font-bold text-slate-200 text-sm">Execution Activity</span>
+    <GlassCard className="p-6 space-y-4 font-mono text-xs">
+      <div className="flex items-center justify-between font-sans border-b border-white/10 pb-3">
+        <div className="flex items-center gap-2.5">
+          <Cpu className="w-4.5 h-4.5 text-cyan-400" />
+          <span className="font-bold text-slate-100 text-sm">Execution Activity Stream</span>
         </div>
-        <span className="text-[10px] text-slate-500 font-mono">Real-Time Event Stream</span>
+        <div className="flex items-center gap-2">
+          <AIActivityIndicator size="sm" active={true} />
+          <span className="text-[10px] text-cyan-300 font-mono font-bold tracking-wider">REAL-TIME EVENT STREAM</span>
+        </div>
       </div>
 
-      <div className="space-y-2 max-h-64 overflow-y-auto pr-2">
+      <div className="space-y-2.5 max-h-72 overflow-y-auto pr-2">
         {logs.map((log, i) => (
-          <div key={i} className="flex items-start gap-2 text-slate-300">
-            <span className="text-slate-500 select-none">[{log.timestamp}]</span>
+          <div key={i} className="flex items-start gap-2.5 text-slate-300 text-[11px] leading-relaxed">
+            <span className="text-slate-400 font-mono shrink-0 select-none">[{log.timestamp}]</span>
             <span
               className={
                 log.type === 'success'
-                  ? 'text-emerald-400'
+                  ? 'text-emerald-300 font-semibold'
                   : log.type === 'warning'
-                  ? 'text-amber-400 font-semibold'
+                  ? 'text-amber-300 font-bold'
                   : log.type === 'tool'
-                  ? 'text-indigo-300'
+                  ? 'text-blue-300'
                   : 'text-slate-300'
               }
             >
@@ -40,6 +44,6 @@ export const AIReasoningCard: React.FC<ExecutionActivityCardProps> = ({ logs }) 
           </div>
         ))}
       </div>
-    </div>
+    </GlassCard>
   );
 };

@@ -4,18 +4,155 @@
 
 @layer base {
   body {
-    background-color: #090a0f;
-    color: #f1f5f9;
+    background: 
+      radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.10), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(34, 211, 238, 0.07), transparent 35%),
+      #080B10;
+    color: #F8FAFC;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
   }
 }
 
-/* Glassmorphism utilities */
+/* ==================================================
+   NEO-TACTILE GLASS & DEPTH SYSTEM
+   ================================================== */
+
+/* LEVEL 1: Glass Panels */
+.neo-glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* LEVEL 2: Elevated Glass Cards */
+.neo-glass-card {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neo-glass-card:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(34, 211, 238, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 22px 50px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3),
+    0 0 25px rgba(34, 211, 238, 0.2);
+}
+
+/* LEVEL 3: Interactive Controls */
+.neo-control-surface {
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* LEVEL 4: Primary Actions (Electric Blue) */
+.neo-button-primary {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  color: #FFFFFF;
+  border-radius: 18px;
+  font-weight: 700;
+  box-shadow: 
+    inset 0 1px 1px rgba(255, 255, 255, 0.4),
+    0 8px 24px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neo-button-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    0 12px 30px rgba(59, 130, 246, 0.55);
+}
+
+.neo-button-primary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* LEVEL 4 (Secondary): Tactile Light Pill */
+.neo-button-light {
+  background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 100%);
+  color: #0F172A;
+  border-radius: 18px;
+  font-weight: 700;
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 1),
+    0 6px 18px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.neo-button-light:hover {
+  transform: translateY(-2px);
+  background: #FFFFFF;
+}
+
+/* LEVEL 5: AI Activity Energy Glow (Cyan) */
+.ai-energy-ring {
+  border: 2px solid #22D3EE;
+  box-shadow: 0 0 18px #22D3EE, inset 0 0 12px rgba(34, 211, 238, 0.5);
+  animation: pulseCyanRing 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulseCyanRing {
+  0% {
+    box-shadow: 0 0 10px rgba(34, 211, 238, 0.4), inset 0 0 8px rgba(34, 211, 238, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(34, 211, 238, 0.8), inset 0 0 15px rgba(34, 211, 238, 0.6);
+  }
+}
+
+/* Physical Toggle Switch */
+.neo-toggle-track {
+  width: 52px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 3px;
+  transition: background 0.3s ease;
+}
+
+.neo-toggle-track.active {
+  background: #3B82F6;
+  box-shadow: 0 0 14px rgba(59, 130, 246, 0.5);
+}
+
+.neo-toggle-knob {
+  width: 20px;
+  height: 20px;
+  background: #FFFFFF;
+  border-radius: 9999px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neo-toggle-track.active .neo-toggle-knob {
+  transform: translateX(24px);
+}
+
+/* Glass panel compatibility */
 .glass-panel {
-  background: rgba(18, 20, 29, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
 }
 
 .glass-panel-hover {
@@ -23,34 +160,30 @@
 }
 
 .glass-panel-hover:hover {
-  background: rgba(24, 27, 40, 0.85);
-  border-color: rgba(99, 102, 241, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(34, 211, 238, 0.35);
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px -5px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 25px rgba(34, 211, 238, 0.2);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 50%, #6366f1 100%);
+  background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 50%, #3B82F6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.gradient-accent {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #06b6d4 100%);
-}
-
-/* Custom scrollbars */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(9, 10, 15, 0.5);
+  background: rgba(8, 11, 16, 0.6);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.16);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.28);
 }

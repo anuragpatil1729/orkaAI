@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/workflow_provider.dart';
 import '../core/theme.dart';
+import '../widgets/tactile_widgets.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,33 +38,40 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: OrkaTheme.primary.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: OrkaTheme.primary.withValues(alpha: 0.4)),
+                          boxShadow: const [
+                            BoxShadow(color: Color(0x303B82F6), blurRadius: 12),
+                          ],
                         ),
-                        child: const Icon(Icons.auto_awesome, color: OrkaTheme.primary, size: 24),
+                        child: const Icon(Icons.auto_awesome, color: OrkaTheme.cyanGlow, size: 22),
                       ),
                       const SizedBox(width: 12),
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('OrkaAI', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                          Text('Mobile Operator Engine', style: TextStyle(color: OrkaTheme.textSecondary, fontSize: 11)),
+                          Text('OrkaAI', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
+                          Text('AI Execution OS', style: TextStyle(color: OrkaTheme.cyanGlow, fontSize: 11, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                      color: OrkaTheme.primary.withValues(alpha: 0.15),
+                      color: OrkaTheme.cyanGlow.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: OrkaTheme.primary.withValues(alpha: 0.3)),
+                      border: Border.all(color: OrkaTheme.cyanGlow.withValues(alpha: 0.4)),
+                      boxShadow: const [
+                        BoxShadow(color: Color(0x2522D3EE), blurRadius: 10),
+                      ],
                     ),
                     child: Text(
                       provider.operatingMode,
-                      style: const TextStyle(color: OrkaTheme.primary, fontSize: 10, fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: OrkaTheme.cyanGlow, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.8),
                     ),
                   ),
                 ],
@@ -77,31 +85,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white,
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
-                  height: 1.2,
+                  height: 1.25,
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Command Control Input Box
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: OrkaTheme.surface,
-                  borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: OrkaTheme.primary.withValues(alpha: 0.3)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: OrkaTheme.primary.withValues(alpha: 0.1),
-                      blurRadius: 20,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
+              // Neo-Tactile Command Center Box
+              GlassCardWidget(
+                padding: const EdgeInsets.all(18),
                 child: Column(
                   children: [
                     TextField(
                       controller: _inputController,
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
                       maxLines: 3,
                       decoration: const InputDecoration(
                         hintText: 'What outcome should I take care of?',
@@ -109,52 +105,50 @@ class _HomeScreenState extends State<HomeScreen> {
                         border: InputBorder.none,
                       ),
                     ),
+                    const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        IconButton(
-                          icon: Icon(
-                            provider.isListening ? Icons.mic : Icons.mic_none,
-                            color: provider.isListening ? OrkaTheme.error : OrkaTheme.primary,
+                        Container(
+                          decoration: BoxDecoration(
+                            color: provider.isListening ? OrkaTheme.cyanGlow.withValues(alpha: 0.2) : const Color(0x1AFFFFFF),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: provider.isListening ? OrkaTheme.cyanGlow : const Color(0x20FFFFFF)),
+                            boxShadow: provider.isListening
+                                ? [BoxShadow(color: OrkaTheme.cyanGlow.withValues(alpha: 0.6), blurRadius: 12)]
+                                : null,
                           ),
-                          onPressed: () {
-                            provider.toggleVoiceListening((recognizedText) {
-                              _inputController.text = recognizedText;
-                            });
-                          },
+                          child: IconButton(
+                            icon: Icon(
+                              provider.isListening ? Icons.mic : Icons.mic_none,
+                              color: provider.isListening ? OrkaTheme.cyanGlow : OrkaTheme.textSecondary,
+                            ),
+                            onPressed: () {
+                              provider.toggleVoiceListening((recognizedText) {
+                                _inputController.text = recognizedText;
+                              });
+                            },
+                          ),
                         ),
-                        ElevatedButton.icon(
-                          onPressed: provider.isLoading
-                              ? null
-                              : () => _submitGoal(_inputController.text),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: OrkaTheme.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                          ),
-                          icon: provider.isLoading
-                              ? const SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                                )
-                              : const Icon(Icons.arrow_forward, size: 18),
-                          label: const Text('Execute', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        TactileButtonWidget(
+                          label: 'Execute',
+                          icon: Icons.arrow_forward_rounded,
+                          isLoading: provider.isLoading,
+                          onPressed: () => _submitGoal(_inputController.text),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 28),
 
               // Quick Suggested Outcome Chips
-              const Text('SUGGESTED OUTCOMES', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
-              const SizedBox(height: 12),
+              const Text('SUGGESTED OUTCOMES', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+              const SizedBox(height: 14),
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 10,
+                runSpacing: 10,
                 children: [
                   _buildChip('Prepare me for my meeting tomorrow', Icons.business_center_outlined),
                   _buildChip('Give me my daily brief', Icons.today_outlined),
@@ -164,22 +158,17 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 28),
 
-              // How Orka Works Card
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.02),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white10),
-                ),
+              // How Orka Works Card (Neo-Tactile Glass)
+              GlassCardWidget(
+                padding: const EdgeInsets.all(18),
                 child: const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.layers_outlined, color: OrkaTheme.secondary, size: 18),
+                        Icon(Icons.layers_outlined, color: OrkaTheme.cyanGlow, size: 18),
                         SizedBox(width: 8),
-                        Text('HOW ORKA WORKS', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                        Text('HOW ORKA WORKS', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.0)),
                       ],
                     ),
                     SizedBox(height: 8),
@@ -203,16 +192,31 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildChip(String text, IconData icon) {
-    return ActionChip(
-      avatar: Icon(icon, size: 16, color: OrkaTheme.primary),
-      label: Text(text, style: const TextStyle(color: Colors.white, fontSize: 12)),
-      backgroundColor: OrkaTheme.surface,
-      side: const BorderSide(color: OrkaTheme.surfaceBorder),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      onPressed: () {
+    return InkWell(
+      onTap: () {
         _inputController.text = text;
         _submitGoal(text);
       },
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0x12FFFFFF),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0x25FFFFFF)),
+          boxShadow: const [
+            BoxShadow(color: Color(0x20000000), blurRadius: 10, offset: Offset(0, 4)),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 15, color: OrkaTheme.primary),
+            const SizedBox(width: 8),
+            Text(text, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
     );
   }
 }

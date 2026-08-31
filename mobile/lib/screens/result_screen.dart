@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/workflow_provider.dart';
 import '../widgets/execution_receipt_dialog.dart';
+import '../widgets/tactile_widgets.dart';
 import '../core/theme.dart';
 
 class ResultScreen extends StatefulWidget {
@@ -44,7 +45,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ORKA EXECUTED OUTCOME', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: OrkaTheme.success)),
+        title: const Text('ORKA EXECUTED OUTCOME', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: OrkaTheme.success, fontFamily: 'monospace')),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: OrkaTheme.textMuted),
@@ -58,28 +59,19 @@ class _ResultScreenState extends State<ResultScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Hero Banner
-            Container(
-              width: double.infinity,
+            GlassCardWidget(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF0F382C), Color(0xFF0F111A)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: OrkaTheme.success.withOpacity(0.3)),
-              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: OrkaTheme.success.withOpacity(0.2),
+                      color: OrkaTheme.success.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: OrkaTheme.success.withValues(alpha: 0.3)),
                     ),
-                    child: const Text('✓ WORKFLOW EXECUTED & API VERIFIED', style: TextStyle(color: OrkaTheme.success, fontSize: 10, fontWeight: FontWeight.bold)),
+                    child: const Text('✓ WORKFLOW EXECUTED & API VERIFIED', style: TextStyle(color: OrkaTheme.success, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
                   ),
                   const SizedBox(height: 12),
                   const Text(
@@ -88,27 +80,36 @@ class _ResultScreenState extends State<ResultScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    result.brief.title.isNotEmpty ? result.brief.title : 'Acme Sync • Tomorrow 11:00 AM',
+                    result.brief.title.isNotEmpty ? result.brief.title : 'Workspace Alignment Briefing',
                     style: const TextStyle(color: OrkaTheme.textSecondary, fontSize: 13),
                   ),
                   const SizedBox(height: 16),
 
                   if (result.receipt != null)
-                    ElevatedButton.icon(
-                      onPressed: () {
+                    InkWell(
+                      onTap: () {
                         showDialog(
                           context: context,
                           builder: (ctx) => ExecutionReceiptDialog(receipt: result.receipt!),
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: OrkaTheme.primary.withOpacity(0.2),
-                        foregroundColor: OrkaTheme.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        side: BorderSide(color: OrkaTheme.primary.withOpacity(0.4)),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: OrkaTheme.primary.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: OrkaTheme.primary.withValues(alpha: 0.3)),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.receipt_long, size: 16, color: OrkaTheme.primaryBright),
+                            SizedBox(width: 8),
+                            Text('View Execution Receipt', style: TextStyle(color: OrkaTheme.primaryBright, fontSize: 12, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
                       ),
-                      icon: const Icon(Icons.receipt_long, size: 16),
-                      label: const Text('View Execution Receipt', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                     ),
                 ],
               ),
@@ -163,8 +164,9 @@ class _ResultScreenState extends State<ResultScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.black26,
+                        color: Colors.black38,
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0x15FFFFFF)),
                       ),
                       child: Row(
                         children: [
@@ -184,22 +186,22 @@ class _ResultScreenState extends State<ResultScreen> {
               _buildSectionCard(
                 title: 'FOLLOW-UP EMAIL DRAFT',
                 icon: Icons.mail_outline,
-                iconColor: OrkaTheme.secondary,
+                iconColor: OrkaTheme.cyanGlow,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('To: ${result.draftEmail!.to}', style: const TextStyle(color: OrkaTheme.textMuted, fontSize: 12)),
+                        Text('To: ${result.draftEmail!.to}', style: const TextStyle(color: OrkaTheme.cyanGlow, fontSize: 12, fontFamily: 'monospace')),
                         TextButton.icon(
                           onPressed: () {
                             setState(() {
                               _isEditingDraft = !_isEditingDraft;
                             });
                           },
-                          icon: const Icon(Icons.edit, size: 14, color: OrkaTheme.primary),
-                          label: Text(_isEditingDraft ? 'Save' : 'Edit', style: const TextStyle(color: OrkaTheme.primary, fontSize: 12)),
+                          icon: const Icon(Icons.edit, size: 14, color: OrkaTheme.primaryBright),
+                          label: Text(_isEditingDraft ? 'Save' : 'Edit', style: const TextStyle(color: OrkaTheme.primaryBright, fontSize: 12)),
                         ),
                       ],
                     ),
@@ -219,32 +221,28 @@ class _ResultScreenState extends State<ResultScreen> {
                       ),
                     const SizedBox(height: 16),
                     if (!_isSent)
-                      ElevatedButton.icon(
+                      TactileButtonWidget(
+                        label: 'Approve & Send Email',
+                        icon: Icons.send_rounded,
                         onPressed: () {
                           setState(() {
                             _isSent = true;
                           });
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: OrkaTheme.success,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                        icon: const Icon(Icons.send, size: 16),
-                        label: const Text('Approve & Send Email', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                       )
                     else
                       Container(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: OrkaTheme.success.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
+                          color: OrkaTheme.success.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: OrkaTheme.success.withValues(alpha: 0.3)),
                         ),
                         child: const Row(
                           children: [
                             Icon(Icons.check_circle, color: OrkaTheme.success, size: 16),
                             SizedBox(width: 8),
-                            Text('Sent to Rahul Sharma • API Verified', style: TextStyle(color: OrkaTheme.success, fontSize: 12, fontWeight: FontWeight.bold)),
+                            Text('Sent to Recipient • API Verified', style: TextStyle(color: OrkaTheme.success, fontSize: 12, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -255,7 +253,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
             const Center(
               child: Text(
-                '"Go into the meeting prepared."',
+                '"Accountable • Auditable • Verified"',
                 style: TextStyle(color: OrkaTheme.textMuted, fontSize: 12, fontStyle: FontStyle.italic),
               ),
             ),
@@ -271,14 +269,8 @@ class _ResultScreenState extends State<ResultScreen> {
     required Color iconColor,
     required Widget child,
   }) {
-    return Container(
-      width: double.infinity,
+    return GlassCardWidget(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: OrkaTheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: OrkaTheme.surfaceBorder),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -286,7 +278,7 @@ class _ResultScreenState extends State<ResultScreen> {
             children: [
               Icon(icon, color: iconColor, size: 18),
               const SizedBox(width: 8),
-              Text(title, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+              Text(title, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
             ],
           ),
           const SizedBox(height: 12),

@@ -87,6 +87,9 @@ export class WorkflowExecutor {
       }
       // All completed
       wf.status = 'completed';
+      if (!wf.result) {
+        wf.result = await this.compileResult(wf, provider);
+      }
       store.updateActivityStatus(wf.id, 'Completed', wf);
       return wf;
     }
@@ -94,21 +97,33 @@ export class WorkflowExecutor {
     const step = wf.steps[pendingIndex];
     wf.currentStepId = step.id;
 
-    // Execute step first to collect tool payload
-    const stepResult = await this.executeStepTool(step, wf.prompt, provider, userProfile);
-    step.output = stepResult;
-
     // Policy Engine check: High risk approval requirement
     if (step.requiresApproval && wf.mode === 'COPILOT') {
+      // Dynamic recipient extraction from prior email tools or user profile
+      const foundEmails = this.collectStepOutputs(wf.steps, 'search_emails')?.emails || [];
+      const externalEmail = Array.isArray(foundEmails)
+        ? foundEmails.find((e: any) => e.sender && !e.sender.includes(userProfile.email))
+        : null;
+
+      // If no external recipient is found (e.g. self or empty search), auto-skip sending email to self!
+      if (!externalEmail && step.tool === 'send_email') {
+        step.status = 'completed';
+        step.output = { status: 'skipped', reason: 'No external recipient detected to send email to.' };
+        step.verified = true;
+        step.completedAt = new Date().toISOString();
+        wf.reasoningLog.push({
+          timestamp: new Date().toLocaleTimeString(),
+          message: `ℹ Skipped send_email step (no external recipient specified)`,
+          type: 'info'
+        });
+        return await this.advanceWorkflow(id);
+      }
+
       step.status = 'waiting_approval';
       wf.status = 'waiting_approval';
 
-      // Dynamic recipient extraction from prior email tools or user profile
-      const foundEmails = this.collectStepOutputs(wf.steps, 'search_emails')?.emails || [];
-      const firstEmail = Array.isArray(foundEmails) && foundEmails.length > 0 ? foundEmails[0] : null;
-
-      const recipient = firstEmail?.sender || userProfile.email;
-      const subject = firstEmail?.subject ? `Re: ${firstEmail.subject}` : `Follow-up: ${wf.prompt}`;
+      const recipient = externalEmail?.sender || userProfile.email;
+      const subject = externalEmail?.subject ? `Re: ${externalEmail.subject}` : `Follow-up: ${wf.prompt}`;
       const previewText = `Hi ${recipient.includes('@') ? recipient.split('@')[0] : 'there'},\n\nFollowing up regarding "${wf.prompt}".\n\nI have reviewed the workspace context and compiled open action items.\n\nBest regards,\n${userProfile.name}`;
 
       wf.approvalRequest = {
@@ -139,6 +154,8 @@ export class WorkflowExecutor {
     });
 
     try {
+      const stepResult = await this.executeStepTool(step, wf.prompt, provider, userProfile, wf.steps);
+      step.output = stepResult;
       step.status = 'completed';
       step.verified = true; // Tool API response verified
       step.completedAt = new Date().toISOString();
@@ -186,16 +203,28 @@ export class WorkflowExecutor {
     if (step) {
       step.requiresApproval = false;
       step.status = 'running';
-      step.output = await this.executeStepTool(step, wf.prompt, provider, userProfile, customPayload);
-      step.status = 'completed';
-      step.verified = true; // Tool API verified
-      step.completedAt = new Date().toISOString();
-      wf.approvalRequest = undefined;
-      wf.reasoningLog.push({
-        timestamp: new Date().toLocaleTimeString(),
-        message: `✓ Approved & Verified: Email successfully transmitted to ${customPayload?.to || 'recipient'}`,
-        type: 'success'
-      });
+      try {
+        step.output = await this.executeStepTool(step, wf.prompt, provider, userProfile, wf.steps, customPayload);
+        step.status = 'completed';
+        step.verified = true; // Tool API verified
+        step.completedAt = new Date().toISOString();
+        wf.approvalRequest = undefined;
+        wf.reasoningLog.push({
+          timestamp: new Date().toLocaleTimeString(),
+          message: `✓ Approved & Verified: Email successfully transmitted to ${customPayload?.to || 'recipient'}`,
+          type: 'success'
+        });
+      } catch (err: any) {
+        step.status = 'failed';
+        step.verified = false;
+        step.error = err.message || 'Approval step failed';
+        wf.approvalRequest = undefined;
+        wf.reasoningLog.push({
+          timestamp: new Date().toLocaleTimeString(),
+          message: `✕ Failed to execute approved action: ${step.error}`,
+          type: 'warning'
+        });
+      }
     }
 
     // Resume remaining workflow
@@ -212,6 +241,7 @@ export class WorkflowExecutor {
     prompt: string,
     provider: WorkspaceDataProvider,
     userProfile: any,
+    steps?: WorkflowStep[],
     customPayload?: any
   ): Promise<Record<string, any>> {
     switch (step.tool) {
@@ -230,9 +260,9 @@ export class WorkflowExecutor {
           contextResolved: true
         };
       case 'generate_brief': {
-        const meeting = (step.output as any)?.meeting;
-        const emails = (step.output as any)?.emails || [];
-        const docs = (step.output as any)?.docs || [];
+        const meeting = steps ? this.collectStepOutputs(steps, 'find_calendar_event')?.meeting : undefined;
+        const emails = steps ? (this.collectStepOutputs(steps, 'search_emails')?.emails || []) : [];
+        const docs = steps ? (this.collectStepOutputs(steps, 'search_drive')?.docs || []) : [];
         return await geminiService.generateBrief(prompt, emails, docs, meeting, userProfile.name);
       }
       case 'create_task':
@@ -242,11 +272,15 @@ export class WorkflowExecutor {
           ]
         };
       case 'create_draft_email': {
-        const recipient = customPayload?.to || userProfile.email;
+        const emails = steps ? (this.collectStepOutputs(steps, 'search_emails')?.emails || []) : [];
+        const firstEmailSender = Array.isArray(emails) && emails.length > 0 ? emails[0].sender : undefined;
+        const recipient = customPayload?.to || firstEmailSender || userProfile.email;
         return await geminiService.generateEmailDraft(recipient, [`Review workspace updates for: ${prompt}`], userProfile.name);
       }
       case 'send_email': {
-        const recipient = customPayload?.to || userProfile.email;
+        const emails = steps ? (this.collectStepOutputs(steps, 'search_emails')?.emails || []) : [];
+        const firstEmailSender = Array.isArray(emails) && emails.length > 0 ? emails[0].sender : undefined;
+        const recipient = customPayload?.to || firstEmailSender || userProfile.email;
         const subject = customPayload?.subject || `Follow-up: ${prompt}`;
         const body = customPayload?.body || `Hi,\n\nFollowing up on ${prompt}.\n\nBest regards,\n${userProfile.name}`;
         return await GmailTool.sendEmail(provider, recipient, subject, body);

@@ -16,7 +16,9 @@
     "cli:build": "tsc",
     "build": "tsc && vite build",
     "start": "tsx server/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:server",
+    "test:server": "tsx server/tests/runAllTests.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

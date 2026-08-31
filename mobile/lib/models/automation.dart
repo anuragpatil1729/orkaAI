@@ -3,7 +3,7 @@ class AutomationRule {
   final String title;
   final String trigger;
   final String condition;
-  final bool active;
+  bool active;
 
   AutomationRule({
     required this.id,

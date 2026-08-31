@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/workflow_provider.dart';
 import '../models/workflow.dart';
 import '../widgets/approval_bottom_sheet.dart';
+import '../widgets/tactile_widgets.dart';
 import '../core/theme.dart';
 
 class ExecutionScreen extends StatelessWidget {
@@ -47,8 +48,14 @@ class ExecutionScreen extends StatelessWidget {
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ORKA IS WORKING', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: OrkaTheme.primary)),
-            Text('Autonomous Tool Orchestration Timeline', style: TextStyle(fontSize: 10, color: OrkaTheme.textSecondary)),
+            Row(
+              children: [
+                AIActivityPulseWidget(active: true),
+                SizedBox(width: 8),
+                Text('ORKA IS WORKING', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: OrkaTheme.cyanGlow)),
+              ],
+            ),
+            Text('Autonomous Execution Network', style: TextStyle(fontSize: 10, color: OrkaTheme.textSecondary)),
           ],
         ),
         actions: [
@@ -64,22 +71,17 @@ class ExecutionScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Goal Banner
-            Container(
+            GlassCardWidget(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: OrkaTheme.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: OrkaTheme.surfaceBorder),
-              ),
               child: Row(
                 children: [
-                  const Icon(Icons.bolt, color: OrkaTheme.warning, size: 20),
+                  const Icon(Icons.bolt, color: OrkaTheme.primary, size: 22),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('GOAL', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold)),
+                        const Text('EXECUTION GOAL', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
                         Text(execution.prompt, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
                       ],
                     ),
@@ -89,10 +91,10 @@ class ExecutionScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            const Text('EXECUTION TIMELINE', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+            const Text('EXECUTION NODES', style: TextStyle(color: OrkaTheme.textMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
             const SizedBox(height: 16),
 
-            // Step List
+            // Step Node List
             Expanded(
               child: ListView.builder(
                 itemCount: execution.steps.length,
@@ -112,39 +114,60 @@ class ExecutionScreen extends StatelessWidget {
     IconData iconData = Icons.radio_button_unchecked;
     Color statusColor = OrkaTheme.textMuted;
     String statusLabel = 'Pending';
+    BoxDecoration borderDecoration = BoxDecoration(
+      color: OrkaTheme.glassSurface,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: OrkaTheme.glassBorder),
+    );
 
     if (step.status == 'completed') {
       iconData = Icons.check_circle;
       statusColor = OrkaTheme.success;
       statusLabel = step.verified ? '✓ VERIFIED' : 'Completed';
+      borderDecoration = BoxDecoration(
+        color: OrkaTheme.success.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: OrkaTheme.success.withValues(alpha: 0.3)),
+      );
     } else if (step.status == 'running') {
       iconData = Icons.sync;
       statusColor = OrkaTheme.primary;
-      statusLabel = 'Running';
+      statusLabel = 'RUNNING';
+      borderDecoration = BoxDecoration(
+        color: OrkaTheme.primary.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: OrkaTheme.primary),
+        boxShadow: [
+          BoxShadow(color: OrkaTheme.primary.withValues(alpha: 0.4), blurRadius: 15),
+        ],
+      );
     } else if (step.status == 'waiting_approval') {
       iconData = Icons.shield_outlined;
       statusColor = OrkaTheme.warning;
-      statusLabel = 'Approval Required';
+      statusLabel = 'APPROVAL REQUIRED';
+      borderDecoration = BoxDecoration(
+        color: OrkaTheme.warning.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: OrkaTheme.warning),
+        boxShadow: [
+          BoxShadow(color: OrkaTheme.warning.withValues(alpha: 0.4), blurRadius: 15),
+        ],
+      );
     } else if (step.status == 'failed') {
       iconData = Icons.error_outline;
       statusColor = OrkaTheme.error;
-      statusLabel = 'Failed';
+      statusLabel = 'FAILED';
+      borderDecoration = BoxDecoration(
+        color: OrkaTheme.error.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: OrkaTheme.error.withValues(alpha: 0.4)),
+      );
     }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: OrkaTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: step.status == 'running'
-              ? OrkaTheme.primary
-              : step.status == 'waiting_approval'
-                  ? OrkaTheme.warning
-                  : OrkaTheme.surfaceBorder,
-        ),
-      ),
+      decoration: borderDecoration,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -159,12 +182,13 @@ class ExecutionScreen extends StatelessWidget {
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.15),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                 ),
-                child: Text(statusLabel, style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
+                child: Text(statusLabel, style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace')),
               ),
             ],
           ),
@@ -176,11 +200,12 @@ class ExecutionScreen extends StatelessWidget {
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: Colors.black45,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: const Color(0x20FFFFFF)),
               ),
               child: Text(
                 'WHY ORKA DID THIS: ${step.whyExplanation}',
-                style: const TextStyle(color: OrkaTheme.secondary, fontSize: 10, fontStyle: FontStyle.italic),
+                style: const TextStyle(color: OrkaTheme.cyanGlow, fontSize: 10, fontStyle: FontStyle.italic),
               ),
             ),
           ],
