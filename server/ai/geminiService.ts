@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { INTENT_PARSER_SYSTEM_PROMPT, PLANNER_SYSTEM_PROMPT, BRIEF_GENERATION_PROMPT, EMAIL_DRAFT_PROMPT } from './prompts';
+import { PromptInjectionGuard } from '../security/promptInjectionGuard';
 import { IntentParseResult, WorkflowStep, ExecutiveBrief, EmailDraft } from '../../src/types/agent';
 import { isValidTool } from '../tools/registry';
 
@@ -59,10 +60,25 @@ export class GeminiService {
           model: getModelName(),
           generationConfig: { responseMimeType: 'application/json' }
         });
-        const fullPrompt = `${INTENT_PARSER_SYSTEM_PROMPT}\n\nUser Request: "${prompt}"`;
+        const fullPrompt = `${INTENT_PARSER_SYSTEM_PROMPT}\n\n<untrusted_user_request><![CDATA[\n${PromptInjectionGuard.sanitizeEmailBody(prompt)}\n]]></untrusted_user_request>`;
         const response = await model.generateContent(fullPrompt);
         const text = response.response.text();
         const parsed = JSON.parse(text);
+
+        const sanity = PromptInjectionGuard.validateExtractedIntent({
+          requestedAction: parsed.goal,
+          summary: parsed.entity,
+          targetActions: parsed.targetActions
+        });
+        if (!sanity.safe) {
+          return {
+            rawPrompt: prompt,
+            goal: `Blocked unsafe request: ${sanity.reason}`,
+            timeframe: 'today',
+            targetActions: ['analyze_context'],
+            isDemoScenario: false
+          };
+        }
         
         const validActions = Array.isArray(parsed.targetActions)
           ? parsed.targetActions.filter((a: string) => isValidTool(a))

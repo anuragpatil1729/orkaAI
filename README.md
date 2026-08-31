@@ -33,7 +33,7 @@ ORKAAI AGENT ENGINE:   USER GOAL → INTENT → DYNAMIC PLAN → TOOL EXECUTION 
 - **🧠 Google Gemini API Brain:** Uses official `@google/generative-ai` SDK for dynamic goal decomposition, intent parsing, contextual reasoning, executive brief synthesis, and email drafting.
 - **📱 Native Flutter Mobile Application (`mobile/`):** Material 3 Android app with voice speech recognition (`speech_to_text`), vertical step execution timeline, native approval bottom sheet, and outcome receipt dialog.
 - **📊 Live Execution DAG Graph:** Visualizes real-time tool orchestration steps with node states (`○ Pending`, `◉ Running`, `✓ Completed & Verified`, `⚠ Approval Required`, `✕ Failed`).
-- **🛡️ Deterministic Action Policy Engine:** Security rules are enforced strictly by backend policy code, **not** LLM recommendations. High-risk write actions (`send_email`) strictly require human approval in Copilot mode.
+- **🛡️ Layered execution security:** Untrusted email content is delimited before LLM classification, prompt-injection screening is a best-effort filter (not a security boundary), model-selected tools are constrained to the backend registry, and deterministic policy code requires human approval for high-risk writes (`send_email`, repository modification/push/PR creation) in Copilot mode.
 - **💻 Terminal-Native CLI (`orka`):** Full-featured terminal interface sharing the backend API, interactive approval gate, live step rendering, and execution receipts.
 - **❓ "Why Orka Did This" Explanations:** Explains tool selection rationale across Web, CLI, and Mobile interfaces.
 - **🧾 Orka Execution Receipt:** Generates an auditable execution receipt detailing total actions executed, API-verified actions, granted approvals, audited items, and execution duration in seconds.
