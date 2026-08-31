@@ -19,7 +19,7 @@ export class WorkflowExecutor {
       reasoningLog: [
         {
           timestamp: new Date().toLocaleTimeString(),
-          message: `Parsed user intent: "${prompt}"`,
+          message: `Parsed intent: "${prompt}"`,
           type: 'info'
         },
         {
@@ -71,10 +71,10 @@ export class WorkflowExecutor {
         stepId: step.id,
         actionName: step.name,
         toolName: step.tool,
-        targetRecipient: 'rahul.sharma@acmecorp.com (VP of Product)',
+        targetRecipient: 'rahul.sharma@acmecorp.com',
         subject: 'Acme Integration Sync - Pre-Meeting Alignment & Docs',
-        contentPreview: `Send email to Rahul Sharma with attached OAuth 2.0 specs and confirmation of October 15th enterprise deployment date.`,
-        riskReason: 'Transmitting external email communication to Acme Corp client'
+        contentPreview: `Hi Rahul,\n\nFollowing up ahead of our sync tomorrow at 11:00 AM.\n\nI've reviewed your team's feedback regarding our integration specs. Here is where we stand on your three core questions:\n\n1. Deployment Date: We are set to deploy the Enterprise Tier on October 15th.\n2. API Documentation: Updated OAuth 2.0 documentation is attached for your security team.\n3. Token Refresh Policy: Our gateway handles up to 50k token refreshes/min with zero latency degradation.\n\nLooking forward to finalizing the rollout tomorrow!\n\nBest regards,\nAlex V\nOrkaAI Team`,
+        riskReason: 'Orka prepared this follow-up email from your recent Acme Corp email conversations.'
       };
       wf.reasoningLog.push({
         timestamp: new Date().toLocaleTimeString(),
@@ -127,7 +127,7 @@ export class WorkflowExecutor {
     return wf;
   }
 
-  public async approveStep(id: string, stepId: string): Promise<WorkflowExecution> {
+  public async approveStep(id: string, stepId: string, customPayload?: { to?: string; subject?: string; body?: string }): Promise<WorkflowExecution> {
     const wf = this.activeWorkflows.get(id);
     if (!wf) throw new Error('Workflow not found');
 
@@ -135,13 +135,13 @@ export class WorkflowExecutor {
     if (step) {
       step.requiresApproval = false;
       step.status = 'running';
-      step.output = await this.executeStepTool(step);
+      step.output = await this.executeStepTool(step, customPayload);
       step.status = 'completed';
       step.completedAt = new Date().toISOString();
       wf.approvalRequest = undefined;
       wf.reasoningLog.push({
         timestamp: new Date().toLocaleTimeString(),
-        message: `✓ Approved & Sent: Email successfully delivered to Rahul Sharma`,
+        message: `✓ Approved & Sent: Email successfully delivered to ${customPayload?.to || 'Rahul Sharma'}`,
         type: 'success'
       });
     }
@@ -150,7 +150,7 @@ export class WorkflowExecutor {
     return await this.advanceWorkflow(id);
   }
 
-  private async executeStepTool(step: WorkflowStep): Promise<Record<string, any>> {
+  private async executeStepTool(step: WorkflowStep, customPayload?: any): Promise<Record<string, any>> {
     switch (step.tool) {
       case 'find_calendar_event':
         return await CalendarTool.findMeeting('Acme');
@@ -173,7 +173,11 @@ export class WorkflowExecutor {
       case 'create_draft_email':
         return await geminiService.generateEmailDraft('rahul.sharma@acmecorp.com', ['Deployment date', 'OAuth docs', 'Token refresh']);
       case 'send_email':
-        return await GmailTool.sendEmail('rahul.sharma@acmecorp.com', 'Acme Integration Sync - Pre-Meeting Alignment & Docs', 'Email body delivered successfully.');
+        return await GmailTool.sendEmail(
+          customPayload?.to || 'rahul.sharma@acmecorp.com',
+          customPayload?.subject || 'Acme Integration Sync - Pre-Meeting Alignment & Docs',
+          customPayload?.body || 'Email body delivered successfully.'
+        );
       default:
         return { status: 'executed', tool: step.tool };
     }
@@ -214,7 +218,7 @@ export class WorkflowExecutor {
         unresolvedItemsDetected: brief.unresolvedItems.length,
         draftsPrepared: 1,
         actionsCompleted: completedActionsCount,
-        totalTimeMs: 4200
+        totalTimeMs: 3800
       }
     };
   }

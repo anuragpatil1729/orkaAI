@@ -13,7 +13,7 @@ interface WorkflowContextType {
   geminiConfigured: boolean;
   isExecuting: boolean;
   startWorkflow: (prompt: string) => Promise<void>;
-  approveCurrentStep: () => Promise<void>;
+  approveCurrentStep: (customPayload?: { to?: string; subject?: string; body?: string }) => Promise<void>;
   resetWorkflow: () => void;
   launchDemoScenario: () => Promise<void>;
 }
@@ -27,7 +27,7 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isExecuting, setIsExecuting] = useState(false);
   const [workspaceStatus] = useState<GoogleWorkspaceStatus>({
     connected: true,
-    userEmail: 'alex.v@actionos.ai',
+    userEmail: 'alex.v@orka.ai (Demo Workspace)',
     services: { gmail: true, calendar: true, drive: true }
   });
   const [geminiConfigured, setGeminiConfigured] = useState(false);
@@ -55,7 +55,6 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const data = await res.json();
       if (data.workflow) {
         setCurrentWorkflow(data.workflow);
-        // Start advancing execution steps automatically
         runStepLoop(data.workflow.id);
       }
     } catch (err) {
@@ -81,7 +80,7 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             break;
           }
         }
-        await new Promise(r => setTimeout(r, 900)); // Smooth step animation timing for demo
+        await new Promise(r => setTimeout(r, 450)); // Responsive & smooth step progression for 90s hackathon demo
       } catch (err) {
         console.error('Step loop error:', err);
         active = false;
@@ -90,14 +89,17 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const approveCurrentStep = async () => {
+  const approveCurrentStep = async (customPayload?: { to?: string; subject?: string; body?: string }) => {
     if (!currentWorkflow || !currentWorkflow.approvalRequest) return;
     setIsExecuting(true);
     try {
       const res = await fetch(`/api/agent/workflow/${currentWorkflow.id}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stepId: currentWorkflow.approvalRequest.stepId })
+        body: JSON.stringify({
+          stepId: currentWorkflow.approvalRequest.stepId,
+          ...customPayload
+        })
       });
       const data = await res.json();
       if (data.workflow) {

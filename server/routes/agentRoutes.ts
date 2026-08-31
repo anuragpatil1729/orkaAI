@@ -10,13 +10,13 @@ const router = Router();
 router.post('/execute', async (req, res) => {
   try {
     const { prompt, mode = 'COPILOT' } = req.body;
-    if (!prompt) {
-      return res.status(400).json({ error: 'Prompt is required' });
+    if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
+      return res.status(400).json({ error: 'Prompt string is required' });
     }
 
-    const intent = await parseUserIntent(prompt);
+    const intent = await parseUserIntent(prompt.trim());
     const steps = await createExecutionPlan(intent);
-    const workflow = workflowExecutor.createWorkflow(prompt, mode, steps);
+    const workflow = workflowExecutor.createWorkflow(prompt.trim(), mode, steps);
 
     // Save to initial activity log
     INITIAL_ACTIVITIES.unshift({
@@ -64,8 +64,8 @@ router.get('/workflow/:id', (req, res) => {
 router.post('/workflow/:id/approve', async (req, res) => {
   try {
     const { id } = req.params;
-    const { stepId } = req.body;
-    const workflow = await workflowExecutor.approveStep(id, stepId);
+    const { stepId, to, subject, body } = req.body;
+    const workflow = await workflowExecutor.approveStep(id, stepId, { to, subject, body });
     res.json({ workflow });
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Failed to approve workflow step' });

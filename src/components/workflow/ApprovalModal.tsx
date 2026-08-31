@@ -1,15 +1,32 @@
 import React, { useState } from 'react';
 import { useWorkflow } from '../../context/WorkflowContext';
-import { ShieldAlert, Send, Eye, X, Edit3 } from 'lucide-react';
+import { ShieldAlert, Send, Eye, X, Edit3, CheckCircle2, Clock } from 'lucide-react';
 
 export const ApprovalModal: React.FC = () => {
   const { currentWorkflow, approveCurrentStep, resetWorkflow } = useWorkflow();
   const [isEditing, setIsEditing] = useState(false);
+  const [editedTo, setEditedTo] = useState('');
+  const [editedSubject, setEditedSubject] = useState('');
   const [editedBody, setEditedBody] = useState('');
+  const [sendingState, setSendingState] = useState<'idle' | 'sending' | 'sent'>('idle');
 
   if (!currentWorkflow || !currentWorkflow.approvalRequest) return null;
 
   const req = currentWorkflow.approvalRequest;
+
+  const handleApprove = async () => {
+    setSendingState('sending');
+    await new Promise(r => setTimeout(r, 600)); // Smooth animation tick
+    setSendingState('sent');
+    await new Promise(r => setTimeout(r, 400));
+    
+    await approveCurrentStep({
+      to: editedTo || req.targetRecipient,
+      subject: editedSubject || req.subject,
+      body: editedBody || req.contentPreview
+    });
+    setSendingState('idle');
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
@@ -29,7 +46,7 @@ export const ApprovalModal: React.FC = () => {
               </span>
             </div>
             <h3 className="text-xl font-extrabold text-white mt-1">
-              Send Email to {req.targetRecipient || 'Acme VP'}?
+              Send Email to {editedTo || req.targetRecipient || 'Acme VP'}?
             </h3>
             <p className="text-xs text-slate-400 mt-1">
               OrkaAI has paused autonomous execution for human verification.
@@ -37,7 +54,7 @@ export const ApprovalModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Structured Explanation Card: ACTION, TARGET, WHY, CONTENT */}
+        {/* Structured Card: ACTION, TARGET, WHY, CONTENT */}
         <div className="space-y-3 p-4 rounded-2xl bg-slate-900/90 border border-white/10 text-xs">
           <div className="grid grid-cols-3 gap-2 pb-3 border-b border-white/5">
             <div>
@@ -46,7 +63,16 @@ export const ApprovalModal: React.FC = () => {
             </div>
             <div>
               <span className="text-slate-500 uppercase font-bold text-[10px]">TARGET</span>
-              <p className="text-indigo-300 font-semibold mt-0.5">{req.targetRecipient}</p>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editedTo || req.targetRecipient || ''}
+                  onChange={(e) => setEditedTo(e.target.value)}
+                  className="bg-black/60 border border-indigo-500/40 text-indigo-300 font-mono font-semibold px-2 py-1 rounded text-xs w-full outline-none mt-0.5"
+                />
+              ) : (
+                <p className="text-indigo-300 font-semibold mt-0.5">{editedTo || req.targetRecipient}</p>
+              )}
             </div>
             <div>
               <span className="text-slate-500 uppercase font-bold text-[10px]">WHY</span>
@@ -56,7 +82,16 @@ export const ApprovalModal: React.FC = () => {
 
           <div>
             <span className="text-slate-400 font-semibold">Subject Line:</span>
-            <p className="text-slate-100 font-bold mt-0.5 text-sm">{req.subject}</p>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedSubject || req.subject || ''}
+                onChange={(e) => setEditedSubject(e.target.value)}
+                className="bg-black/60 border border-indigo-500/40 text-slate-100 font-bold px-2 py-1.5 rounded text-xs w-full outline-none mt-1"
+              />
+            ) : (
+              <p className="text-slate-100 font-bold mt-0.5 text-sm">{editedSubject || req.subject}</p>
+            )}
           </div>
 
           <div className="pt-2">
@@ -66,45 +101,63 @@ export const ApprovalModal: React.FC = () => {
                 onClick={() => {
                   setIsEditing(!isEditing);
                   if (!editedBody) setEditedBody(req.contentPreview);
+                  if (!editedTo) setEditedTo(req.targetRecipient || '');
+                  if (!editedSubject) setEditedSubject(req.subject || '');
                 }}
                 className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-semibold"
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                <span>{isEditing ? 'Save Edits' : 'Edit Draft'}</span>
+                <span>{isEditing ? 'Save Edits' : 'Edit Email'}</span>
               </button>
             </div>
 
             {isEditing ? (
               <textarea
-                value={editedBody}
+                value={editedBody || req.contentPreview}
                 onChange={(e) => setEditedBody(e.target.value)}
-                rows={5}
+                rows={6}
                 className="w-full p-3 rounded-xl bg-black/60 border border-indigo-500/40 text-slate-200 text-xs outline-none font-sans leading-relaxed resize-none"
               />
             ) : (
-              <div className="p-3 rounded-xl bg-black/40 border border-white/5 font-sans text-slate-300 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
+              <div className="p-3 rounded-xl bg-black/40 border border-white/5 font-sans text-slate-300 whitespace-pre-wrap leading-relaxed max-h-44 overflow-y-auto">
                 {editedBody || req.contentPreview}
               </div>
             )}
           </div>
         </div>
 
-        {/* Actions: [Edit], [Reject], [Approve & Send] */}
+        {/* Actions: [Reject], [Approve & Send] */}
         <div className="flex items-center justify-between pt-2">
           <button
             onClick={resetWorkflow}
-            className="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-xs font-semibold flex items-center gap-1.5 transition-all"
+            disabled={sendingState !== 'idle'}
+            className="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-40"
           >
             <X className="w-4 h-4" />
             <span>Reject Action</span>
           </button>
 
           <button
-            onClick={approveCurrentStep}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-extrabold shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all active:scale-95"
+            onClick={handleApprove}
+            disabled={sendingState !== 'idle'}
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-extrabold shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-75"
           >
-            <Send className="w-4 h-4" />
-            <span>Approve & Send</span>
+            {sendingState === 'idle' ? (
+              <>
+                <Send className="w-4 h-4" />
+                <span>Approve & Send Email</span>
+              </>
+            ) : sendingState === 'sending' ? (
+              <>
+                <Clock className="w-4 h-4 animate-spin text-white" />
+                <span>Sending Email...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-4 h-4 text-white" />
+                <span>Email Sent!</span>
+              </>
+            )}
           </button>
         </div>
       </div>
