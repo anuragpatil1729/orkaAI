@@ -4,14 +4,18 @@ import { Mail, RefreshCw, ArrowRight, ShieldAlert, Code } from 'lucide-react';
 import { GlassCard, StatusPill, TactileButton } from '../ui/NeoTactileSystem';
 import { TaskDetailModal } from './TaskDetailModal';
 
-export const IncomingWorkWidget: React.FC = () => {
+interface IncomingWorkWidgetProps {
+  onExecuteTriggered?: (task: EmailTaskItem) => void;
+}
+
+export const IncomingWorkWidget: React.FC<IncomingWorkWidgetProps> = ({ onExecuteTriggered }) => {
   const [tasks, setTasks] = useState<EmailTaskItem[]>([]);
   const [selectedTask, setSelectedTask] = useState<EmailTaskItem | null>(null);
   const [isScanning, setIsScanning] = useState(false);
 
   const fetchTasks = async () => {
     try {
-      const res = await fetch('/api/tasks');
+      const res = await fetch('/api/mail/tasks');
       const data = await res.json();
       if (data.tasks) {
         setTasks(data.tasks.filter((t: EmailTaskItem) => t.actionable));
@@ -26,7 +30,7 @@ export const IncomingWorkWidget: React.FC = () => {
   const handleScanInbox = async () => {
     setIsScanning(true);
     try {
-      const res = await fetch('/api/tasks/scan', { method: 'POST' });
+      const res = await fetch('/api/mail/scan', { method: 'POST' });
       const data = await res.json();
       if (data.allTasks) {
         setTasks(data.allTasks.filter((t: EmailTaskItem) => t.actionable));
@@ -35,6 +39,14 @@ export const IncomingWorkWidget: React.FC = () => {
       console.error('Failed to scan inbox:', err);
     } finally {
       setIsScanning(false);
+    }
+  };
+
+  const handleTaskClick = (task: EmailTaskItem) => {
+    if ((task.status === 'EXECUTING' || task.status === 'COMPLETED') && onExecuteTriggered) {
+      onExecuteTriggered(task);
+    } else {
+      setSelectedTask(task);
     }
   };
 
@@ -75,7 +87,7 @@ export const IncomingWorkWidget: React.FC = () => {
           {tasks.slice(0, 4).map((task) => (
             <div
               key={task.id}
-              onClick={() => setSelectedTask(task)}
+              onClick={() => handleTaskClick(task)}
               className="p-4.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 flex items-center justify-between cursor-pointer transition-all group"
             >
               <div className="flex items-start gap-4">
@@ -109,7 +121,14 @@ export const IncomingWorkWidget: React.FC = () => {
 
       {/* Task Detail Modal */}
       {selectedTask && (
-        <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} />
+        <TaskDetailModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onExecuteTriggered={(task) => {
+            setSelectedTask(null);
+            if (onExecuteTriggered) onExecuteTriggered(task);
+          }}
+        />
       )}
     </GlassCard>
   );

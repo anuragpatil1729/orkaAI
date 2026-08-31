@@ -46,7 +46,7 @@ export const DashboardPage: React.FC = () => {
       <CheckScanMailButton onScanComplete={handleScanComplete} />
 
       {/* INCOMING WORK (EMAIL-TO-ACTION) TASK CENTER */}
-      <IncomingWorkWidget />
+      <IncomingWorkWidget onExecuteTriggered={(task) => setActiveExecutionTask(task)} />
 
       {/* Hero 2-Column Section: Command Input & Active Execution Progress Gauge */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">

@@ -1,5 +1,35 @@
 [
   {
+    "receiptId": "rcpt_mthd1n94",
+    "taskId": "task_email_1a058395d17a8261",
+    "originalRequest": "GitHub home @sarthakpatil6636 has invited you to collaborate on the sarthakpatil6636/atestproject repository You can accept or decline this invitation. You can also head over to https://github.com/",
+    "sender": "Sarthak Patil <noreply@github.com>",
+    "repository": "anuragpatil1729/orkaai",
+    "branch": "orka/task/sarthakpatil6636-invited",
+    "commitSha": "ppze307",
+    "filesChangedCount": 2,
+    "testsPassed": true,
+    "buildPassed": true,
+    "status": "COMPLETED",
+    "prUrl": "https://github.com/anuragpatil1729/orkaAI/pull/194",
+    "completedAt": "2026-08-31T14:55:34.648Z"
+  },
+  {
+    "receiptId": "rcpt_mthd1ba1",
+    "taskId": "task_email_1a0583dccf80e5e3",
+    "originalRequest": "Good Morning anurag , I have a share a repo with you and added you as a collaborator , it a calculator project , i have done with cli can you make the remaining gui for the same , github repo link :",
+    "sender": "Anurag Patil <anuragpatil1510@gmail.com>",
+    "repository": "orkaaidemo/targetproject",
+    "branch": "orka/task/no-subject",
+    "commitSha": "3pb2xfa",
+    "filesChangedCount": 2,
+    "testsPassed": true,
+    "buildPassed": true,
+    "status": "COMPLETED",
+    "prUrl": "https://github.com/orkaaidemo/targetproject/pull/162",
+    "completedAt": "2026-08-31T14:55:19.129Z"
+  },
+  {
     "receiptId": "rcpt_e2e_mthd02vo",
     "taskId": "task_e2e_msg_test_collaborator_001",
     "originalRequest": "I have shared a repo with you and added you as a collaborator, it is a calculator project, I have done with CLI can you make the remaining GUI for the same.",

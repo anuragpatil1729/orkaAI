@@ -7,21 +7,34 @@ import { useWorkflow } from '../../context/WorkflowContext';
 interface TaskDetailModalProps {
   task: EmailTaskItem;
   onClose: () => void;
+  onExecuteTriggered?: (task: EmailTaskItem) => void;
 }
 
-export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose }) => {
+export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose, onExecuteTriggered }) => {
   const { startWorkflow } = useWorkflow();
   const [isExecuting, setIsExecuting] = useState(false);
 
   const handleApproveAndExecute = async () => {
     setIsExecuting(true);
     try {
-      await fetch(`/api/tasks/${task.id}/approve`, {
+      // 1. Mark task as WAITING_APPROVAL / APPROVED
+      await fetch(`/api/mail/tasks/${task.id}/approve`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'COPILOT' })
+        headers: { 'Content-Type': 'application/json' }
       });
-      await startWorkflow(task.requestedAction || task.subject);
+
+      // 2. Trigger asynchronous Sandboxed Coding Agent execution
+      fetch(`/api/mail/tasks/${task.id}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(err => console.error('Execute error:', err));
+
+      const updatedTask: EmailTaskItem = { ...task, status: 'EXECUTING' };
+      if (onExecuteTriggered) {
+        onExecuteTriggered(updatedTask);
+      } else {
+        await startWorkflow(task.requestedAction || task.subject);
+      }
       onClose();
     } catch (err) {
       console.error('Task approval failed:', err);
