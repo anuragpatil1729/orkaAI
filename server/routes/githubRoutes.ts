@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import fs from 'fs';
+import path from 'path';
 import { GitHubToolService } from '../tools/githubTool';
 import { CodingAgent } from '../agents/codingAgent';
 import { optionalAuthMiddleware, AuthenticatedRequest } from '../middleware/authMiddleware';
@@ -36,12 +38,26 @@ router.post('/task/:id/execute', optionalAuthMiddleware, async (req: Authenticat
   }
 });
 
-// POST /api/github/token - Save GitHub PAT dynamically
+// POST /api/github/token - Save GitHub PAT dynamically & persist to .env
 router.post('/token', optionalAuthMiddleware, (req: AuthenticatedRequest, res) => {
   const { token } = req.body;
   if (token && typeof token === 'string') {
-    process.env.GITHUB_TOKEN = token.trim();
-    return res.json({ status: 'connected', message: 'GitHub Personal Access Token configured successfully' });
+    const cleanToken = token.trim();
+    process.env.GITHUB_TOKEN = cleanToken;
+
+    // Persist to .env
+    const envPath = path.join(process.cwd(), '.env');
+    if (fs.existsSync(envPath)) {
+      let envContent = fs.readFileSync(envPath, 'utf8');
+      if (envContent.includes('GITHUB_TOKEN=')) {
+        envContent = envContent.replace(/GITHUB_TOKEN=.*/g, `GITHUB_TOKEN=${cleanToken}`);
+      } else {
+        envContent += `\nGITHUB_TOKEN=${cleanToken}\n`;
+      }
+      fs.writeFileSync(envPath, envContent, 'utf8');
+    }
+
+    return res.json({ status: 'connected', message: 'GitHub Personal Access Token configured successfully and persisted to .env' });
   }
   res.status(400).json({ error: 'Invalid GitHub token provided' });
 });
