@@ -7,12 +7,12 @@ export const QuickActionCards: React.FC = () => {
 
   const actions = [
     {
-      title: 'Prepare Acme Meeting',
-      prompt: 'I have a meeting with Acme tomorrow. Get me completely ready.',
+      title: 'Prepare Meeting',
+      prompt: 'Prepare me for my next upcoming meeting on Google Calendar.',
       icon: Calendar,
       gradient: 'from-indigo-500/20 via-indigo-500/5 to-transparent',
       border: 'border-indigo-500/30',
-      badge: 'CENTERPIECE DEMO',
+      badge: 'MEETING AGENT',
       badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
     },
     {
@@ -21,16 +21,16 @@ export const QuickActionCards: React.FC = () => {
       icon: Mail,
       gradient: 'from-cyan-500/20 via-cyan-500/5 to-transparent',
       border: 'border-cyan-500/30',
-      badge: 'AUTOPILOT SAFE',
+      badge: 'GMAIL AGENT',
       badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30'
     },
     {
       title: 'Summarize Today\'s Work',
-      prompt: 'Analyze sent emails, calendar invites, and updated docs today and generate daily summary.',
+      prompt: 'Analyze sent emails, calendar invites, and updated docs today and generate summary.',
       icon: FileText,
       gradient: 'from-violet-500/20 via-violet-500/5 to-transparent',
       border: 'border-violet-500/30',
-      badge: 'SUMMARY',
+      badge: 'WORKSPACE SUMMARY',
       badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30'
     },
     {

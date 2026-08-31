@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useWorkflow } from '../../context/WorkflowContext';
-import { Sparkles, ArrowRight, Play } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 
 export const CommandInput: React.FC = () => {
   const [prompt, setPrompt] = useState('');
-  const { startWorkflow, isExecuting, launchDemoScenario } = useWorkflow();
+  const { startWorkflow, isExecuting } = useWorkflow();
 
   const suggestions = [
-    "Prepare me for my Acme meeting tomorrow",
+    "Prepare me for my meeting tomorrow",
     "Clean up my inbox",
     "Summarize today's work",
     "Find everything I need for tomorrow",
@@ -55,15 +55,6 @@ export const CommandInput: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={launchDemoScenario}
-                className="px-3 py-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all"
-              >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Try Acme Meeting Demo</span>
-              </button>
-
               <button
                 type="submit"
                 disabled={!prompt.trim() || isExecuting}

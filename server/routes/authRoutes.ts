@@ -1,20 +1,27 @@
 import { Router } from 'express';
 import { geminiService } from '../ai/geminiService';
 import { GoogleAuthService } from '../auth/googleOAuth';
+import { getWorkspaceProvider } from '../providers/workspaceProvider';
 
 const router = Router();
 
-router.get('/status', (req, res) => {
+router.get('/status', async (req, res) => {
   const isOauthConfigured = GoogleAuthService.isConfigured();
+  const authClient = GoogleAuthService.getAuthenticatedClient();
+  const provider = getWorkspaceProvider(authClient);
+  const profile = await provider.getUserProfile();
+
   res.json({
     workspace: {
-      mode: isOauthConfigured ? 'REAL WORKSPACE' : 'DEMO WORKSPACE',
-      connected: true,
-      userEmail: isOauthConfigured ? 'connected.user@workspace.com' : 'alex.v@orka.ai (Demo Workspace)',
+      mode: profile.connected ? 'REAL WORKSPACE' : 'DISCONNECTED',
+      connected: profile.connected,
+      userEmail: profile.email,
+      userName: profile.name,
+      avatarUrl: profile.avatarUrl,
       services: {
-        gmail: true,
-        calendar: true,
-        drive: true
+        gmail: profile.connected,
+        calendar: profile.connected,
+        drive: profile.connected
       }
     },
     gemini: {
@@ -25,6 +32,13 @@ router.get('/status', (req, res) => {
   });
 });
 
+router.get('/me', async (req, res) => {
+  const authClient = GoogleAuthService.getAuthenticatedClient();
+  const provider = getWorkspaceProvider(authClient);
+  const profile = await provider.getUserProfile();
+  res.json(profile);
+});
+
 router.get('/google/url', (req, res) => {
   const url = GoogleAuthService.getAuthUrl();
   if (!url) {
@@ -33,7 +47,6 @@ router.get('/google/url', (req, res) => {
     });
   }
 
-  // If accessed directly in browser or with redirect query, redirect to Google consent page
   if (req.query.redirect === 'true' || req.headers.accept?.includes('text/html')) {
     return res.redirect(url);
   }

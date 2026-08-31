@@ -3,12 +3,9 @@ import { CommandInput } from '../components/dashboard/CommandInput';
 import { QuickActionCards } from '../components/dashboard/QuickActionCards';
 import { IntegrationBar } from '../components/dashboard/IntegrationBar';
 import { RecentActivityWidget } from '../components/dashboard/RecentActivityWidget';
-import { Sparkles, Zap, ArrowRight, Layers, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import { useWorkflow } from '../context/WorkflowContext';
+import { Sparkles, Layers } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
-  const { launchDemoScenario } = useWorkflow();
-
   return (
     <div className="space-y-8 animate-fadeIn">
       {/* Welcome Hero Banner */}
@@ -27,17 +24,6 @@ export const DashboardPage: React.FC = () => {
           <p className="text-slate-300 text-sm md:text-base leading-relaxed">
             OrkaAI parses your outcome goal, generates a dynamic tool plan, interacts with Gmail, Calendar, and Drive, executes verified work, and asks approval before sensitive external actions.
           </p>
-
-          <div className="pt-2 flex items-center gap-4">
-            <button
-              onClick={launchDemoScenario}
-              className="bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold px-6 py-3 rounded-2xl shadow-xl shadow-indigo-600/30 flex items-center gap-2 text-sm transition-all active:scale-95"
-            >
-              <Zap className="w-4 h-4 fill-current" />
-              <span>Run Acme Meeting Scenario</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
       </div>
 

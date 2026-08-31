@@ -15,7 +15,6 @@ interface WorkflowContextType {
   startWorkflow: (prompt: string) => Promise<void>;
   approveCurrentStep: (customPayload?: { to?: string; subject?: string; body?: string }) => Promise<void>;
   resetWorkflow: () => void;
-  launchDemoScenario: () => Promise<void>;
 }
 
 const WorkflowContext = createContext<WorkflowContextType | undefined>(undefined);
@@ -25,10 +24,10 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [mode, setMode] = useState<'COPILOT' | 'AUTOPILOT'>('COPILOT');
   const [currentWorkflow, setCurrentWorkflow] = useState<WorkflowExecution | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
-  const [workspaceStatus] = useState<GoogleWorkspaceStatus>({
-    connected: true,
-    userEmail: 'alex.v@orka.ai (Demo Workspace)',
-    services: { gmail: true, calendar: true, drive: true }
+  const [workspaceStatus, setWorkspaceStatus] = useState<GoogleWorkspaceStatus>({
+    connected: false,
+    userEmail: '',
+    services: { gmail: false, calendar: false, drive: false }
   });
   const [geminiConfigured, setGeminiConfigured] = useState(false);
 
@@ -36,6 +35,13 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     fetch('/api/auth/status')
       .then(res => res.json())
       .then(data => {
+        if (data.workspace) {
+          setWorkspaceStatus({
+            connected: data.workspace.connected,
+            userEmail: data.workspace.userEmail || '',
+            services: data.workspace.services || { gmail: false, calendar: false, drive: false }
+          });
+        }
         if (data.gemini?.configured) {
           setGeminiConfigured(true);
         }
@@ -80,7 +86,7 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             break;
           }
         }
-        await new Promise(r => setTimeout(r, 450)); // Responsive & smooth step progression for 90s hackathon demo
+        await new Promise(r => setTimeout(r, 450));
       } catch (err) {
         console.error('Step loop error:', err);
         active = false;
@@ -116,10 +122,6 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const launchDemoScenario = async () => {
-    await startWorkflow('Prepare me for my Acme meeting tomorrow.');
-  };
-
   const resetWorkflow = () => {
     setCurrentWorkflow(null);
     setIsExecuting(false);
@@ -140,8 +142,7 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isExecuting,
         startWorkflow,
         approveCurrentStep,
-        resetWorkflow,
-        launchDemoScenario
+        resetWorkflow
       }}
     >
       {children}

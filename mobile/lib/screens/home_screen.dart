@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: OrkaTheme.primary.withOpacity(0.2),
+                          color: OrkaTheme.primary.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(Icons.auto_awesome, color: OrkaTheme.primary, size: 24),
@@ -57,9 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: OrkaTheme.primary.withOpacity(0.15),
+                      color: OrkaTheme.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: OrkaTheme.primary.withOpacity(0.3)),
+                      border: Border.all(color: OrkaTheme.primary.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       provider.operatingMode,
@@ -88,10 +88,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: BoxDecoration(
                   color: OrkaTheme.surface,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: OrkaTheme.primary.withOpacity(0.3)),
+                  border: Border.all(color: OrkaTheme.primary.withValues(alpha: 0.3)),
                   boxShadow: [
                     BoxShadow(
-                      color: OrkaTheme.primary.withOpacity(0.1),
+                      color: OrkaTheme.primary.withValues(alpha: 0.1),
                       blurRadius: 20,
                       spreadRadius: 2,
                     ),
@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _buildChip('Prepare me for my Acme meeting tomorrow', Icons.business_center_outlined),
+                  _buildChip('Prepare me for my meeting tomorrow', Icons.business_center_outlined),
                   _buildChip('Give me my daily brief', Icons.today_outlined),
                   _buildChip('Find what needs my attention today', Icons.notification_important_outlined),
                   _buildChip('Follow up with people waiting on me', Icons.mark_email_unread_outlined),
@@ -168,7 +168,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.02),
+                  color: Colors.white.withValues(alpha: 0.02),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.white10),
                 ),

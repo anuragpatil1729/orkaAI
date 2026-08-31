@@ -1,40 +1,40 @@
 import { Router } from 'express';
-import { INITIAL_AUTOMATIONS, DISCOVERED_PATTERN } from '../data/demoStore';
+import { store } from '../storage/store';
 
 const router = Router();
-let automations = [...INITIAL_AUTOMATIONS];
 
 router.get('/', (req, res) => {
+  const automations = store.getAutomations();
+  const patterns = store.discoverPatterns();
+  const discoveredPattern = patterns.length > 0 ? patterns[0] : null;
+
   res.json({
     automations,
-    discoveredPattern: DISCOVERED_PATTERN
+    discoveredPattern
   });
 });
 
 router.post('/toggle', (req, res) => {
-  const { id, active } = req.body;
-  const item = automations.find(a => a.id === id);
-  if (item) {
-    item.active = active;
+  const { id } = req.body;
+  if (id) {
+    store.toggleAutomation(id);
   }
-  res.json({ automations });
+  res.json({ automations: store.getAutomations() });
 });
 
-router.post('/create-pattern', (req, res) => {
-  const newAuto = {
-    id: 'auto_created_' + Date.now(),
-    title: 'Automated Invoice Processing',
-    description: DISCOVERED_PATTERN.description,
-    trigger: DISCOVERED_PATTERN.suggestedWorkflow.when,
-    condition: DISCOVERED_PATTERN.suggestedWorkflow.if,
-    actions: DISCOVERED_PATTERN.suggestedWorkflow.do,
-    active: true,
-    executionsCount: 0,
-    approvalsRequiredCount: 0,
-    category: 'invoice' as const
+router.post('/create', (req, res) => {
+  const { name, trigger, action, risk } = req.body;
+  const newRule = {
+    id: 'auto_' + Date.now(),
+    name: name || 'User Automation Rule',
+    trigger: trigger || 'On Event',
+    action: action || 'Execute Action',
+    risk: risk || 'LOW_RISK_WRITE',
+    enabled: true,
+    executionCount: 0
   };
-  automations.unshift(newAuto);
-  res.json({ automations, created: newAuto });
+  store.addAutomation(newRule);
+  res.json({ automations: store.getAutomations(), created: newRule });
 });
 
 export default router;

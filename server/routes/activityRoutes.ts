@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { INITIAL_ACTIVITIES } from '../data/demoStore';
+import { store } from '../storage/store';
 
 const router = Router();
 
 router.get('/', (req, res) => {
-  res.json({ activities: INITIAL_ACTIVITIES });
+  res.json({ activities: store.getActivities() });
 });
 
 export default router;

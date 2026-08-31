@@ -6,11 +6,12 @@ import { geminiService } from '../ai/geminiService';
 import { ActionPolicyEngine } from '../tools/registry';
 import { GoogleAuthService } from '../auth/googleOAuth';
 import { getWorkspaceProvider, WorkspaceDataProvider } from '../providers/workspaceProvider';
+import { store } from '../storage/store';
 
 export class WorkflowExecutor {
   private activeWorkflows = new Map<string, WorkflowExecution>();
 
-  public createWorkflow(prompt: string, mode: 'COPILOT' | 'AUTOPILOT', steps: WorkflowStep[], executionMode: 'REAL' | 'DEMO' = 'REAL'): WorkflowExecution {
+  public createWorkflow(prompt: string, mode: 'COPILOT' | 'AUTOPILOT', steps: WorkflowStep[]): WorkflowExecution {
     const id = 'exec_' + Date.now();
 
     // Attach why explanations and policy engine requirements
@@ -24,13 +25,12 @@ export class WorkflowExecutor {
       id,
       prompt,
       mode,
-      executionMode,
       status: 'idle',
       steps: enrichedSteps,
       reasoningLog: [
         {
           timestamp: new Date().toLocaleTimeString(),
-          message: `Parsed outcome goal: "${prompt}" [Mode: ${executionMode}]`,
+          message: `Parsed outcome goal: "${prompt}"`,
           type: 'info'
         },
         {
@@ -42,6 +42,19 @@ export class WorkflowExecutor {
       createdAt: new Date().toISOString()
     };
     this.activeWorkflows.set(id, execution);
+
+    // Save to real dynamic store
+    store.addActivity({
+      id: 'act_' + Date.now(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      timeFormatted: 'Just now',
+      dateGroup: 'Today',
+      goal: prompt,
+      actionsCount: enrichedSteps.length,
+      status: 'In Progress',
+      execution
+    });
+
     return execution;
   }
 
@@ -55,12 +68,12 @@ export class WorkflowExecutor {
       return wf || ({} as WorkflowExecution);
     }
 
-    const executionMode = wf.executionMode || (wf.prompt.toLowerCase().includes('acme') ? 'DEMO' : 'REAL');
     const authClient = GoogleAuthService.getAuthenticatedClient();
-    const provider = getWorkspaceProvider(executionMode, authClient);
+    const provider = getWorkspaceProvider(authClient);
     const userProfile = await provider.getUserProfile();
 
     wf.status = 'running';
+    store.updateActivityStatus(wf.id, 'In Progress', wf);
 
     // Find first pending step
     const pendingIndex = wf.steps.findIndex(s => s.status === 'pending');
@@ -69,10 +82,12 @@ export class WorkflowExecutor {
       const waitingStep = wf.steps.find(s => s.status === 'waiting_approval');
       if (waitingStep) {
         wf.status = 'waiting_approval';
+        store.updateActivityStatus(wf.id, 'Action Required', wf);
         return wf;
       }
       // All completed
       wf.status = 'completed';
+      store.updateActivityStatus(wf.id, 'Completed', wf);
       return wf;
     }
 
@@ -94,7 +109,7 @@ export class WorkflowExecutor {
 
       const recipient = firstEmail?.sender || userProfile.email;
       const subject = firstEmail?.subject ? `Re: ${firstEmail.subject}` : `Follow-up: ${wf.prompt}`;
-      const previewText = `Hi ${recipient.split('@')[0]},\n\nFollowing up regarding "${wf.prompt}".\n\nI have reviewed the workspace context and compiled open action items.\n\nBest regards,\n${userProfile.name}`;
+      const previewText = `Hi ${recipient.includes('@') ? recipient.split('@')[0] : 'there'},\n\nFollowing up regarding "${wf.prompt}".\n\nI have reviewed the workspace context and compiled open action items.\n\nBest regards,\n${userProfile.name}`;
 
       wf.approvalRequest = {
         stepId: step.id,
@@ -111,6 +126,7 @@ export class WorkflowExecutor {
         message: `⚠ Approval required for High-Risk action: ${step.name}`,
         type: 'warning'
       });
+      store.updateActivityStatus(wf.id, 'Action Required', wf);
       return wf;
     }
 
@@ -152,6 +168,7 @@ export class WorkflowExecutor {
         message: `🎉 All ${wf.steps.length} actions executed & verified! Receipt generated.`,
         type: 'success'
       });
+      store.updateActivityStatus(wf.id, 'Completed', wf);
     }
 
     return wf;
@@ -161,9 +178,8 @@ export class WorkflowExecutor {
     const wf = this.activeWorkflows.get(id);
     if (!wf) throw new Error('Workflow not found');
 
-    const executionMode = wf.executionMode || (wf.prompt.toLowerCase().includes('acme') ? 'DEMO' : 'REAL');
     const authClient = GoogleAuthService.getAuthenticatedClient();
-    const provider = getWorkspaceProvider(executionMode, authClient);
+    const provider = getWorkspaceProvider(authClient);
     const userProfile = await provider.getUserProfile();
 
     const step = wf.steps.find(s => s.id === stepId);

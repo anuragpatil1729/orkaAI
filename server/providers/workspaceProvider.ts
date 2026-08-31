@@ -1,11 +1,10 @@
 import { google } from 'googleapis';
-import { ACMEMOCK_DATA } from '../data/demoStore';
 
 export interface UserProfile {
   name: string;
   email: string;
   avatarUrl?: string;
-  workspaceMode: 'REAL WORKSPACE' | 'DEMO WORKSPACE';
+  connected: boolean;
 }
 
 export interface CalendarEventData {
@@ -39,7 +38,6 @@ export interface DriveDocumentData {
 }
 
 export interface WorkspaceDataProvider {
-  getMode(): 'REAL' | 'DEMO';
   getUserProfile(): Promise<UserProfile>;
   findCalendarEvents(query: string): Promise<CalendarEventData[]>;
   searchEmails(query: string): Promise<EmailMessageData[]>;
@@ -49,89 +47,8 @@ export interface WorkspaceDataProvider {
   sendEmail(to: string, subject: string, body: string): Promise<{ messageId: string; status: string; sentAt: string; recipient: string; subject: string }>;
 }
 
-export class DemoWorkspaceDataProvider implements WorkspaceDataProvider {
-  getMode(): 'REAL' | 'DEMO' {
-    return 'DEMO';
-  }
-
-  async getUserProfile(): Promise<UserProfile> {
-    return {
-      name: 'Alex V',
-      email: 'alex.v@orka.ai',
-      workspaceMode: 'DEMO WORKSPACE'
-    };
-  }
-
-  async findCalendarEvents(query: string): Promise<CalendarEventData[]> {
-    return [
-      {
-        id: ACMEMOCK_DATA.meeting.id,
-        title: ACMEMOCK_DATA.meeting.title,
-        startTime: ACMEMOCK_DATA.meeting.startTime,
-        location: ACMEMOCK_DATA.meeting.location,
-        attendees: ACMEMOCK_DATA.meeting.attendees,
-        description: ACMEMOCK_DATA.meeting.title
-      }
-    ];
-  }
-
-  async searchEmails(query: string): Promise<EmailMessageData[]> {
-    return ACMEMOCK_DATA.emails.map(e => ({
-      id: e.id,
-      sender: e.sender,
-      subject: e.subject,
-      date: e.date,
-      snippet: e.snippet
-    }));
-  }
-
-  async searchDrive(query: string): Promise<DriveDocumentData[]> {
-    return ACMEMOCK_DATA.documents.map(d => ({
-      id: d.id,
-      title: d.title,
-      type: d.type,
-      lastModified: d.lastModified,
-      summary: d.summary
-    }));
-  }
-
-  async getDriveDocument(docId: string): Promise<DriveDocumentData | null> {
-    const doc = ACMEMOCK_DATA.documents.find(d => d.id === docId) || ACMEMOCK_DATA.documents[0];
-    return {
-      id: doc.id,
-      title: doc.title,
-      type: doc.type,
-      lastModified: doc.lastModified,
-      summary: doc.summary,
-      content: doc.summary
-    };
-  }
-
-  async createEmailDraft(to: string, subject: string, body: string) {
-    return {
-      draftId: 'draft_demo_' + Date.now(),
-      status: 'created',
-      message: `Draft created in Demo Workspace for ${to}`
-    };
-  }
-
-  async sendEmail(to: string, subject: string, body: string) {
-    return {
-      messageId: 'msg_demo_' + Date.now(),
-      status: 'sent',
-      sentAt: new Date().toISOString(),
-      recipient: to,
-      subject: subject
-    };
-  }
-}
-
 export class GoogleWorkspaceDataProvider implements WorkspaceDataProvider {
   constructor(private authClient: any) {}
-
-  getMode(): 'REAL' | 'DEMO' {
-    return 'REAL';
-  }
 
   async getUserProfile(): Promise<UserProfile> {
     if (this.authClient) {
@@ -143,7 +60,7 @@ export class GoogleWorkspaceDataProvider implements WorkspaceDataProvider {
             name: userInfo.data.name || userInfo.data.email.split('@')[0],
             email: userInfo.data.email,
             avatarUrl: userInfo.data.picture || undefined,
-            workspaceMode: 'REAL WORKSPACE'
+            connected: true
           };
         }
       } catch (err: any) {
@@ -152,9 +69,9 @@ export class GoogleWorkspaceDataProvider implements WorkspaceDataProvider {
     }
 
     return {
-      name: 'Connected Workspace User',
-      email: 'user@workspace.com',
-      workspaceMode: 'REAL WORKSPACE'
+      name: 'Unauthenticated User',
+      email: 'not_connected@workspace.com',
+      connected: false
     };
   }
 
@@ -282,7 +199,7 @@ export class GoogleWorkspaceDataProvider implements WorkspaceDataProvider {
 
   async createEmailDraft(to: string, subject: string, body: string) {
     if (!this.authClient) {
-      throw new Error('Google Workspace OAuth client not authenticated');
+      throw new Error('Google Workspace account not connected. Please connect your Google account to create email drafts.');
     }
 
     const gmail = google.gmail({ version: 'v1', auth: this.authClient });
@@ -311,7 +228,7 @@ export class GoogleWorkspaceDataProvider implements WorkspaceDataProvider {
 
   async sendEmail(to: string, subject: string, body: string) {
     if (!this.authClient) {
-      throw new Error('Google Workspace OAuth client not authenticated');
+      throw new Error('Google Workspace account not connected. Please connect your Google account to send emails.');
     }
 
     const gmail = google.gmail({ version: 'v1', auth: this.authClient });
@@ -339,9 +256,6 @@ export class GoogleWorkspaceDataProvider implements WorkspaceDataProvider {
   }
 }
 
-export function getWorkspaceProvider(mode: 'REAL' | 'DEMO', authClient?: any): WorkspaceDataProvider {
-  if (mode === 'DEMO') {
-    return new DemoWorkspaceDataProvider();
-  }
+export function getWorkspaceProvider(authClient?: any): WorkspaceDataProvider {
   return new GoogleWorkspaceDataProvider(authClient);
 }

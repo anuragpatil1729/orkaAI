@@ -7,37 +7,20 @@ import { printStatus } from './commands/status';
 import { activityCommand } from './commands/activity';
 import { automationsCommand } from './commands/automations';
 import { configCommand } from './commands/config';
-import { printBanner, theme } from './ui/theme';
 
 const program = new Command();
 
 program
   .name('orka')
-  .description('OrkaAI — AI Autonomous Execution Agent for Productivity ("Tell it the outcome. It handles the work.")')
+  .description('OrkaAI — Autonomous AI Execution Agent for Productivity ("Tell it the outcome. It handles the work.")')
   .version('1.0.0')
-  .option('-d, --demo [goal]', 'Run Acme meeting centerpiece scenario in Demo Mode')
-  .argument('[goal]', 'Natural language outcome goal, e.g. "prepare me for my Acme meeting tomorrow"')
-  .action(async (goal, options) => {
-    if (options.demo) {
-      const demoGoal = typeof options.demo === 'string' ? options.demo : 'Prepare me for my Acme meeting tomorrow.';
-      console.log(theme.brand('\n  ORKA DEMO MODE (Acme Corp Dataset)'));
-      await runOutcomeCommand(demoGoal);
-      return;
-    }
-
+  .argument('[goal]', 'Natural language outcome goal, e.g. "Prepare me for my meeting tomorrow"')
+  .action(async (goal) => {
     if (goal) {
       await runOutcomeCommand(goal);
     } else {
       await startInteractiveShell();
     }
-  });
-
-program
-  .command('demo')
-  .description('Run centerpiece Acme meeting scenario in Demo Mode')
-  .action(async () => {
-    console.log(theme.brand('\n  ORKA DEMO MODE (Acme Corp Dataset)'));
-    await runOutcomeCommand('Prepare me for my Acme meeting tomorrow.');
   });
 
 program
