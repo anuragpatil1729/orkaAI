@@ -122,6 +122,109 @@ export const TOOL_REGISTRY: Record<string, ExtendedToolDefinition> = {
       subject: { type: 'string', description: 'Email subject line', required: true },
       body: { type: 'string', description: 'Email body text', required: true }
     }
+  },
+
+  /* ==========================================================================
+     CODING & REPOSITORY AGENT TOOLS
+     ========================================================================== */
+  inspect_repository: {
+    id: 'inspect_repository',
+    name: 'Inspect Target Repository',
+    category: 'github',
+    description: 'Inspects project structure, package.json, and source files.',
+    riskLevel: 'READ',
+    whyExplanation: 'Scans project structure to understand codebase architecture before planning edits.',
+    parameters: {
+      repoName: { type: 'string', description: 'Target repository name', required: false }
+    }
+  },
+  search_code: {
+    id: 'search_code',
+    name: 'Search Source Code',
+    category: 'github',
+    description: 'Searches codebase for matching symbols, routes, or function signatures.',
+    riskLevel: 'READ',
+    whyExplanation: 'Locates exact file paths and method definitions matching email request.',
+    parameters: {
+      query: { type: 'string', description: 'Code pattern or symbol query', required: true }
+    }
+  },
+  create_branch: {
+    id: 'create_branch',
+    name: 'Create Task Git Branch',
+    category: 'github',
+    description: 'Creates an isolated task branch (orka/task/<id>) for safe code editing.',
+    riskLevel: 'LOW_RISK_WRITE',
+    whyExplanation: 'Isolates code changes in a dedicated task branch to keep main branch clean.',
+    parameters: {
+      taskKey: { type: 'string', description: 'Task topic or ID', required: true }
+    }
+  },
+  modify_file: {
+    id: 'modify_file',
+    name: 'Modify Source File',
+    category: 'github',
+    description: 'Edits or creates a source file inside the task workspace.',
+    riskLevel: 'HIGH_RISK_WRITE',
+    whyExplanation: 'Modifying repository source code requires policy verification & human approval.',
+    parameters: {
+      filePath: { type: 'string', description: 'Target file path', required: true },
+      content: { type: 'string', description: 'Updated file content', required: true }
+    }
+  },
+  run_tests: {
+    id: 'run_tests',
+    name: 'Run Verification Test Suite',
+    category: 'github',
+    description: 'Executes npm run typecheck, npm run build, and test suites.',
+    riskLevel: 'READ',
+    whyExplanation: 'Verifies that code modifications compile cleanly and pass all automated tests.',
+    parameters: {
+      testCommand: { type: 'string', description: 'Test command to run', required: false }
+    }
+  },
+  git_diff: {
+    id: 'git_diff',
+    name: 'Perform AI Git Diff Review',
+    category: 'github',
+    description: 'Analyzes git diff for security hazards, secrets, or unintended changes.',
+    riskLevel: 'READ',
+    whyExplanation: 'Performs AI audit on git diff before preparing commit.',
+    parameters: {}
+  },
+  commit_changes: {
+    id: 'commit_changes',
+    name: 'Commit Git Changes',
+    category: 'github',
+    description: 'Creates a git commit with auto-generated commit message.',
+    riskLevel: 'HIGH_RISK_WRITE',
+    whyExplanation: 'Committing code changes to git history requires approval.',
+    parameters: {
+      message: { type: 'string', description: 'Commit message', required: true }
+    }
+  },
+  push_branch: {
+    id: 'push_branch',
+    name: 'Push Task Branch to GitHub',
+    category: 'github',
+    description: 'Pushes task branch (orka/task/<id>) to remote GitHub repository.',
+    riskLevel: 'HIGH_RISK_WRITE',
+    whyExplanation: 'Pushing code modifications to remote GitHub origin requires human sign-off.',
+    parameters: {
+      branchName: { type: 'string', description: 'Target branch name', required: true }
+    }
+  },
+  create_pull_request: {
+    id: 'create_pull_request',
+    name: 'Create GitHub Pull Request',
+    category: 'github',
+    description: 'Opens a Pull Request on GitHub with implementation summary & test results.',
+    riskLevel: 'HIGH_RISK_WRITE',
+    whyExplanation: 'Opening a public Pull Request on GitHub requires human approval.',
+    parameters: {
+      title: { type: 'string', description: 'Pull Request title', required: true },
+      body: { type: 'string', description: 'PR description body', required: true }
+    }
   }
 };
 

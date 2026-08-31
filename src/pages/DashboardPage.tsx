@@ -2,6 +2,7 @@ import React from 'react';
 import { CommandInput } from '../components/dashboard/CommandInput';
 import { IntegrationBar } from '../components/dashboard/IntegrationBar';
 import { RecentActivityWidget } from '../components/dashboard/RecentActivityWidget';
+import { IncomingWorkWidget } from '../components/tasks/IncomingWorkWidget';
 import { Sparkles, Layers, Cpu } from 'lucide-react';
 import { GlassPanel, GlassCard, ExecutionDialGauge, StatusPill } from '../components/ui/NeoTactileSystem';
 import { useWorkflow } from '../context/WorkflowContext';
@@ -29,6 +30,9 @@ export const DashboardPage: React.FC = () => {
           </p>
         </div>
       </GlassPanel>
+
+      {/* INCOMING WORK (EMAIL-TO-ACTION) TASK CENTER */}
+      <IncomingWorkWidget />
 
       {/* Hero 2-Column Section: Command Input & Active Execution Progress Gauge */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">

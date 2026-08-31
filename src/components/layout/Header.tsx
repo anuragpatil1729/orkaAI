@@ -1,11 +1,13 @@
 import React from 'react';
 import { useWorkflow } from '../../context/WorkflowContext';
-import { ShieldAlert, Cpu } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { ShieldAlert, Cpu, LogOut, User } from 'lucide-react';
 import { StatusPill, AIIndicator, ThemeTogglePill } from '../ui/NeoTactileSystem';
 import { useTheme } from '../../context/ThemeContext';
 
 export const Header: React.FC = () => {
   const { mode, setMode, workspaceStatus, geminiConfigured } = useWorkflow();
+  const { user, logout } = useAuth();
   const { theme } = useTheme();
 
   return (
@@ -39,8 +41,27 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Right: Theme Toggle & Policy Mode Switcher Bar */}
+      {/* Right: User Profile, Logout & Policy Mode Switcher */}
       <div className="flex items-center gap-4">
+        {/* User Profile Pill & Logout Button */}
+        {user && (
+          <div className="flex items-center gap-2.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-medium font-mono">
+            {user.avatarUrl ? (
+              <img src={user.avatarUrl} alt={user.name} className="w-5 h-5 rounded-full object-cover" />
+            ) : (
+              <User className="w-4 h-4 text-cyan-300" />
+            )}
+            <span className="text-slate-200 font-bold max-w-[120px] truncate">{user.name}</span>
+            <button
+              onClick={logout}
+              title="Sign Out & Invalidate Session"
+              className="text-slate-400 hover:text-rose-400 p-1 rounded-full hover:bg-rose-500/20 transition-all cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* Physical Theme Toggle Pill */}
         <ThemeTogglePill />
 

@@ -33,6 +33,24 @@ export class GeminiService {
     return getModelName();
   }
 
+  async generateRawText(systemPrompt: string, userPrompt: string): Promise<string> {
+    const apiKey = getApiKey();
+    if (apiKey && this.genAI) {
+      try {
+        const model = this.genAI.getGenerativeModel({
+          model: getModelName(),
+          generationConfig: { responseMimeType: 'application/json' }
+        });
+        const fullPrompt = `${systemPrompt}\n\n${userPrompt}`;
+        const response = await model.generateContent(fullPrompt);
+        return response.response.text();
+      } catch (err: any) {
+        console.warn('[GeminiService] Error generating raw text:', err.message || err);
+      }
+    }
+    return '';
+  }
+
   async parseIntent(prompt: string): Promise<IntentParseResult> {
     const apiKey = getApiKey();
     if (apiKey && this.genAI) {

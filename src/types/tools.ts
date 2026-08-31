@@ -3,7 +3,7 @@ import { RiskLevel } from './agent';
 export interface ToolDefinition {
   id: string;
   name: string;
-  category: 'calendar' | 'gmail' | 'drive' | 'tasks' | 'ai';
+  category: 'calendar' | 'gmail' | 'drive' | 'tasks' | 'ai' | 'github';
   description: string;
   riskLevel: RiskLevel;
   parameters: Record<string, {

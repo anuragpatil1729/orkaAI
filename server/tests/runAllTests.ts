@@ -4,6 +4,9 @@ import path from 'path';
 console.log('🚀 Running OrkaAI Complete Automated Verification Test Suite...\n');
 
 const testFiles = [
+  'server/tests/authSession.test.ts',
+  'server/tests/emailIngestion.test.ts',
+  'server/tests/codingAgent.test.ts',
   'server/tests/dynamicEngine.test.ts',
   'server/tests/securityApproval.test.ts',
   'server/tests/geminiFailures.test.ts',

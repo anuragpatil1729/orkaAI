@@ -6,13 +6,14 @@ import authRoutes from './routes/authRoutes';
 import toolsRoutes from './routes/toolsRoutes';
 import automationsRoutes from './routes/automationsRoutes';
 import activityRoutes from './routes/activityRoutes';
+import emailTaskRoutes from './routes/emailTaskRoutes';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
 // API Routes
@@ -21,11 +22,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tools', toolsRoutes);
 app.use('/api/automations', automationsRoutes);
 app.use('/api/activity', activityRoutes);
+app.use('/api/tasks', emailTaskRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
-    app: 'ActionOS API Server',
+    app: 'OrkaAI Email-to-Action Execution Server',
     time: new Date().toISOString()
   });
 });
