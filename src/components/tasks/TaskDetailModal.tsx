@@ -31,22 +31,22 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-2xl flex items-center justify-center p-4 animate-fadeIn select-none">
-      <GlassPanel glowEdge={true} className="w-full max-w-2xl border border-blue-500/40 p-8 shadow-2xl space-y-6 relative overflow-hidden font-sans">
+    <div className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-2xl flex items-center justify-center p-4 animate-fadeIn select-none overflow-y-auto">
+      <GlassPanel glowEdge={true} className="w-full max-w-2xl max-h-[85vh] overflow-y-auto border border-blue-500/40 p-6 md:p-8 shadow-2xl space-y-6 relative font-sans my-auto">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-white/10 pb-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(59,130,246,0.35)]">
-              <Mail className="w-6 h-6" />
+          <div className="flex items-center gap-3.5 pr-6">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(59,130,246,0.35)]">
+              <Mail className="w-5 h-5 md:w-6 md:h-6" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40">
                   EMAIL-TO-ACTION TASK
                 </span>
                 <StatusPill status={task.status === 'COMPLETED' ? 'completed' : task.status === 'EXECUTING' ? 'running' : 'waiting_approval'} text={task.status} />
               </div>
-              <h3 className="text-xl font-extrabold text-white mt-1 leading-snug">
+              <h3 className="text-base md:text-lg font-extrabold text-white mt-1 leading-snug break-words">
                 {task.requestedAction || task.subject}
               </h3>
             </div>
@@ -54,7 +54,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose 
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-2 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer"
+            className="text-slate-400 hover:text-white p-2 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -64,13 +64,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose 
         <div className="space-y-4 text-xs font-sans">
           {/* Email Sender & Context */}
           <div className="p-4 rounded-2xl bg-[#0B0F15]/95 border border-white/10 space-y-2 shadow-inner">
-            <div className="flex items-center justify-between font-mono text-[11px]">
-              <div className="flex items-center gap-2">
-                <User className="w-3.5 h-3.5 text-blue-400" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between font-mono text-[11px] gap-1">
+              <div className="flex items-center gap-2 truncate">
+                <User className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                 <span className="text-slate-400">Sender:</span>
-                <span className="text-cyan-300 font-bold">{task.sender}</span>
+                <span className="text-cyan-300 font-bold truncate">{task.sender}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-slate-400">
+              <div className="flex items-center gap-1.5 text-slate-400 shrink-0">
                 <Clock className="w-3.5 h-3.5" />
                 <span>{task.receivedAt}</span>
               </div>
@@ -78,7 +78,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose 
 
             <div className="pt-2 border-t border-white/10">
               <span className="text-slate-400 font-semibold font-mono text-[10px]">ORIGINAL EMAIL SNIPPET:</span>
-              <p className="text-slate-200 mt-1 leading-relaxed italic bg-black/40 p-3 rounded-xl border border-white/5">
+              <p className="text-slate-200 mt-1 leading-relaxed italic bg-black/40 p-3 rounded-xl border border-white/5 break-words">
                 "{task.bodySnippet || task.subject}"
               </p>
             </div>
@@ -92,9 +92,9 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose 
             </div>
             <p className="text-slate-100 font-semibold leading-relaxed">{task.summary}</p>
             {task.technicalTask && (
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-400/30 font-bold">
-                <Code className="w-3 h-3" />
-                <span>TECHNICAL CODING TASK • REPO HINT: {task.repositoryHint || 'orkaAI'}</span>
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-400/30 font-bold max-w-full truncate">
+                <Code className="w-3 h-3 shrink-0" />
+                <span className="truncate">TECHNICAL CODING TASK • REPO HINT: {task.repositoryHint || 'orkaAI'}</span>
               </div>
             )}
           </div>
@@ -105,8 +105,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose 
             <div className="space-y-1.5 font-mono text-[11px]">
               {task.proposedPlan.map((step, idx) => (
                 <div key={idx} className="flex items-start gap-2 text-slate-200">
-                  <span className="text-emerald-400 font-bold">✓</span>
-                  <span>{step}</span>
+                  <span className="text-emerald-400 font-bold shrink-0">✓</span>
+                  <span className="leading-relaxed">{step}</span>
                 </div>
               ))}
             </div>
@@ -114,10 +114,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose 
         </div>
 
         {/* Action Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/10">
+        <div className="flex items-center justify-between pt-3 border-t border-white/10">
           <button
             onClick={onClose}
-            className="text-xs text-slate-400 hover:text-white font-bold transition-colors cursor-pointer"
+            className="text-xs text-slate-400 hover:text-white font-bold transition-colors cursor-pointer px-2 py-1"
           >
             Cancel
           </button>

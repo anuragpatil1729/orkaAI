@@ -33,11 +33,11 @@ export const CheckScanMailButton: React.FC<CheckScanMailButtonProps> = ({ onScan
   };
 
   return (
-    <GlassPanel glowEdge={true} className="p-8 border border-cyan-400/40 shadow-2xl relative overflow-hidden select-none">
+    <GlassPanel glowEdge={true} className="p-7 border border-cyan-400/40 shadow-2xl relative overflow-hidden select-none">
       {/* Background radial glow */}
       <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-cyan-400/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <div className="space-y-2 text-left max-w-xl">
           <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-cyan-400/15 border border-cyan-400/30 text-cyan-300 text-xs font-mono font-bold">
             <Sparkles className="w-3.5 h-3.5" />
@@ -66,7 +66,7 @@ export const CheckScanMailButton: React.FC<CheckScanMailButtonProps> = ({ onScan
           disabled={isScanning}
           variant="primary"
           size="lg"
-          className="py-5 px-8 text-white font-extrabold justify-center shadow-[0_15px_35px_rgba(59,130,246,0.4)] hover:shadow-[0_20px_45px_rgba(34,211,238,0.5)] shrink-0"
+          className="py-4 px-7 text-white font-extrabold justify-center shadow-[0_15px_35px_rgba(59,130,246,0.4)] hover:shadow-[0_20px_45px_rgba(34,211,238,0.5)] shrink-0 w-full lg:w-auto"
         >
           {isScanning ? (
             <div className="flex items-center gap-3">
@@ -74,9 +74,9 @@ export const CheckScanMailButton: React.FC<CheckScanMailButtonProps> = ({ onScan
               <span>✦ Scanning your workspace...</span>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center gap-3">
               <Sparkles className="w-5 h-5 text-cyan-300 animate-pulse" />
-              <span className="text-base">✦ Check & Scan My Mail</span>
+              <span className="text-sm md:text-base font-bold">✦ Scan Gmail Inbox</span>
               <ArrowRight className="w-4 h-4 ml-1 text-white" />
             </div>
           )}
