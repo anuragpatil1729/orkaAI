@@ -165,7 +165,11 @@ export const LiveExecutionCockpit: React.FC<LiveExecutionCockpitProps> = ({ task
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <a
-                href={receipt.prUrl || `https://github.com/${receipt.repository}`}
+                href={
+                  receipt.prUrl && !receipt.prUrl.includes('/pull/')
+                    ? receipt.prUrl
+                    : `https://github.com/${receipt.repository.includes('/') ? receipt.repository : 'sarthakpatil6636/atestproject'}/compare/main...${encodeURIComponent(receipt.branch || 'main')}?expand=1`
+                }
                 target="_blank"
                 rel="noreferrer"
                 className="px-4 py-2 rounded-full bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-bold text-xs flex items-center gap-1.5 transition-all"
