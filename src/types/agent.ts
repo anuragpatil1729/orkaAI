@@ -5,14 +5,16 @@ export type StepStatus = 'pending' | 'running' | 'completed' | 'waiting_approval
 export interface WorkflowStep {
   id: string;
   name: string;
-  tool: string; // e.g. 'find_calendar_event', 'search_emails', 'search_drive', 'generate_brief', 'draft_email', 'send_email'
+  tool: string;
   description: string;
   risk: RiskLevel;
   requiresApproval: boolean;
   status: StepStatus;
   input?: Record<string, any>;
   output?: Record<string, any>;
-  reasoningSnippet?: string; // safe user-facing reasoning explanation
+  reasoningSnippet?: string; // concise user-safe activity message
+  whyExplanation?: string;  // "Why Orka did this" explanation
+  verified?: boolean;        // Tool API verification flag
   startedAt?: string;
   completedAt?: string;
   error?: string;
@@ -21,8 +23,8 @@ export interface WorkflowStep {
 export interface IntentParseResult {
   rawPrompt: string;
   goal: string;
-  entity?: string; // e.g. "Acme"
-  timeframe?: string; // e.g. "tomorrow"
+  entity?: string;
+  timeframe?: string;
   targetActions: string[];
   isDemoScenario: boolean;
 }
@@ -62,6 +64,24 @@ export interface TaskItem {
   completed: boolean;
 }
 
+export interface ExecutionReceipt {
+  receiptId: string;
+  goal: string;
+  timestamp: string;
+  executionTimeSeconds: number;
+  actionsTotal: number;
+  actionsVerified: number;
+  approvalsRequired: number;
+  approvalsGranted: number;
+  itemsAudited: {
+    calendarMeeting: string;
+    emailsScanned: number;
+    docsAnalyzed: number;
+    openCommitments: number;
+    draftsPrepared: number;
+  };
+}
+
 export interface ExecutionResult {
   brief: ExecutiveBrief;
   draftEmail?: EmailDraft;
@@ -86,8 +106,10 @@ export interface ExecutionResult {
     unresolvedItemsDetected: number;
     draftsPrepared: number;
     actionsCompleted: number;
+    actionsVerified: number;
     totalTimeMs: number;
   };
+  receipt?: ExecutionReceipt;
 }
 
 export interface WorkflowExecution {

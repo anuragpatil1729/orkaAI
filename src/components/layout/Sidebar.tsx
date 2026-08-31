@@ -44,7 +44,7 @@ export const Sidebar: React.FC = () => {
           className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-semibold text-sm py-2.5 px-4 rounded-xl shadow-lg shadow-indigo-500/20 transition-all active:scale-98 mb-6"
         >
           <PlusCircle className="w-4 h-4" />
-          <span>New Task</span>
+          <span>New Outcome</span>
         </button>
 
         {/* Nav Links */}
@@ -82,7 +82,7 @@ export const Sidebar: React.FC = () => {
         <div className="px-3 py-2 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span className="text-slate-300 font-medium">Autopilot Engine</span>
+            <span className="text-slate-300 font-medium">Policy Engine</span>
           </div>
           <span className="text-[10px] text-emerald-400 font-mono">ACTIVE</span>
         </div>
