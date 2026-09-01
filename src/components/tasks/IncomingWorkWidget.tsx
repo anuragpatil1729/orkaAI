@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { EmailTaskItem } from '../../../server/storage/emailTaskStore';
 import { Badge } from '../ui/Badge';
 import { TaskDetailModal } from './TaskDetailModal';
+import { fetchWithAuth } from '../../utils/api';
 
 interface IncomingWorkWidgetProps {
   onExecuteTriggered?: (task: EmailTaskItem) => void;
@@ -13,7 +14,7 @@ export const IncomingWorkWidget: React.FC<IncomingWorkWidgetProps> = ({ onExecut
 
   const fetchTasks = async () => {
     try {
-      const res = await fetch('/api/mail/tasks');
+      const res = await fetchWithAuth('/api/mail/tasks');
       const data = await res.json();
       if (data.tasks) {
         setTasks(data.tasks.filter((t: EmailTaskItem) => t.actionable));

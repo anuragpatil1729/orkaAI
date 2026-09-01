@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useWorkflow } from '../../context/WorkflowContext';
 import { ActivityLogItem } from '../../types/activity';
 import { Badge } from '../ui/Badge';
+import { fetchWithAuth } from '../../utils/api';
 
 export const RecentActivityWidget: React.FC = () => {
   const [activities, setActivities] = useState<ActivityLogItem[]>([]);
   const { setActiveTab } = useWorkflow();
 
   useEffect(() => {
-    fetch('/api/activity')
+    fetchWithAuth('/api/activity')
       .then(res => res.json())
       .then(data => {
         if (data.activities) setActivities(data.activities);

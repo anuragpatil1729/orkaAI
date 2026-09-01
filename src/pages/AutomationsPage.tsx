@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { EmptyState } from '../components/ui/EmptyState';
 import { TactileToggle } from '../components/ui/NeoTactileSystem';
+import { fetchWithAuth } from '../utils/api';
 
 export const AutomationsPage: React.FC = () => {
   const [automations, setAutomations] = useState<AutomationRule[]>([]);
@@ -12,7 +13,7 @@ export const AutomationsPage: React.FC = () => {
   const [patternCreated, setPatternCreated] = useState(false);
 
   useEffect(() => {
-    fetch('/api/automations')
+    fetchWithAuth('/api/automations')
       .then(res => res.json())
       .then(data => {
         if (data.automations) setAutomations(data.automations);
@@ -22,7 +23,7 @@ export const AutomationsPage: React.FC = () => {
   }, []);
 
   const handleToggle = (id: string, active: boolean) => {
-    fetch('/api/automations/toggle', {
+    fetchWithAuth('/api/automations/toggle', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, active: !active })
@@ -34,7 +35,7 @@ export const AutomationsPage: React.FC = () => {
   };
 
   const handleCreatePattern = () => {
-    fetch('/api/automations/create-pattern', { method: 'POST' })
+    fetchWithAuth('/api/automations/create-pattern', { method: 'POST' })
       .then(res => res.json())
       .then(data => {
         if (data.automations) {

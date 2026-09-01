@@ -5,6 +5,7 @@ console.log('🚀 Running OrkaAI Complete Automated Verification Test Suite...\n
 
 const testFiles = [
   'server/tests/authSession.test.ts',
+  'server/tests/multiUserAuth.test.ts',
   'server/tests/emailIngestion.test.ts',
   'server/tests/codingAgent.test.ts',
   'server/tests/checkAndScanMailE2E.test.ts',

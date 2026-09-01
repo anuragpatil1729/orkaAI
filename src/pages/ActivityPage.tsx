@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { ActivityLogItem } from '../types/activity';
 import { Badge } from '../components/ui/Badge';
 import { EmptyState } from '../components/ui/EmptyState';
+import { fetchWithAuth } from '../utils/api';
 
 export const ActivityPage: React.FC = () => {
   const [activities, setActivities] = useState<ActivityLogItem[]>([]);
 
   useEffect(() => {
-    fetch('/api/activity')
+    fetchWithAuth('/api/activity')
       .then(res => res.json())
       .then(data => {
         if (data.activities) setActivities(data.activities);

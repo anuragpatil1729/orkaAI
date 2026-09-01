@@ -2,6 +2,7 @@ import { persistenceStore, ExecutionReceiptItem } from './persistenceStore';
 
 export interface EmailTaskItem {
   id: string;
+  userId?: string;
   emailId: string;
   threadId?: string;
   messageId?: string;
@@ -39,6 +40,8 @@ class EmailTaskStore {
     const saved = persistenceStore.loadTasks();
     for (const task of saved) {
       this.tasks.set(task.id, task);
+      const key = (task.userId || 'global') + ':' + task.emailId;
+      this.processedEmailIds.add(key);
       this.processedEmailIds.add(task.emailId);
     }
   }
@@ -47,12 +50,20 @@ class EmailTaskStore {
     persistenceStore.saveTasks(Array.from(this.tasks.values()));
   }
 
-  public isProcessed(emailId: string): boolean {
-    return this.processedEmailIds.has(emailId);
+  public isProcessed(userIdOrEmailId: string | undefined, emailId?: string): boolean {
+    if (!emailId) {
+      // 1 argument overload: isProcessed(emailId)
+      const targetEmailId = userIdOrEmailId || '';
+      return this.processedEmailIds.has(targetEmailId);
+    }
+    const key = (userIdOrEmailId || 'global') + ':' + emailId;
+    return this.processedEmailIds.has(key) || this.processedEmailIds.has(emailId);
   }
 
   public addTask(task: EmailTaskItem): EmailTaskItem {
     this.tasks.set(task.id, task);
+    const key = (task.userId || 'global') + ':' + task.emailId;
+    this.processedEmailIds.add(key);
     this.processedEmailIds.add(task.emailId);
     this.persist();
     return task;
@@ -62,14 +73,14 @@ class EmailTaskStore {
     return this.tasks.get(id);
   }
 
-  public getAllTasks(): EmailTaskItem[] {
-    return Array.from(this.tasks.values()).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+  public getAllTasks(userId?: string): EmailTaskItem[] {
+    const all = Array.from(this.tasks.values());
+    const filtered = userId ? all.filter(t => !t.userId || t.userId === userId) : all;
+    return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
-  public getActionableTasks(): EmailTaskItem[] {
-    return this.getAllTasks().filter(t => t.actionable);
+  public getActionableTasks(userId?: string): EmailTaskItem[] {
+    return this.getAllTasks(userId).filter(t => t.actionable);
   }
 
   public updateTaskStatus(

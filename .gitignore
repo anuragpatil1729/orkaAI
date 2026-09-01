@@ -8,3 +8,4 @@ dist
 *.log
 .DS_Store
 server/storage/tokens.json
+server/storage/data/user_tokens.json

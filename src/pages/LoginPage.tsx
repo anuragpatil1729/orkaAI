@@ -6,27 +6,25 @@ export const LoginPage: React.FC = () => {
   const { loginWithGoogle } = useAuth();
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-background text-text-primary select-none">
-      <div className="w-full max-w-sm space-y-6">
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-text-primary select-none">
+      <div className="w-full max-w-sm text-center space-y-6">
         {/* Brand Header */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="OrkaAI" className="w-6 h-6 rounded object-cover" />
-            <span className="font-semibold text-base tracking-tight text-text-primary">OrkaAI</span>
+          <div className="flex items-center justify-center gap-2">
+            <img src="/logo.png" alt="OrkaAI" className="w-7 h-7 rounded object-cover" />
+            <span className="font-semibold text-lg tracking-tight text-text-primary">OrkaAI</span>
           </div>
-
-          <div className="space-y-1">
-            <h1 className="text-xl font-semibold tracking-tight text-text-primary">
-              Sign in to OrkaAI
-            </h1>
-            <p className="text-xs text-text-secondary leading-relaxed">
-              Autonomous work assistant for email parsing, repository modifications, and automated task execution.
-            </p>
-          </div>
+          <p className="text-sm font-medium text-text-secondary">
+            Your work, automated.
+          </p>
         </div>
 
-        {/* Authentication Card */}
-        <div className="p-6 rounded-lg bg-background-card border border-border-subtle space-y-4">
+        {/* Content Box */}
+        <div className="p-6 rounded-lg bg-background-card border border-border-subtle space-y-5">
+          <p className="text-xs text-text-secondary leading-relaxed">
+            Connect your Google Workspace to let OrkaAI work on your behalf.
+          </p>
+
           <Button
             onClick={loginWithGoogle}
             variant="primary"
@@ -54,9 +52,12 @@ export const LoginPage: React.FC = () => {
             <span>Continue with Google</span>
           </Button>
 
-          <p className="text-[11px] text-text-muted leading-relaxed font-sans text-center">
-            OAuth 2.0 authentication. Your credentials and API keys remain encrypted on the server.
-          </p>
+          <div className="pt-2 border-t border-border-subtle text-center space-y-1">
+            <h4 className="text-[11px] font-semibold text-text-primary">Privacy</h4>
+            <p className="text-[11px] text-text-muted leading-relaxed">
+              Your account stays yours. You can disconnect access at any time.
+            </p>
+          </div>
         </div>
       </div>
     </div>

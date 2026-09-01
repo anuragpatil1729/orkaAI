@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, RefreshCw, ArrowRight } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { EmailTaskItem } from '../../../server/storage/emailTaskStore';
+import { fetchWithAuth } from '../../utils/api';
 
 interface CheckScanMailButtonProps {
   onScanComplete: (newTasks: EmailTaskItem[], allTasks: EmailTaskItem[]) => void;
@@ -15,7 +16,7 @@ export const CheckScanMailButton: React.FC<CheckScanMailButtonProps> = ({ onScan
     setIsScanning(true);
     setScanMessage('Scanning inbox...');
     try {
-      const res = await fetch('/api/mail/scan', { method: 'POST' });
+      const res = await fetchWithAuth('/api/mail/scan', { method: 'POST' });
       const data = await res.json();
 
       setIsScanning(false);

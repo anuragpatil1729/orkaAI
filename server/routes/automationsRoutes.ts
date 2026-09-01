@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import { store } from '../storage/store';
 import { AutomationRule } from '../../src/types/automations';
+import { optionalAuthMiddleware, AuthenticatedRequest } from '../middleware/authMiddleware';
 
 const router = Router();
 
-router.get('/', (req, res) => {
-  const automations = store.getAutomations();
-  const patterns = store.discoverPatterns();
+router.get('/', optionalAuthMiddleware, (req: AuthenticatedRequest, res) => {
+  const userId = req.session?.userId;
+  const automations = store.getAutomations(userId);
+  const patterns = store.discoverPatterns(userId);
   const discoveredPattern = patterns.length > 0 ? patterns[0] : null;
 
   res.json({
@@ -15,16 +17,18 @@ router.get('/', (req, res) => {
   });
 });
 
-router.post('/toggle', (req, res) => {
+router.post('/toggle', optionalAuthMiddleware, (req: AuthenticatedRequest, res) => {
+  const userId = req.session?.userId;
   const { id, active } = req.body;
   if (id) {
-    store.toggleAutomation(id, active);
+    store.toggleAutomation(id, active, userId);
   }
-  res.json({ automations: store.getAutomations() });
+  res.json({ automations: store.getAutomations(userId) });
 });
 
-router.post('/create-pattern', (req, res) => {
-  const patterns = store.discoverPatterns();
+router.post('/create-pattern', optionalAuthMiddleware, (req: AuthenticatedRequest, res) => {
+  const userId = req.session?.userId;
+  const patterns = store.discoverPatterns(userId);
   if (patterns.length > 0) {
     const pattern = patterns[0];
     const newRule: AutomationRule = {
@@ -39,12 +43,13 @@ router.post('/create-pattern', (req, res) => {
       approvalsRequiredCount: pattern.occurrences,
       category: 'invoice'
     };
-    store.addAutomation(newRule);
+    store.addAutomation(newRule, userId);
   }
-  res.json({ automations: store.getAutomations() });
+  res.json({ automations: store.getAutomations(userId) });
 });
 
-router.post('/create', (req, res) => {
+router.post('/create', optionalAuthMiddleware, (req: AuthenticatedRequest, res) => {
+  const userId = req.session?.userId;
   const { title, description, trigger, condition, actions, category } = req.body;
   const newRule: AutomationRule = {
     id: 'rule_' + Date.now(),
@@ -58,8 +63,8 @@ router.post('/create', (req, res) => {
     approvalsRequiredCount: 0,
     category: category || 'custom'
   };
-  store.addAutomation(newRule);
-  res.json({ automations: store.getAutomations(), created: newRule });
+  store.addAutomation(newRule, userId);
+  res.json({ automations: store.getAutomations(userId), created: newRule });
 });
 
 export default router;

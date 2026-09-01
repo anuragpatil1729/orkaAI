@@ -9,9 +9,9 @@ import { getWorkspaceProvider, WorkspaceDataProvider } from '../providers/worksp
 import { store } from '../storage/store';
 
 export class WorkflowExecutor {
-  private activeWorkflows = new Map<string, WorkflowExecution>();
+  private activeWorkflows = new Map<string, WorkflowExecution & { userId?: string }>();
 
-  public createWorkflow(prompt: string, mode: 'COPILOT' | 'AUTOPILOT', steps: WorkflowStep[]): WorkflowExecution {
+  public createWorkflow(prompt: string, mode: 'COPILOT' | 'AUTOPILOT', steps: WorkflowStep[], userId?: string): WorkflowExecution {
     const id = 'exec_' + Date.now();
 
     // Attach why explanations and policy engine requirements
@@ -21,8 +21,9 @@ export class WorkflowExecutor {
       requiresApproval: ActionPolicyEngine.requiresHumanApproval(s.tool, mode)
     }));
 
-    const execution: WorkflowExecution = {
+    const execution: WorkflowExecution & { userId?: string } = {
       id,
+      userId,
       prompt,
       mode,
       status: 'idle',
@@ -43,9 +44,10 @@ export class WorkflowExecutor {
     };
     this.activeWorkflows.set(id, execution);
 
-    // Save to real dynamic store
+    // Save to real user-isolated dynamic store
     store.addActivity({
       id: 'act_' + Date.now(),
+      userId,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       timeFormatted: 'Just now',
       dateGroup: 'Today',
@@ -62,13 +64,14 @@ export class WorkflowExecutor {
     return this.activeWorkflows.get(id);
   }
 
-  public async advanceWorkflow(id: string): Promise<WorkflowExecution> {
+  public async advanceWorkflow(id: string, userId?: string): Promise<WorkflowExecution> {
     const wf = this.activeWorkflows.get(id);
     if (!wf || wf.status === 'completed' || wf.status === 'failed') {
       return wf || ({} as WorkflowExecution);
     }
 
-    const authClient = GoogleAuthService.getAuthenticatedClient();
+    const effectiveUserId = userId || wf.userId;
+    const authClient = GoogleAuthService.getAuthenticatedClientForUser(effectiveUserId) || GoogleAuthService.getAuthenticatedClient();
     const provider = getWorkspaceProvider(authClient);
     const userProfile = await provider.getUserProfile();
 
@@ -99,13 +102,12 @@ export class WorkflowExecutor {
 
     // Policy Engine check: High risk approval requirement
     if (step.requiresApproval && wf.mode === 'COPILOT') {
-      // Dynamic recipient extraction from prior email tools or user profile
       const foundEmails = this.collectStepOutputs(wf.steps, 'search_emails')?.emails || [];
       const externalEmail = Array.isArray(foundEmails)
         ? foundEmails.find((e: any) => e.sender && !e.sender.includes(userProfile.email))
         : null;
 
-      // If no external recipient is found (e.g. self or empty search), auto-skip sending email to self!
+      // If no external recipient is found, skip sending email to self
       if (!externalEmail && step.tool === 'send_email') {
         step.status = 'completed';
         step.output = { status: 'skipped', reason: 'No external recipient detected to send email to.' };
@@ -116,7 +118,7 @@ export class WorkflowExecutor {
           message: `ℹ Skipped send_email step (no external recipient specified)`,
           type: 'info'
         });
-        return await this.advanceWorkflow(id);
+        return await this.advanceWorkflow(id, effectiveUserId);
       }
 
       step.status = 'waiting_approval';
@@ -157,7 +159,7 @@ export class WorkflowExecutor {
       const stepResult = await this.executeStepTool(step, wf.prompt, provider, userProfile, wf.steps);
       step.output = stepResult;
       step.status = 'completed';
-      step.verified = true; // Tool API response verified
+      step.verified = true;
       step.completedAt = new Date().toISOString();
       wf.reasoningLog.push({
         timestamp: new Date().toLocaleTimeString(),
@@ -175,7 +177,6 @@ export class WorkflowExecutor {
       });
     }
 
-    // Check if next steps remain or if workflow finished
     const remainingPending = wf.steps.filter(s => s.status === 'pending' || s.status === 'waiting_approval');
     if (remainingPending.length === 0) {
       wf.status = 'completed';
@@ -191,11 +192,12 @@ export class WorkflowExecutor {
     return wf;
   }
 
-  public async approveStep(id: string, stepId: string, customPayload?: { to?: string; subject?: string; body?: string }): Promise<WorkflowExecution> {
+  public async approveStep(id: string, stepId: string, customPayload?: { to?: string; subject?: string; body?: string }, userId?: string): Promise<WorkflowExecution> {
     const wf = this.activeWorkflows.get(id);
     if (!wf) throw new Error('Workflow not found');
 
-    const authClient = GoogleAuthService.getAuthenticatedClient();
+    const effectiveUserId = userId || wf.userId;
+    const authClient = GoogleAuthService.getAuthenticatedClientForUser(effectiveUserId) || GoogleAuthService.getAuthenticatedClient();
     const provider = getWorkspaceProvider(authClient);
     const userProfile = await provider.getUserProfile();
 
@@ -206,7 +208,7 @@ export class WorkflowExecutor {
       try {
         step.output = await this.executeStepTool(step, wf.prompt, provider, userProfile, wf.steps, customPayload);
         step.status = 'completed';
-        step.verified = true; // Tool API verified
+        step.verified = true;
         step.completedAt = new Date().toISOString();
         wf.approvalRequest = undefined;
         wf.reasoningLog.push({
@@ -227,8 +229,7 @@ export class WorkflowExecutor {
       }
     }
 
-    // Resume remaining workflow
-    return await this.advanceWorkflow(id);
+    return await this.advanceWorkflow(id, effectiveUserId);
   }
 
   private collectStepOutputs(steps: WorkflowStep[], toolName: string): any {

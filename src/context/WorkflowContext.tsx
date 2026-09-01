@@ -31,8 +31,15 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
   const [geminiConfigured, setGeminiConfigured] = useState(false);
 
+  const getHeaders = (extraHeaders: Record<string, string> = {}) => {
+    const sessionId = localStorage.getItem('orka_session_id');
+    const headers: Record<string, string> = { ...extraHeaders };
+    if (sessionId) headers['x-orka-session-id'] = sessionId;
+    return headers;
+  };
+
   useEffect(() => {
-    fetch('/api/auth/status')
+    fetch('/api/auth/status', { headers: getHeaders() })
       .then(res => res.json())
       .then(data => {
         if (data.workspace) {
@@ -55,7 +62,7 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const res = await fetch('/api/agent/execute', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ prompt, mode })
       });
       const data = await res.json();
@@ -74,7 +81,8 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     while (active) {
       try {
         const res = await fetch(`/api/agent/workflow/${workflowId}/advance`, {
-          method: 'POST'
+          method: 'POST',
+          headers: getHeaders()
         });
         const data = await res.json();
         if (data.workflow) {
@@ -101,7 +109,7 @@ export const WorkflowProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     try {
       const res = await fetch(`/api/agent/workflow/${currentWorkflow.id}/approve`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           stepId: currentWorkflow.approvalRequest.stepId,
           ...customPayload

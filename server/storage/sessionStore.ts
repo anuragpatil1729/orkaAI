@@ -6,8 +6,6 @@ export interface UserSession {
   email: string;
   name: string;
   avatarUrl?: string;
-  accessToken?: string;
-  refreshToken?: string;
   createdAt: number;
   expiresAt: number;
 }
@@ -23,19 +21,15 @@ class SessionStore {
     email: string;
     name: string;
     avatarUrl?: string;
-    accessToken?: string;
-    refreshToken?: string;
   }): UserSession {
     const sessionId = 'sess_' + crypto.randomBytes(24).toString('hex');
     const now = Date.now();
     const session: UserSession = {
       sessionId,
-      userId: userData.userId || 'user_' + crypto.randomBytes(8).toString('hex'),
+      userId: userData.userId || 'usr_' + crypto.randomBytes(12).toString('hex'),
       email: userData.email,
       name: userData.name,
       avatarUrl: userData.avatarUrl,
-      accessToken: userData.accessToken,
-      refreshToken: userData.refreshToken,
       createdAt: now,
       expiresAt: now + this.defaultTTL
     };
@@ -55,16 +49,6 @@ class SessionStore {
     }
 
     return session;
-  }
-
-  public updateSessionTokens(sessionId: string, accessToken: string, refreshToken?: string): boolean {
-    const session = this.sessions.get(sessionId);
-    if (!session) return false;
-
-    session.accessToken = accessToken;
-    if (refreshToken) session.refreshToken = refreshToken;
-    session.expiresAt = Date.now() + this.defaultTTL;
-    return true;
   }
 
   public invalidateSession(sessionId: string): boolean {

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "usr_98e96fff23a822f84c550b88",
+    "email": "anurag151006@gmail.com",
+    "name": "ANURAG PATIL",
+    "avatarUrl": "https://lh3.googleusercontent.com/a/ACg8ocLPArh7C2rhwHoi1fvzpSkvrImGzB4CE-fe_V7koCW2-ci93gQ1=s96-c",
+    "createdAt": 1788242596621,
+    "updatedAt": 1788243610551
+  },
+  {
+    "id": "usr_511edd2be943192678f22d3a",
+    "googleId": "g_user_a_123",
+    "email": "usera@example.com",
+    "name": "User A",
+    "createdAt": 1788243266115,
+    "updatedAt": 1788243266115
+  },
+  {
+    "id": "usr_ab5e6dba749d5c4d5ee1d6f8",
+    "googleId": "g_user_b_456",
+    "email": "userb@example.com",
+    "name": "User B",
+    "createdAt": 1788243266115,
+    "updatedAt": 1788243266115
+  }
+]

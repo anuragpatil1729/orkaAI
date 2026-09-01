@@ -3,6 +3,7 @@ import { AutomationRule, DiscoveredPattern } from '../../src/types/automations';
 
 export interface ActivityItem {
   id: string;
+  userId?: string;
   timestamp: string;
   timeFormatted: string;
   dateGroup: string;
@@ -14,47 +15,52 @@ export interface ActivityItem {
 
 class Store {
   private activities: ActivityItem[] = [];
-  private automations: AutomationRule[] = [
-    {
-      id: 'rule_1',
-      title: 'Pre-Meeting Briefing & Audit Generator',
-      description: 'Automatically compiles executive briefs, scours recent email threads and Google Drive documents 2 hours before scheduled client meetings.',
-      trigger: 'Calendar Event starting in 2h',
-      condition: 'Event attendees include external domain',
-      actions: ['Find calendar event', 'Search Gmail threads', 'Search Drive documents', 'Synthesize brief & draft follow-up'],
-      active: true,
-      executionsCount: 14,
-      approvalsRequiredCount: 14,
-      category: 'meeting'
-    },
-    {
-      id: 'rule_2',
-      title: 'High-Risk Email Transmission Guardrail',
-      description: 'Pauses execution and prompts explicit user verification whenever an external email communication payload is prepared.',
-      trigger: 'Agent Action: send_email',
-      condition: 'Recipient is external contact',
-      actions: ['Intercept payload', 'Request Human-in-the-Loop Approval', 'Transmit on Approval'],
-      active: true,
-      executionsCount: 9,
-      approvalsRequiredCount: 9,
-      category: 'inbox'
-    },
-    {
-      id: 'rule_3',
-      title: 'Invoice & Vendor Document Extraction',
-      description: 'Identifies incoming invoice attachments, parses key total values, and generates structured action items in task management.',
-      trigger: 'Gmail message with attachment "Invoice"',
-      condition: 'Amount < $10,000',
-      actions: ['Download Drive file', 'Extract values', 'Create verified task item'],
-      active: true,
-      executionsCount: 6,
-      approvalsRequiredCount: 0,
-      category: 'invoice'
-    }
-  ];
+  private automationsByUserId = new Map<string, AutomationRule[]>();
 
-  public getActivities(): ActivityItem[] {
-    return this.activities;
+  private getDefaultAutomations(): AutomationRule[] {
+    return [
+      {
+        id: 'rule_1',
+        title: 'Pre-Meeting Briefing & Audit Generator',
+        description: 'Automatically compiles executive briefs, scours recent email threads and Google Drive documents 2 hours before scheduled client meetings.',
+        trigger: 'Calendar Event starting in 2h',
+        condition: 'Event attendees include external domain',
+        actions: ['Find calendar event', 'Search Gmail threads', 'Search Drive documents', 'Synthesize brief & draft follow-up'],
+        active: true,
+        executionsCount: 14,
+        approvalsRequiredCount: 14,
+        category: 'meeting'
+      },
+      {
+        id: 'rule_2',
+        title: 'High-Risk Email Transmission Guardrail',
+        description: 'Pauses execution and prompts explicit user verification whenever an external email communication payload is prepared.',
+        trigger: 'Agent Action: send_email',
+        condition: 'Recipient is external contact',
+        actions: ['Intercept payload', 'Request Human-in-the-Loop Approval', 'Transmit on Approval'],
+        active: true,
+        executionsCount: 9,
+        approvalsRequiredCount: 9,
+        category: 'inbox'
+      },
+      {
+        id: 'rule_3',
+        title: 'Invoice & Vendor Document Extraction',
+        description: 'Identifies incoming invoice attachments, parses key total values, and generates structured action items in task management.',
+        trigger: 'Gmail message with attachment "Invoice"',
+        condition: 'Amount < $10,000',
+        actions: ['Download Drive file', 'Extract values', 'Create verified task item'],
+        active: true,
+        executionsCount: 6,
+        approvalsRequiredCount: 0,
+        category: 'invoice'
+      }
+    ];
+  }
+
+  public getActivities(userId?: string): ActivityItem[] {
+    if (!userId) return this.activities;
+    return this.activities.filter(a => !a.userId || a.userId === userId);
   }
 
   public addActivity(activity: ActivityItem): void {
@@ -71,23 +77,30 @@ class Store {
     }
   }
 
-  public getAutomations(): AutomationRule[] {
-    return this.automations;
+  public getAutomations(userId?: string): AutomationRule[] {
+    const key = userId || 'global';
+    if (!this.automationsByUserId.has(key)) {
+      this.automationsByUserId.set(key, this.getDefaultAutomations());
+    }
+    return this.automationsByUserId.get(key)!;
   }
 
-  public addAutomation(automation: AutomationRule): void {
-    this.automations.push(automation);
+  public addAutomation(automation: AutomationRule, userId?: string): void {
+    const list = this.getAutomations(userId);
+    list.push(automation);
   }
 
-  public toggleAutomation(id: string, active?: boolean): void {
-    const auto = this.automations.find(a => a.id === id);
+  public toggleAutomation(id: string, active?: boolean, userId?: string): void {
+    const list = this.getAutomations(userId);
+    const auto = list.find(a => a.id === id);
     if (auto) {
       auto.active = active !== undefined ? active : !auto.active;
     }
   }
 
-  public discoverPatterns(): DiscoveredPattern[] {
-    if (this.activities.length < 2) {
+  public discoverPatterns(userId?: string): DiscoveredPattern[] {
+    const userActivities = this.getActivities(userId);
+    if (userActivities.length < 2) {
       return [
         {
           id: 'pattern_1',
@@ -104,7 +117,7 @@ class Store {
     }
 
     const goalCounts = new Map<string, number>();
-    this.activities.forEach(a => {
+    userActivities.forEach(a => {
       const simplifiedGoal = a.goal.toLowerCase().trim();
       goalCounts.set(simplifiedGoal, (goalCounts.get(simplifiedGoal) || 0) + 1);
     });

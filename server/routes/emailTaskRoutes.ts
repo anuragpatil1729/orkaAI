@@ -8,7 +8,8 @@ const router = Router();
 
 // Helper handlers to support both /:id and /tasks/:id route parameters
 const handleGetTasks = (req: AuthenticatedRequest, res: Response) => {
-  const tasks = emailTaskStore.getAllTasks();
+  const userId = req.session?.userId;
+  const tasks = emailTaskStore.getAllTasks(userId);
   res.json({ tasks });
 };
 
@@ -103,11 +104,12 @@ const handleGetExecution = (req: AuthenticatedRequest, res: Response) => {
   });
 };
 
-// POST /api/mail/scan - Trigger dynamic Gmail scan
+// POST /api/mail/scan - Trigger user-scoped Gmail scan
 router.post('/scan', optionalAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const newTasks = await EmailIngestionService.scanIncomingEmails();
-    const allTasks = emailTaskStore.getAllTasks();
+    const userId = req.session?.userId;
+    const newTasks = await EmailIngestionService.scanIncomingEmails(userId);
+    const allTasks = emailTaskStore.getAllTasks(userId);
     res.json({
       status: 'SCAN_COMPLETED',
       scannedCount: newTasks.length,
@@ -122,7 +124,8 @@ router.post('/scan', optionalAuthMiddleware, async (req: AuthenticatedRequest, r
 // POST /api/mail/analyze/:messageId
 router.post('/analyze/:messageId', optionalAuthMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   const messageId = req.params.messageId as string;
-  const tasks = emailTaskStore.getAllTasks();
+  const userId = req.session?.userId;
+  const tasks = emailTaskStore.getAllTasks(userId);
   const existing = tasks.find(t => t.emailId === messageId || t.id === messageId);
   if (existing) {
     return res.json({ task: existing });
@@ -134,7 +137,7 @@ router.post('/analyze/:messageId', optionalAuthMiddleware, async (req: Authentic
 router.get('/tasks', optionalAuthMiddleware, handleGetTasks);
 router.get('/', optionalAuthMiddleware, handleGetTasks);
 
-// Task Detail & Execution endpoints (supporting both /tasks/:id and /:id)
+// Task Detail & Execution endpoints
 router.get('/tasks/:id', optionalAuthMiddleware, handleGetTaskById);
 router.get('/:id', optionalAuthMiddleware, handleGetTaskById);
 

@@ -26,195 +26,23 @@
       "Commit changes & push branch orka/task/<task_id>",
       "Open GitHub Pull Request & generate completion receipt"
     ],
-    "createdAt": "2026-09-01T05:44:46.566Z",
+    "createdAt": "2026-09-01T06:14:27.559Z",
     "links": [
       "https://github.com/sarthakpatil6636/atestproject"
     ],
     "receipt": {
-      "receiptId": "rcpt_e2e_mti8t67h",
+      "receiptId": "rcpt_e2e_mti9vcfe",
       "taskId": "task_e2e_msg_test_collaborator_001",
       "originalRequest": "I have shared a repo with you and added you as a collaborator, it is a calculator project, I have done with CLI can you make the remaining GUI for the same.",
       "sender": "sarthakpatil6636@gmail.com",
-      "repository": "sarthakpatil6636/L3Zhci9mb2xkZXJzL204L2hfOGpqXzYx-d1rPrO",
-      "branch": "orka/task/calculator-project-gui-i-mti8t5z9",
-      "commitSha": "e3ed0d2",
+      "repository": "sarthakpatil6636/L3Zhci9mb2xkZXJzL204L2hfOGpqXzYx-8oB0gj",
+      "branch": "orka/task/calculator-project-gui-i-mti9vc77",
+      "commitSha": "dba5caa",
       "filesChangedCount": 2,
       "testsPassed": true,
       "buildPassed": true,
       "status": "COMPLETED",
-      "completedAt": "2026-09-01T05:44:47.021Z"
+      "completedAt": "2026-09-01T06:14:28.010Z"
     }
-  },
-  {
-    "id": "task_email_1a05b4f29ad6aa22",
-    "emailId": "1a05b4f29ad6aa22",
-    "sender": "HDFC Bank InstaAlerts <alerts@hdfcbank.bank.in>",
-    "recipient": "ANURAG151006@gmail.com",
-    "subject": "❗  You have done a UPI txn. Check details!",
-    "receivedAt": "Tue, 01 Sep 2026 10:21:49 +0530",
-    "bodySnippet": "Dear Customer, Greetings from HDFC Bank! Rs.3.00 is debited from your account ending 2220 towards VPA 8380020215@axl (Mr Vishwesh Kailas Bhilare) on 01-09-26. UPI transaction reference no.:",
-    "actionable": true,
-    "summary": "Email request from HDFC Bank InstaAlerts: \"❗  You have done a UPI txn. Check details!\"",
-    "requestedAction": "❗  You have done a UPI txn. Check details!",
-    "priority": "high",
-    "technicalTask": true,
-    "category": "CODING",
-    "repositoryUrls": [
-      "https://github.com/orkaaidemo/targetproject"
-    ],
-    "repositoryHint": "targetproject",
-    "confidence": 0.94,
-    "status": "NEW",
-    "proposedPlan": [
-      "Inspect referenced repository architecture & package files",
-      "Understand existing CLI / application codebase",
-      "Implement requested GUI / feature requirements",
-      "Execute automated test & build verification suite",
-      "Perform AI git diff review",
-      "Commit changes & push branch orka/task/<task_id>",
-      "Open GitHub Pull Request & generate completion receipt"
-    ],
-    "createdAt": "2026-09-01T05:45:52.265Z",
-    "links": [
-      "https://trkt.aclemails.com/v1/r/uOhBqdiC0ltrZGQT1HRSOUaXtGRQcTEA1iyT9jJ2Zxomn0Z2jKS3Uj7ginAI76K1vxvSLd%2BKSVPSW8l8w6slO6olYTu2gVRV0sfiZ9tI6t6cEvXVng7vWjknjKj6L9Lf%2BHRs33272O1PhvMf6X9wRiJ%2F8PIPiwQjrHvCU3f32uWKMRu1vxcqBb3SNZfFvKtqQ1IFQg%2FKANei49nMfwaZDfdMCgIkx0BriNViAlnAUOu1%2BmsKwaHGtEI%2B%2Fa%2FHQIcozQu6jMhHmUaR7LBdpcpKe5wLl0EskgNqL9eX0nYRsJagHYTrm97CMFsi%2B65wRjTKp1xzNerbkRlHwTeZD1y49slrKjo%2F%2F9%2FkBRj%2FlJijjuL3tOvOlKlIO8t6ufY3tvCmM%2BbQww%3D%3D",
-      "https://img.pinchappmails.com/hdfc/images/2026/aug/HDFC-Bank-Banner-Update-2026-08-20.png",
-      "https://wgjpss.stripocdn.email/content/guids/CABINET_d17330eb5cbe5af68cf444e0d9b181ad116d88b22fb8b3fd1c93e1846c59af76/images/nmbandnew.jpg",
-      "https://img.pinchappmails.com/hdfc/images/2025/dec/Digital-Arrest-Scam_Insta-Alert-Banner_600-x-60_Sep%2725+(1)+(1).jpg",
-      "https://trkt.aclemails.com/v1/r/4LLcpPRtafbsBPMhPeffu65cetLPwvdnXiSjaB%2B2E5qxpbVEUfUUQtf4M3V1N%2BBjgSiNl3OC9%2FhHS32owZ78eLNtXPUozQbDiqMJDuPlsq4V9sUsH1lX5jSDqc4boemM4P8mH8h%2FCm%2BRKfuKCFhPIKJpPmXnbUEIvuwNu8zKgf7rZuNd1b5VfIT89lCQIIY2847axUnLKitgjng44ebpXiChG%2Fame1QnexSGiEIjyNGzVZsn2DIY3HBOR%2FeHslzFTvxEuPkE%2Bn7sTED8u1UuHrjNZcqmwaOdJ%2FhfXaVbRJ5G7lwG8mttkfcbESwJ792V6qui8yXgOq%2FHv7vTiw%3D%3D",
-      "https://trkt.aclemails.com/v1/w/QNZRPRh4WMAIyaLtMFEVbsuXQm%2Bsz7azA4XGHimW%2FjAiTANZ3Zt9UPzKmsrkAd4B1ZXf01bZAHysucJA78YWkHRF5hQQAivO7fFKMJbsNE%2BWk5yQDuXW%2BQAw7nBpckU1OHaavcs6TAKXnLBnimYskIcsz6Ck4k1JCGfGCDvjCgerCY5Dq6svw53o0EYEl%2BhPXozgB7jTXth0h0mtwUwV9MUI4VMx1TWYVJyA4y%2FQrDF2E73nqDrXPVg%3D"
-    ]
-  },
-  {
-    "id": "task_email_1a05b13f6ae8956f",
-    "emailId": "1a05b13f6ae8956f",
-    "sender": "Adobe Acrobat <mail@mail.adobe.com>",
-    "recipient": "<anurag151006@gmail.com>",
-    "subject": "Edit text and swap images 📝",
-    "receivedAt": "Mon, 31 Aug 2026 20:42:24 -0700",
-    "bodySnippet": "Modify PDFs instantly with Acrobat Pro. Turn to-dos into ta-das. Crop or swap out images, add text, and fix typos in proposals and planning documents with Acrobat Pro. Get started Turn to-dos into ta-",
-    "actionable": true,
-    "summary": "Email request from Adobe Acrobat: \"Edit text and swap images 📝\"",
-    "requestedAction": "Edit text and swap images 📝",
-    "priority": "medium",
-    "technicalTask": false,
-    "category": "PRODUCTIVITY",
-    "repositoryUrls": [],
-    "repositoryHint": "orkaAI",
-    "confidence": 0.94,
-    "status": "NEW",
-    "proposedPlan": [
-      "Analyze workspace context",
-      "Compile executive brief package"
-    ],
-    "createdAt": "2026-09-01T05:45:52.268Z",
-    "links": [
-      "https://t3.mail.adobe.com/r/?id=te22602f1-2ff6-4d48-b453-842396914bd6,15b413f1,60ed5f&e=cDE9JTQwWnpteFIlMkZVS0xaVHV4RzVMWWVaVEFLOEhjNWEzY0J4a3g0WDRLbldOOWF6Q3pIYWxnNyUyQmw2bXZJcU9CNmNsd3pEdFFuaDc4NzZvV1NjQkFESXl3ZFhzTzR6ZVVDVkl1c2olMkJ1cENaeHJyNmslM0Q&s=bWre7ExfeWbPSzArjBuQSnOHaND3UuM-NAdHKje7UPs",
-      "https://t3.mail.adobe.com/r/?id=te22602f1-2ff6-4d48-b453-842396914bd6,15b413f1,60ed60&e=cDE9JTQwc0V4JTJCTndjbGJSSGZWUlZhUUtKQlNVZUw0VzlsTDYwJTJCQkU3YzUzZ2NqNGMlM0QmcDI9JmxvYz1pbiZwMz0yMg&s=YUrOaDQu1NC8SUBPdNVtcRdDaqOyo6LK2iGiXAa2SRQ",
-      "https://t3.mail.adobe.com/r/?id=te22602f1-2ff6-4d48-b453-842396914bd6,15b413f1,60ed61",
-      "https://t3.mail.adobe.com/r/?id=te22602f1-2ff6-4d48-b453-842396914bd6,15b413f1,60ed62",
-      "https://t3.mail.adobe.com/r/?id=te22602f1-2ff6-4d48-b453-842396914bd6,15b413f1,60ed63"
-    ]
-  },
-  {
-    "id": "task_email_1a05b0e8eba9b3d3",
-    "emailId": "1a05b0e8eba9b3d3",
-    "sender": "Google Cloud <googlecloud@google.com>",
-    "recipient": "anurag151006@gmail.com",
-    "subject": "[Register Now] Scale your Agentic Strategy: September Webinars now live",
-    "receivedAt": "Mon, 31 Aug 2026 22:41:14 -0500 (CDT)",
-    "bodySnippet": "From BigQuery analytics to disrupting recovery denial In focus | September 2026 Hi Anurag, It&#39;s time to move beyond the maze of complex tools and mounting security risks. Register for our September",
-    "actionable": true,
-    "summary": "Email request from Google Cloud: \"[Register Now] Scale your Agentic Strategy: September Webinars now live\"",
-    "requestedAction": "[Register Now] Scale your Agentic Strategy: September Webinars now live",
-    "priority": "medium",
-    "technicalTask": false,
-    "category": "PRODUCTIVITY",
-    "repositoryUrls": [],
-    "repositoryHint": "orkaAI",
-    "confidence": 0.94,
-    "status": "NEW",
-    "proposedPlan": [
-      "Analyze workspace context",
-      "Compile executive brief package"
-    ],
-    "createdAt": "2026-09-01T05:45:52.270Z",
-    "links": [
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5oa8vZGSWEU-d11vs-ngt2BYbMkaQ1oYYqupVM5Cj-TGGLnAkxSbZzxmCeuktIFont-U=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5oXUgiRFWB9qRFDFYextXYiaTAPWCVM7nFHj5pbow-Xmn2qADDjwEJxxFpINQkeIQvPQ=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5oSaDW1TRXR5V7o_2K2Bwq7h-feehqkyC8umE7IJApt5ClD2lvBYp1v0psxQfORFJeSw=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5oYtFh3SZUxVthf4gHjS3ucFO6FN3iAm6Q63rAt5LplMtoN20IbxYWyJPYQ00FaHCoXo=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5oTQWqYTxWAVGmjU2Uv2iVeLZJzmDoVKceWaes0Q9GKf1c7aZUugEp6RBhog2iE4HH6Q=",
-      "https://cloud.google.com/preferences/?Opt_In_Events__c=&Opt_In_Newsletter__c=&Opt_In_Offers__c=&Opt_In_Products__c=&Opt_In_Research__c=&preferenceCenterSubscription1=&preferenceCenterSubscription2=&preferenceCenterSubscription3=&preferenceCenterSubscription4=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5oW4TfCOhhdNpnGuYc8KO18hVgjc3O0rx9Jn1nSpEsk8uhRc1TeSGjejsX5EXFDDSrbg=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5obw3p0MfoEkVH_5d9sNizfc4jp7eItjaIDVZrLqC0fca0jegwnW5NyDb-S2_52TLseM=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5occxfymeByw5S9z1f9Pq_jYUrcKB78BhkH8fJNMbR7BUDLvTh5molhQ0IXwJ1ZWLw8E=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5oK4_qAPBlyEHk6ToRYT9znNB7seIkTl0lVACeLZ9EYEwLCmoEGrZ30Ta9lVirFrHaCs=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5oUUd3p8GCBiJJYyKJEV8Olr--IEEBLXPy5aCBzQConiS1fvV9THRQQN1qdk3fLsiYC8=",
-      "https://go.cloudplatformonline.com/ODA4LUdKVy0zMTQAAAGj-gc5oFPTHbLAYHmtU4z6dyKvlE59pzP8e9wtKMGllRhVLUPOAMN3OAUDEhMm98UqwEXztqk="
-    ]
-  },
-  {
-    "id": "task_email_1a059268b8a966ab",
-    "emailId": "1a059268b8a966ab",
-    "sender": "iQOO Hackathon <noreply@reskilll.co.in>",
-    "recipient": "anurag151006@gmail.com",
-    "subject": "iQOO Hackathon: 23 Hours Left to Submit Your Pune Idea",
-    "receivedAt": "Mon, 31 Aug 2026 18:48:12 +0000",
-    "bodySnippet": "● Pune City Battle · Phase 1 23 Hours To Go. Phase 1 · Closing Your idea for Pune isn&#39;t in yet, and submissions close in 23 hours. Only submitted teams enter the shortlist for the 30-hour build on",
-    "actionable": false,
-    "summary": "Email request from iQOO Hackathon: \"iQOO Hackathon: 23 Hours Left to Submit Your Pune Idea\"",
-    "requestedAction": "iQOO Hackathon: 23 Hours Left to Submit Your Pune Idea",
-    "priority": "medium",
-    "technicalTask": false,
-    "category": "PRODUCTIVITY",
-    "repositoryUrls": [],
-    "repositoryHint": "orkaAI",
-    "confidence": 0.94,
-    "status": "REJECTED",
-    "proposedPlan": [
-      "Analyze workspace context",
-      "Compile executive brief package"
-    ],
-    "createdAt": "2026-09-01T05:45:52.272Z",
-    "links": [
-      "https://iqoo.reskilll.com/email-logo.png",
-      "https://jgqln4xw.r.ap-south-1.awstrack.me/L0/https:%2F%2Fiqoo.reskilll.com%2Fdashboard%2Fiqoo-pune/1/010901a059268732-d026ff61-83ac-4837-ae55-83a7ace7ad64-000000/55vz1Uec7VfEYtGR24Hdg3RxIKs=258",
-      "https://jgqln4xw.r.ap-south-1.awstrack.me/L0/https:%2F%2Fwww.instagram.com%2Freskilllofficial%2F/1/010901a059268732-d026ff61-83ac-4837-ae55-83a7ace7ad64-000000/OeyUnwlryQQaHRVtA8BF5Jp30xo=258",
-      "https://jgqln4xw.r.ap-south-1.awstrack.me/I0/010901a059268732-d026ff61-83ac-4837-ae55-83a7ace7ad64-000000/CQB5V_pEDjU_CVFy1Ry4hq9sy0c=258"
-    ]
-  },
-  {
-    "id": "task_email_1a058d9914a1e5f9",
-    "emailId": "1a058d9914a1e5f9",
-    "sender": "Anurag Patil <anuragpatil1510@gmail.com>",
-    "recipient": "ANURAG PATIL <ANURAG151006@gmail.com>",
-    "subject": "No Subject",
-    "receivedAt": "Mon, 31 Aug 2026 22:53:56 +0530",
-    "bodySnippet": "make a colorful design for cli github repo link : https://github.com/sarthakpatil6636/atestproject",
-    "actionable": true,
-    "summary": "Email request from Anurag Patil: \"No Subject\"",
-    "requestedAction": "No Subject",
-    "priority": "high",
-    "technicalTask": true,
-    "category": "CODING",
-    "repositoryUrls": [
-      "https://github.com/sarthakpatil6636/atestproject"
-    ],
-    "repositoryHint": "atestproject",
-    "confidence": 0.94,
-    "status": "NEW",
-    "proposedPlan": [
-      "Inspect referenced repository architecture & package files",
-      "Understand existing CLI / application codebase",
-      "Implement requested GUI / feature requirements",
-      "Execute automated test & build verification suite",
-      "Perform AI git diff review",
-      "Commit changes & push branch orka/task/<task_id>",
-      "Open GitHub Pull Request & generate completion receipt"
-    ],
-    "createdAt": "2026-09-01T05:45:52.274Z",
-    "links": [
-      "https://github.com/sarthakpatil6636/atestproject"
-    ]
   }
 ]

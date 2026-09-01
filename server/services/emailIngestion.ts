@@ -15,15 +15,15 @@ export class EmailIngestionService {
     return Array.from(new Set(matches.map(u => u.replace(/[.,;!)]+$/, ''))));
   }
 
-  public static async scanIncomingEmails(): Promise<EmailTaskItem[]> {
-    const authClient = GoogleAuthService.getAuthenticatedClient();
+  public static async scanIncomingEmails(userId?: string): Promise<EmailTaskItem[]> {
+    const authClient = GoogleAuthService.getAuthenticatedClientForUser(userId) || GoogleAuthService.getAuthenticatedClient();
     const provider = new GoogleWorkspaceDataProvider(authClient);
     const emails = await provider.searchEmails('is:unread OR label:inbox');
 
     const newTasks: EmailTaskItem[] = [];
 
     for (const email of emails) {
-      if (emailTaskStore.isProcessed(email.id)) continue;
+      if (emailTaskStore.isProcessed(userId, email.id)) continue;
 
       const rawBody = email.body || email.snippet || '';
       const extractedLinks = this.extractUrls(rawBody);
@@ -37,6 +37,7 @@ export class EmailIngestionService {
 
       const task: EmailTaskItem = {
         id: 'task_email_' + email.id,
+        userId,
         emailId: email.id,
         threadId: (email as any).threadId,
         sender: email.sender,
