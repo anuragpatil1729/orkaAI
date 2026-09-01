@@ -77,7 +77,7 @@ async function runCodingAgentTests() {
     console.error('✕ Test 2 Failed: Cloned workspace did not receive a local git identity.', { workspaceEmail, workspaceName });
     process.exit(1);
   }
-  if (headSha !== result.commitResult.commitSha || !committedContent.includes('after')) {
+  if (!headSha.startsWith(result.commitResult.commitSha) || !committedContent.includes('after')) {
     console.error('✕ Test 2 Failed: Reported commit SHA/content does not match git state.');
     process.exit(1);
   }

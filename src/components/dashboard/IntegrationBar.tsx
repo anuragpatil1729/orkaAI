@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useWorkflow } from '../../context/WorkflowContext';
 import { Mail, Calendar, HardDrive, CheckCircle2, ShieldCheck, Github, Key, X, ArrowRight } from 'lucide-react';
-import { GlassCard, TactileButton } from '../ui/NeoTactileSystem';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
 
 export const IntegrationBar: React.FC = () => {
   const { workspaceStatus, setActiveTab } = useWorkflow();
@@ -29,44 +30,44 @@ export const IntegrationBar: React.FC = () => {
   const services = [
     { name: 'Gmail', icon: Mail, connected: workspaceStatus.services.gmail },
     { name: 'Calendar', icon: Calendar, connected: workspaceStatus.services.calendar },
-    { name: 'Google Drive', icon: HardDrive, connected: workspaceStatus.services.drive },
-    { name: 'GitHub API', icon: Github, connected: githubConnected },
+    { name: 'Drive', icon: HardDrive, connected: workspaceStatus.services.drive },
+    { name: 'GitHub', icon: Github, connected: githubConnected },
   ];
 
   return (
     <>
-      <GlassCard className="p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.25)]">
-            <ShieldCheck className="w-5.5 h-5.5" />
+      <Card className="p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <ShieldCheck className="w-4.5 h-4.5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-slate-100">Workspace & API Integrations</h4>
-            <p className="text-xs text-slate-400">
-              Connected account: <span className="text-cyan-300 font-mono font-semibold">{workspaceStatus.userEmail || 'not_connected@workspace.com'}</span>
+            <h4 className="text-xs font-bold text-text-primary uppercase font-mono tracking-wider">Connected Workspace</h4>
+            <p className="text-xs text-text-secondary">
+              Account: <span className="text-indigo-400 font-mono font-medium">{workspaceStatus.userEmail || 'not_connected@workspace.com'}</span>
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           {services.map((s, idx) => {
             const Icon = s.icon;
             return (
               <div
                 key={idx}
-                onClick={s.name === 'GitHub API' ? () => setShowGithubModal(true) : undefined}
-                className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-semibold cursor-pointer transition-all ${
-                  s.name === 'GitHub API' && !githubConnected
-                    ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20'
-                    : 'bg-white/[0.04] border-white/10 text-slate-200'
+                onClick={s.name === 'GitHub' ? () => setShowGithubModal(true) : undefined}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium cursor-pointer transition-all ${
+                  s.name === 'GitHub' && !githubConnected
+                    ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/20'
+                    : 'bg-background-elevated border-border-subtle text-text-primary'
                 }`}
               >
-                <Icon className="w-4 h-4 text-blue-400" />
+                <Icon className="w-3.5 h-3.5 text-indigo-400" />
                 <span>{s.name}</span>
                 {s.connected ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-1" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 ) : (
-                  <span className="text-[10px] text-cyan-300 font-mono font-bold ml-1">+ Connect</span>
+                  <span className="text-[10px] text-indigo-400 font-mono font-semibold">+ Connect</span>
                 )}
               </div>
             );
@@ -74,55 +75,55 @@ export const IntegrationBar: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('connected')}
-            className="text-xs text-blue-400 hover:text-cyan-300 font-extrabold px-3 py-1.5 rounded-xl hover:bg-white/5 transition-all cursor-pointer"
+            className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold px-2 py-1 rounded hover:bg-white/5 transition-colors cursor-pointer"
           >
             Manage →
           </button>
         </div>
-      </GlassCard>
+      </Card>
 
       {/* GitHub Token Config Modal */}
       {showGithubModal && (
-        <div className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-2xl flex items-center justify-center p-4 animate-fadeIn select-none">
-          <GlassCard className="w-full max-w-md p-6 space-y-5 border border-cyan-400/40 relative">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2.5">
-                <Github className="w-5 h-5 text-cyan-300" />
-                <h3 className="text-base font-extrabold text-white">Connect GitHub Token</h3>
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn select-none">
+          <Card className="w-full max-w-md p-6 space-y-4 border-border-strong relative">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+              <div className="flex items-center gap-2">
+                <Github className="w-4.5 h-4.5 text-indigo-400" />
+                <h3 className="text-sm font-bold text-text-primary">Connect GitHub Token</h3>
               </div>
-              <button onClick={() => setShowGithubModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowGithubModal(false)} className="text-text-muted hover:text-text-primary">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Paste a GitHub Personal Access Token (PAT with <code className="text-cyan-300">repo</code> scope) to enable OrkaAI to publish real Pull Requests directly to target repositories like <code className="text-cyan-300">sarthakpatil6636/atestproject</code>.
+            <p className="text-xs text-text-secondary leading-relaxed">
+              Paste a GitHub Personal Access Token (PAT with <code className="text-indigo-400">repo</code> scope) to enable OrkaAI to publish real Pull Requests directly to target repositories.
             </p>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-mono font-bold text-slate-400 uppercase">GITHUB PERSONAL ACCESS TOKEN</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-mono font-semibold text-text-muted uppercase">GITHUB PERSONAL ACCESS TOKEN</label>
               <div className="relative">
-                <Key className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <Key className="w-4 h-4 text-text-muted absolute left-3 top-2.5" />
                 <input
                   type="password"
                   placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
                   value={githubToken}
                   onChange={(e) => setGithubToken(e.target.value)}
-                  className="w-full bg-black/60 border border-white/15 rounded-xl py-3 pl-10 pr-4 text-xs font-mono text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
+                  className="w-full bg-background-elevated border border-border-subtle rounded-lg py-2 pl-9 pr-3 text-xs font-mono text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo-500"
                 />
               </div>
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-2">
-              <button onClick={() => setShowGithubModal(false)} className="text-xs text-slate-400 hover:text-white">
+              <button onClick={() => setShowGithubModal(false)} className="text-xs text-text-muted hover:text-text-primary">
                 Cancel
               </button>
-              <TactileButton onClick={handleSaveToken} variant="primary" size="sm">
+              <Button onClick={handleSaveToken} variant="primary" size="sm">
                 <span>Save Token & Connect</span>
-                <ArrowRight className="w-3.5 h-3.5 text-white" />
-              </TactileButton>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
             </div>
-          </GlassCard>
+          </Card>
         </div>
       )}
     </>

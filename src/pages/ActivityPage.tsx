@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityLogItem } from '../types/activity';
-import { Activity, CheckCircle2, Zap, ExternalLink, Inbox } from 'lucide-react';
-import { GlassCard, StatusPill } from '../components/ui/NeoTactileSystem';
+import { Badge } from '../components/ui/Badge';
+import { EmptyState } from '../components/ui/EmptyState';
 
 export const ActivityPage: React.FC = () => {
   const [activities, setActivities] = useState<ActivityLogItem[]>([]);
@@ -16,68 +16,37 @@ export const ActivityPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl font-extrabold text-white flex items-center gap-2.5 font-mono">
-          <Activity className="w-6 h-6 text-blue-400" />
-          <span>Autonomous Activity Log</span>
+    <div className="space-y-6 animate-fadeIn max-w-3xl mx-auto">
+      <div className="border-b border-border-subtle pb-3">
+        <h1 className="text-base font-semibold text-text-primary">
+          Activity Audit Log
         </h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Complete audit trail of all goals, plans, tools used, approvals, and verified outputs.
+        <p className="text-xs text-text-secondary mt-0.5">
+          History of all goal executions and verified outputs.
         </p>
       </div>
 
       {activities.length === 0 ? (
-        <GlassCard className="p-12 text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-400 mx-auto">
-            <Inbox className="w-6 h-6" />
-          </div>
-          <h3 className="text-sm font-bold text-slate-200">No executions recorded yet</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-            Enter an outcome goal in the Command Control Center to begin executing autonomous AI workflows.
-          </p>
-        </GlassCard>
+        <EmptyState
+          title="No activity recorded"
+          description="Activity logs will appear here after your first task execution."
+        />
       ) : (
-        <div className="space-y-4">
+        <div className="rounded-lg border border-border-subtle bg-background-card divide-y divide-border-subtle text-xs">
           {activities.map((act) => (
-            <GlassCard
-              key={act.id}
-              className="p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 group"
-            >
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(52,211,153,0.2)]">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">
-                    {act.goal}
-                  </h3>
-                  <div className="flex items-center gap-3 text-xs text-slate-400 font-medium">
-                    <span className="font-mono">{act.timeFormatted}</span>
-                    <span>•</span>
-                    <span className="text-cyan-300 font-semibold flex items-center gap-1 font-mono">
-                      <Zap className="w-3.5 h-3.5 text-blue-400" />
-                      {act.actionsCount} verified actions
-                    </span>
-                  </div>
-                </div>
+            <div key={act.id} className="p-3 px-4 flex items-center justify-between gap-4 font-mono">
+              <div className="flex items-center gap-4">
+                <span className="text-text-muted text-[11px] shrink-0">{act.timeFormatted}</span>
+                <span className="font-sans font-medium text-text-primary">{act.goal}</span>
               </div>
 
-              <div className="flex items-center gap-3">
-                <StatusPill
-                  status={
-                    act.status === 'Completed'
-                      ? 'completed'
-                      : act.status === 'In Progress'
-                      ? 'running'
-                      : 'failed'
-                  }
-                  text={act.status}
-                />
-                <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-cyan-300 transition-colors cursor-pointer" />
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-text-muted text-[11px] font-sans">{act.actionsCount} actions</span>
+                <Badge variant={act.status === 'Completed' ? 'success' : act.status === 'In Progress' ? 'info' : 'error'}>
+                  {act.status}
+                </Badge>
               </div>
-            </GlassCard>
+            </div>
           ))}
         </div>
       )}

@@ -16,7 +16,10 @@ import {
   Check,
   Receipt
 } from 'lucide-react';
-import { GlassPanel, GlassCard, TactileButton, GlassTextarea, StatusPill } from '../ui/NeoTactileSystem';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
+import { GlassTextarea } from '../ui/NeoTactileSystem';
 
 export const ResultView: React.FC<{ result: ExecutionResult; onReset: () => void }> = ({ result, onReset }) => {
   const [draftBody, setDraftBody] = useState(result.draftEmail?.body || '');
@@ -29,295 +32,285 @@ export const ResultView: React.FC<{ result: ExecutionResult; onReset: () => void
   };
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn">
       {/* Hero Header Banner */}
-      <GlassPanel glowEdge={true} className="p-8 border border-emerald-500/40 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold uppercase tracking-wider font-mono">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>WORKFLOW EXECUTED & VERIFIED BY POLICY ENGINE</span>
+      <Card className="p-6 border-emerald-500/30 bg-emerald-500/5 flex flex-col md:flex-row items-center justify-between gap-5">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-1.5">
+            <Badge variant="success">WORKFLOW VERIFIED & EXECUTED</Badge>
           </div>
 
-          <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white">
-            YOU'RE READY.
+          <h2 className="text-2xl font-bold tracking-tight text-text-primary">
+            Execution Completed Successfully
           </h2>
 
-          <div className="flex items-center gap-3 text-xs text-slate-300 font-medium">
-            <span className="font-bold text-blue-300 flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-blue-400" />
+          <div className="flex items-center gap-2 text-xs text-text-secondary font-medium">
+            <span className="font-semibold text-indigo-400 flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-indigo-400" />
               {result.brief.meetingDetails.title}
             </span>
             <span>•</span>
-            <span className="font-mono text-slate-300">{result.brief.meetingDetails.time}</span>
+            <span className="font-mono text-text-muted">{result.brief.meetingDetails.time}</span>
           </div>
         </div>
 
         {/* Stats Summary & Execution Receipt Trigger */}
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="flex items-center gap-6 bg-black/70 p-5 rounded-2xl border border-white/10 text-center font-mono shadow-inner">
+        <div className="flex flex-col md:flex-row items-center gap-3">
+          <div className="flex items-center gap-4 bg-background-elevated px-4 py-3 rounded-lg border border-border-subtle text-center font-mono">
             <div>
-              <span className="text-3xl font-black text-emerald-400">{result.stats.actionsCompleted}</span>
-              <p className="text-[11px] text-slate-400 font-medium">Actions Executed</p>
+              <span className="text-xl font-bold text-emerald-400">{result.stats.actionsCompleted}</span>
+              <p className="text-[10px] text-text-muted">Actions</p>
             </div>
-            <div className="w-[1px] h-10 bg-white/15" />
+            <div className="w-[1px] h-6 bg-border-subtle" />
             <div>
-              <span className="text-3xl font-black text-cyan-400">{result.stats.actionsVerified || result.stats.actionsCompleted}</span>
-              <p className="text-[11px] text-slate-400 font-medium">API Verified</p>
+              <span className="text-xl font-bold text-indigo-400">{result.stats.actionsVerified || result.stats.actionsCompleted}</span>
+              <p className="text-[10px] text-text-muted">Verified</p>
             </div>
           </div>
 
           {result.receipt && (
-            <TactileButton
+            <Button
               onClick={() => setShowReceiptModal(true)}
-              variant="light"
+              variant="secondary"
               size="md"
             >
               <Receipt className="w-4 h-4" />
-              <span>View Execution Receipt</span>
-            </TactileButton>
+              <span>Receipt</span>
+            </Button>
           )}
         </div>
-      </GlassPanel>
+      </Card>
 
       {/* Main 2-Column Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2 cols): Executive Summary, Key Decisions, Open Items, Follow-Up Draft */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-5">
           {/* Executive Summary Card */}
-          <GlassCard className="p-7 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="text-base font-bold text-slate-100 flex items-center gap-2.5 font-mono">
-                <Sparkles className="w-4.5 h-4.5 text-blue-400" />
-                <span>EXECUTIVE SUMMARY</span>
+          <Card className="p-6 space-y-3">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+              <h3 className="text-xs font-bold text-text-primary uppercase font-mono tracking-wider flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-indigo-400" />
+                <span>Executive Brief Summary</span>
               </h3>
-              <span className="text-xs text-slate-400 font-mono">Synthesized by Gemini</span>
+              <span className="text-[11px] text-text-muted font-mono">Synthesized by Gemini</span>
             </div>
 
-            <p className="text-sm text-slate-200 leading-relaxed font-medium">
+            <p className="text-xs text-text-secondary leading-relaxed">
               {result.brief.summary}
             </p>
-          </GlassCard>
+          </Card>
 
           {/* Key Decisions Card */}
-          <GlassCard className="p-7 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="text-base font-bold text-slate-100 flex items-center gap-2.5 font-mono">
-                <ShieldCheck className="w-4.5 h-4.5 text-emerald-400" />
-                <span>KEY DECISIONS & AGREEMENTS</span>
+          <Card className="p-6 space-y-3">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+              <h3 className="text-xs font-bold text-text-primary uppercase font-mono tracking-wider flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Key Decisions & Insights</span>
               </h3>
             </div>
 
-            <ul className="space-y-3 text-xs text-slate-300">
+            <ul className="space-y-2 text-xs text-text-secondary">
               {result.brief.keyInsights.map((insight, idx) => (
-                <li key={idx} className="flex items-start gap-3 p-4 rounded-2xl bg-white/[0.04] border border-white/10">
+                <li key={idx} className="flex items-start gap-2.5 p-3 rounded-lg bg-background-elevated border border-border-subtle">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <span className="font-medium text-slate-200 leading-relaxed">{insight}</span>
+                  <span className="text-text-primary leading-relaxed">{insight}</span>
                 </li>
               ))}
             </ul>
-          </GlassCard>
+          </Card>
 
           {/* Open Items & Next Actions */}
-          <GlassCard className="p-7 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h3 className="text-base font-bold text-slate-100 flex items-center gap-2.5 font-mono">
-                <CheckSquare className="w-4.5 h-4.5 text-amber-400" />
-                <span>OPEN ITEMS & NEXT ACTIONS ({result.tasks.length})</span>
+          <Card className="p-6 space-y-3">
+            <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+              <h3 className="text-xs font-bold text-text-primary uppercase font-mono tracking-wider flex items-center gap-2">
+                <CheckSquare className="w-4 h-4 text-amber-400" />
+                <span>Open Tasks & Actions ({result.tasks.length})</span>
               </h3>
-              <span className="text-xs font-mono font-semibold px-3 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                TASKS CREATED
-              </span>
+              <Badge variant="warning">Tasks Created</Badge>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               {result.tasks.map((t, idx) => (
-                <div key={t.id} className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
-                  <div className="flex items-center gap-3.5">
-                    <span className="w-7 h-7 rounded-xl bg-blue-500/20 text-blue-300 font-mono font-bold text-xs flex items-center justify-center border border-blue-500/30">
+                <div key={t.id} className="p-3 rounded-lg bg-background-elevated border border-border-subtle flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-5 h-5 rounded-md bg-indigo-500/10 text-indigo-400 font-mono font-bold text-[10px] flex items-center justify-center border border-indigo-500/20">
                       {idx + 1}
                     </span>
-                    <span className="text-xs font-semibold text-slate-200">{t.title}</span>
+                    <span className="font-medium text-text-primary">{t.title}</span>
                   </div>
-                  <span className="text-[10px] font-mono font-bold uppercase px-3 py-1 rounded-full bg-white/10 text-slate-300 border border-white/10">
-                    {t.priority}
-                  </span>
+                  <Badge variant="neutral">{t.priority}</Badge>
                 </div>
               ))}
             </div>
-          </GlassCard>
+          </Card>
 
-          {/* Editable Follow-Up Email Draft Card */}
+          {/* Follow-Up Email Draft Card */}
           {result.draftEmail && (
-            <GlassCard className="p-7 border border-blue-500/40 space-y-4 relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <div className="flex items-center gap-2.5">
-                  <Mail className="w-4.5 h-4.5 text-blue-400" />
-                  <h3 className="text-base font-bold text-slate-100 font-mono">FOLLOW-UP EMAIL DRAFT</h3>
+            <Card className="p-6 border-indigo-500/30 space-y-3">
+              <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-indigo-400" />
+                  <h3 className="text-xs font-bold text-text-primary uppercase font-mono tracking-wider">Follow-Up Email Draft</h3>
                 </div>
 
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsEditingDraft(!isEditingDraft)}
-                    className="text-xs text-blue-400 hover:text-cyan-300 flex items-center gap-1 font-semibold transition-colors cursor-pointer"
+                    className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1 font-medium transition-colors cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>{isEditingDraft ? 'Done Editing' : 'Edit Email'}</span>
                   </button>
 
                   {isSent ? (
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                      Sent to Recipient
-                    </span>
+                    <Badge variant="success">Sent</Badge>
                   ) : (
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono">
-                      Draft Prepared
-                    </span>
+                    <Badge variant="info">Draft Prepared</Badge>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-3 text-xs">
-                <div className="flex items-center gap-2 text-slate-400 font-mono">
-                  <span className="font-semibold">To:</span>
-                  <span className="text-cyan-300 font-bold">{result.draftEmail.to}</span>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center gap-2 text-text-muted font-mono">
+                  <span>To:</span>
+                  <span className="text-indigo-400 font-medium">{result.draftEmail.to}</span>
                 </div>
 
-                <div className="flex items-center gap-2 text-slate-400">
-                  <span className="font-semibold font-mono">Subject:</span>
-                  <span className="text-slate-100 font-bold">{result.draftEmail.subject}</span>
+                <div className="flex items-center gap-2 text-text-muted font-mono">
+                  <span>Subject:</span>
+                  <span className="text-text-primary font-medium">{result.draftEmail.subject}</span>
                 </div>
 
                 {isEditingDraft ? (
                   <GlassTextarea
                     value={draftBody}
                     onChange={(e) => setDraftBody(e.target.value)}
-                    rows={7}
+                    rows={6}
                   />
                 ) : (
-                  <div className="p-4 rounded-2xl bg-[#080B10]/95 border border-white/10 font-sans text-slate-200 whitespace-pre-wrap leading-relaxed shadow-inner">
+                  <div className="p-3.5 rounded-lg bg-background-elevated border border-border-subtle font-sans text-text-secondary whitespace-pre-wrap leading-relaxed">
                     {draftBody}
                   </div>
                 )}
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <span className="text-[11px] text-slate-400 italic font-mono">
+                <span className="text-[11px] text-text-muted italic">
                   Rationale: Addresses open action items from workspace context.
                 </span>
 
                 {!isSent && (
-                  <TactileButton onClick={handleSendDraft} variant="primary" size="md">
+                  <Button onClick={handleSendDraft} variant="primary" size="sm">
                     <Send className="w-3.5 h-3.5" />
                     <span>Approve & Send Email</span>
-                  </TactileButton>
+                  </Button>
                 )}
               </div>
-            </GlassCard>
+            </Card>
           )}
         </div>
 
-        {/* Right Column (1 col): Relevant Emails, Documents, and Orka Activity */}
-        <div className="space-y-6">
-          {/* ORKA ACTIVITY Audit Checklist */}
-          <GlassCard className="p-6 space-y-4">
-            <h3 className="text-sm font-bold text-slate-200 flex items-center justify-between font-mono">
+        {/* Right Column (1 col): Audit Checklist & Context */}
+        <div className="space-y-5">
+          {/* Audit Checklist */}
+          <Card className="p-5 space-y-3">
+            <h3 className="text-xs font-bold text-text-primary uppercase font-mono tracking-wider flex items-center justify-between border-b border-border-subtle pb-3">
               <span className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-blue-400" />
-                <span>ORKA ACTIVITY AUDIT</span>
+                <Zap className="w-4 h-4 text-indigo-400" />
+                <span>Execution Audit</span>
               </span>
-              <span className="text-[10px] text-emerald-400 font-mono font-bold">100% VERIFIED</span>
+              <Badge variant="success">100% Verified</Badge>
             </h3>
 
-            <div className="space-y-2.5 text-xs font-semibold">
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.04] border border-white/10 text-emerald-400">
+            <div className="space-y-2 text-xs font-medium">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-background-elevated border border-border-subtle text-emerald-400">
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Check className="w-3.5 h-3.5 shrink-0" />
                   <span>Calendar meeting analyzed</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono">VERIFIED</span>
+                <span className="text-[10px] text-text-muted font-mono">OK</span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.04] border border-white/10 text-emerald-400">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-background-elevated border border-border-subtle text-emerald-400">
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Check className="w-3.5 h-3.5 shrink-0" />
                   <span>{result.stats.emailsAnalyzed} Gmail threads scanned</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono">VERIFIED</span>
+                <span className="text-[10px] text-text-muted font-mono">OK</span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.04] border border-white/10 text-emerald-400">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-background-elevated border border-border-subtle text-emerald-400">
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{result.stats.docsAnalyzed} Drive documents analyzed</span>
+                  <Check className="w-3.5 h-3.5 shrink-0" />
+                  <span>{result.stats.docsAnalyzed} Drive docs analyzed</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono">VERIFIED</span>
+                <span className="text-[10px] text-text-muted font-mono">OK</span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.04] border border-white/10 text-emerald-400">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-background-elevated border border-border-subtle text-emerald-400">
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Check className="w-3.5 h-3.5 shrink-0" />
                   <span>Executive brief synthesized</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono">VERIFIED</span>
+                <span className="text-[10px] text-text-muted font-mono">OK</span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.04] border border-white/10 text-emerald-400">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-background-elevated border border-border-subtle text-emerald-400">
                 <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <Check className="w-3.5 h-3.5 shrink-0" />
                   <span>{result.tasks.length} Action tasks prepared</span>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono">VERIFIED</span>
+                <span className="text-[10px] text-text-muted font-mono">OK</span>
               </div>
             </div>
-          </GlassCard>
+          </Card>
 
           {/* Relevant Emails */}
-          <GlassCard className="p-6 space-y-3">
-            <h3 className="text-sm font-bold text-slate-200 flex items-center justify-between font-mono">
+          <Card className="p-5 space-y-3">
+            <h3 className="text-xs font-bold text-text-primary uppercase font-mono tracking-wider flex items-center justify-between border-b border-border-subtle pb-3">
               <span className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-blue-400" />
-                <span>RELEVANT EMAILS</span>
+                <Mail className="w-4 h-4 text-indigo-400" />
+                <span>Relevant Emails</span>
               </span>
-              <span className="text-[11px] text-slate-400 font-normal">{result.emailsFound.length} total</span>
+              <span className="text-[11px] text-text-muted">{result.emailsFound.length}</span>
             </h3>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {result.emailsFound.map((em) => (
-                <div key={em.id} className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 space-y-1 text-xs">
-                  <div className="flex items-center justify-between font-mono">
-                    <span className="font-semibold text-cyan-300">{em.sender}</span>
-                    <span className="text-[10px] text-slate-400">{em.date}</span>
+                <div key={em.id} className="p-3 rounded-lg bg-background-elevated border border-border-subtle space-y-0.5 text-xs">
+                  <div className="flex items-center justify-between font-mono text-[10px]">
+                    <span className="font-semibold text-indigo-400">{em.sender}</span>
+                    <span className="text-text-muted">{em.date}</span>
                   </div>
-                  <p className="font-bold text-slate-200 line-clamp-1">{em.subject}</p>
-                  <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">{em.snippet}</p>
+                  <p className="font-bold text-text-primary line-clamp-1">{em.subject}</p>
+                  <p className="text-[11px] text-text-secondary line-clamp-2 leading-relaxed">{em.snippet}</p>
                 </div>
               ))}
             </div>
-          </GlassCard>
+          </Card>
 
           {/* Relevant Drive Documents */}
-          <GlassCard className="p-6 space-y-3">
-            <h3 className="text-sm font-bold text-slate-200 flex items-center justify-between font-mono">
+          <Card className="p-5 space-y-3">
+            <h3 className="text-xs font-bold text-text-primary uppercase font-mono tracking-wider flex items-center justify-between border-b border-border-subtle pb-3">
               <span className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-cyan-400" />
-                <span>RELEVANT DOCUMENTS</span>
+                <FileText className="w-4 h-4 text-indigo-400" />
+                <span>Relevant Documents</span>
               </span>
-              <span className="text-[11px] text-slate-400 font-normal">{result.docsFound.length} total</span>
+              <span className="text-[11px] text-text-muted">{result.docsFound.length}</span>
             </h3>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {result.docsFound.map((doc) => (
-                <div key={doc.id} className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between text-xs">
+                <div key={doc.id} className="p-3 rounded-lg bg-background-elevated border border-border-subtle flex items-center justify-between text-xs">
                   <div>
-                    <h4 className="font-bold text-slate-200 line-clamp-1">{doc.title}</h4>
-                    <p className="text-[10px] text-slate-400 font-mono">Modified {doc.lastModified} • {doc.type}</p>
+                    <h4 className="font-bold text-text-primary line-clamp-1">{doc.title}</h4>
+                    <p className="text-[10px] text-text-muted font-mono">Modified {doc.lastModified} • {doc.type}</p>
                   </div>
-                  <ExternalLink className="w-4 h-4 text-slate-400 hover:text-cyan-300 cursor-pointer shrink-0 ml-2 transition-colors" />
+                  <ExternalLink className="w-4 h-4 text-text-muted hover:text-text-primary cursor-pointer shrink-0 ml-2 transition-colors" />
                 </div>
               ))}
             </div>
-          </GlassCard>
+          </Card>
         </div>
       </div>
 

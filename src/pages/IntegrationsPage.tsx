@@ -1,7 +1,7 @@
 import React from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { Mail, Calendar, HardDrive, ShieldCheck, Key, Grid } from 'lucide-react';
-import { GlassCard, StatusPill } from '../components/ui/NeoTactileSystem';
+import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/Button';
 
 export const IntegrationsPage: React.FC = () => {
   const { workspaceStatus, geminiConfigured } = useWorkflow();
@@ -9,94 +9,70 @@ export const IntegrationsPage: React.FC = () => {
   const services = [
     {
       name: 'Gmail API',
-      description: 'Search email threads, analyze context, create drafts, send approved emails.',
-      icon: Mail,
+      description: 'Scan email threads and create email response drafts.',
       connected: workspaceStatus.services.gmail
     },
     {
       name: 'Google Calendar API',
-      description: 'Find upcoming meetings, retrieve attendee lists, add pre-meeting brief notes.',
-      icon: Calendar,
+      description: 'Retrieve upcoming meetings and attendee lists.',
       connected: workspaceStatus.services.calendar
     },
     {
       name: 'Google Drive API',
-      description: 'Search specs, technical docs, PDFs, spreadsheets for meeting background.',
-      icon: HardDrive,
+      description: 'Search documentation, specs, and PDFs.',
       connected: workspaceStatus.services.drive
     }
   ];
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl font-extrabold text-white flex items-center gap-2.5 font-mono">
-          <Grid className="w-6 h-6 text-blue-400" />
-          <span>Connected Workspace & APIs</span>
+    <div className="space-y-6 animate-fadeIn max-w-3xl mx-auto">
+      <div className="border-b border-border-subtle pb-3">
+        <h1 className="text-base font-semibold text-text-primary">
+          Integrations
         </h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Google Workspace OAuth 2.0 integration and Gemini LLM provider settings.
+        <p className="text-xs text-text-secondary mt-0.5">
+          Connected workspace accounts and API providers.
         </p>
       </div>
 
-      {/* Account Info Banner */}
-      <GlassCard className="p-7 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 shadow-[0_0_20px_rgba(34,211,238,0.25)]">
-            <ShieldCheck className="w-6 h-6" />
+      {/* Account Info */}
+      <div className="p-4 rounded-lg bg-background-card border border-border-subtle flex items-center justify-between text-xs">
+        <div>
+          <span className="text-[11px] text-text-muted font-mono uppercase">Authenticated Account</span>
+          <h3 className="font-semibold text-text-primary mt-0.5">{workspaceStatus.userEmail || 'not_connected@workspace.com'}</h3>
+        </div>
+
+        <Badge variant={workspaceStatus.connected ? 'success' : 'warning'}>
+          {workspaceStatus.connected ? 'Connected' : 'Setup Required'}
+        </Badge>
+      </div>
+
+      {/* Settings List */}
+      <div className="rounded-lg border border-border-subtle bg-background-card divide-y divide-border-subtle text-xs">
+        {services.map((s, i) => (
+          <div key={i} className="p-3.5 flex items-center justify-between gap-4">
+            <div>
+              <h3 className="font-semibold text-text-primary">{s.name}</h3>
+              <p className="text-[11px] text-text-secondary">{s.description}</p>
+            </div>
+
+            <Badge variant={s.connected ? 'success' : 'neutral'}>
+              {s.connected ? 'Connected' : 'Offline'}
+            </Badge>
           </div>
+        ))}
+
+        <div className="p-3.5 flex items-center justify-between gap-4">
           <div>
-            <span className="text-xs text-slate-400 font-mono">Active Google Account</span>
-            <h3 className="text-lg font-bold text-white font-mono">{workspaceStatus.userEmail || 'not_connected@workspace.com'}</h3>
+            <h3 className="font-semibold text-text-primary font-mono">Google Gemini API Provider</h3>
+            <p className="text-[11px] text-text-secondary">LLM reasoning engine configured on server.</p>
           </div>
+
+          <Badge variant={geminiConfigured ? 'success' : 'neutral'}>
+            {geminiConfigured ? 'Active' : 'Fallback Reasoner'}
+          </Badge>
         </div>
-
-        <StatusPill status={workspaceStatus.connected ? 'connected' : 'disconnected'} text={workspaceStatus.connected ? 'Google OAuth Connected' : 'Setup Required'} />
-      </GlassCard>
-
-      {/* Services List */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {services.map((s, i) => {
-          const Icon = s.icon;
-          return (
-            <GlassCard key={i} className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-11 h-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center text-blue-400 shadow-inner">
-                  <Icon className="w-5.5 h-5.5" />
-                </div>
-                <StatusPill status={s.connected ? 'connected' : 'disconnected'} text={s.connected ? 'Connected' : 'Offline'} />
-              </div>
-
-              <div>
-                <h3 className="font-extrabold text-slate-100 text-base">{s.name}</h3>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">{s.description}</p>
-              </div>
-            </GlassCard>
-          );
-        })}
       </div>
-
-      {/* Gemini Engine Banner */}
-      <GlassCard className="p-7 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Key className="w-5 h-5 text-blue-400" />
-            <h3 className="font-bold text-slate-100 text-base font-mono">Google Gemini API Provider</h3>
-          </div>
-          {geminiConfigured ? (
-            <span className="text-xs font-bold font-mono px-3.5 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-              ✓ GEMINI_API_KEY Active
-            </span>
-          ) : (
-            <span className="text-xs font-bold font-mono px-3.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-              Demo Mode (Fallback LLM Reasoner)
-            </span>
-          )}
-        </div>
-        <p className="text-xs text-slate-400 leading-relaxed">
-          OrkaAI uses Google Gemini API key securely on backend server. Keys are never exposed to client side.
-        </p>
-      </GlassCard>
     </div>
   );
 };

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useWorkflow } from '../../context/WorkflowContext';
 import { ActivityLogItem } from '../../types/activity';
-import { Clock, ChevronRight, Zap } from 'lucide-react';
-import { GlassCard, StatusPill } from '../ui/NeoTactileSystem';
+import { Badge } from '../ui/Badge';
 
 export const RecentActivityWidget: React.FC = () => {
   const [activities, setActivities] = useState<ActivityLogItem[]>([]);
@@ -17,61 +16,34 @@ export const RecentActivityWidget: React.FC = () => {
       .catch(() => {});
   }, []);
 
+  if (activities.length === 0) {
+    return (
+      <div className="p-4 rounded-lg bg-background-card border border-border-subtle text-xs text-text-muted">
+        No recent work executed yet.
+      </div>
+    );
+  }
+
   return (
-    <GlassCard className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2 font-mono">
-          <Clock className="w-4 h-4 text-blue-400" />
-          <span>Recent Autonomous Executions</span>
-        </h3>
-
-        <button
+    <div className="rounded-lg border border-border-subtle bg-background-card divide-y divide-border-subtle">
+      {activities.slice(0, 4).map((act) => (
+        <div
+          key={act.id}
           onClick={() => setActiveTab('activity')}
-          className="text-xs text-blue-400 hover:text-cyan-300 font-bold flex items-center gap-1 transition-colors cursor-pointer"
+          className="p-3 px-4 flex items-center justify-between hover:bg-background-elevated cursor-pointer transition-colors text-xs"
         >
-          <span>View All</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      <div className="space-y-3">
-        {activities.slice(0, 3).map((act) => (
-          <div
-            key={act.id}
-            onClick={() => setActiveTab('activity')}
-            className="p-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 flex items-center justify-between cursor-pointer transition-all group"
-          >
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/20 shadow-[0_0_12px_rgba(52,211,153,0.2)]">
-                <Zap className="w-4.5 h-4.5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-200 group-hover:text-blue-300 transition-colors">
-                  {act.goal}
-                </h4>
-                <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-1 font-medium">
-                  <span>{act.timeFormatted}</span>
-                  <span>•</span>
-                  <span className="text-cyan-300 font-semibold flex items-center gap-1 font-mono">
-                    {act.actionsCount} verified actions
-                  </span>
-                </div>
-              </div>
+          <div className="space-y-0.5">
+            <h4 className="font-semibold text-text-primary">{act.goal}</h4>
+            <div className="text-[11px] text-text-muted">
+              {act.timeFormatted} • {act.actionsCount} verified actions
             </div>
-
-            <StatusPill
-              status={
-                act.status === 'Completed'
-                  ? 'completed'
-                  : act.status === 'In Progress'
-                  ? 'running'
-                  : 'failed'
-              }
-              text={act.status}
-            />
           </div>
-        ))}
-      </div>
-    </GlassCard>
+
+          <Badge variant={act.status === 'Completed' ? 'success' : act.status === 'In Progress' ? 'info' : 'error'}>
+            {act.status}
+          </Badge>
+        </div>
+      ))}
+    </div>
   );
 };

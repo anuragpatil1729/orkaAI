@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { EmailTaskItem } from '../../../server/storage/emailTaskStore';
-import { Mail, CheckCircle2, ShieldAlert, Cpu, ArrowRight, X, Clock, Code, User } from 'lucide-react';
-import { GlassPanel, TactileButton, StatusPill } from '../ui/NeoTactileSystem';
+import { Mail, Cpu, ArrowRight, X, Clock, Code, User } from 'lucide-react';
+import { Card } from '../ui/Card';
+import { Button } from '../ui/Button';
+import { Badge } from '../ui/Badge';
 import { useWorkflow } from '../../context/WorkflowContext';
 
 interface TaskDetailModalProps {
@@ -17,13 +19,11 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose,
   const handleApproveAndExecute = async () => {
     setIsExecuting(true);
     try {
-      // 1. Mark task as WAITING_APPROVAL / APPROVED
       await fetch(`/api/mail/tasks/${task.id}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
 
-      // 2. Trigger asynchronous Sandboxed Coding Agent execution
       fetch(`/api/mail/tasks/${task.id}/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -44,22 +44,22 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose,
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#080B10]/85 backdrop-blur-2xl flex items-center justify-center p-4 animate-fadeIn select-none overflow-y-auto">
-      <GlassPanel glowEdge={true} className="w-full max-w-2xl max-h-[85vh] overflow-y-auto border border-blue-500/40 p-6 md:p-8 shadow-2xl space-y-6 relative font-sans my-auto">
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn select-none overflow-y-auto">
+      <Card className="w-full max-w-xl p-6 border-border-strong shadow-modal space-y-4 relative my-auto">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-white/10 pb-4">
-          <div className="flex items-center gap-3.5 pr-6">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-blue-500/20 text-blue-300 border border-blue-500/30 flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(59,130,246,0.35)]">
-              <Mail className="w-5 h-5 md:w-6 md:h-6" />
+        <div className="flex items-start justify-between border-b border-border-subtle pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
+              <Mail className="w-4.5 h-4.5" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40">
-                  EMAIL-TO-ACTION TASK
-                </span>
-                <StatusPill status={task.status === 'COMPLETED' ? 'completed' : task.status === 'EXECUTING' ? 'running' : 'waiting_approval'} text={task.status} />
+              <div className="flex items-center gap-2">
+                <Badge variant="accent">EMAIL-TO-ACTION TASK</Badge>
+                <Badge variant={task.status === 'COMPLETED' ? 'success' : task.status === 'EXECUTING' ? 'info' : 'warning'}>
+                  {task.status}
+                </Badge>
               </div>
-              <h3 className="text-base md:text-lg font-extrabold text-white mt-1 leading-snug break-words">
+              <h3 className="text-sm font-bold text-text-primary mt-0.5">
                 {task.requestedAction || task.subject}
               </h3>
             </div>
@@ -67,59 +67,56 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose,
 
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-2 rounded-2xl hover:bg-white/10 transition-colors cursor-pointer shrink-0"
+            className="text-text-muted hover:text-text-primary p-1 rounded hover:bg-white/5 transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Content Details Grid */}
-        <div className="space-y-4 text-xs font-sans">
-          {/* Email Sender & Context */}
-          <div className="p-4 rounded-2xl bg-[#0B0F15]/95 border border-white/10 space-y-2 shadow-inner">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between font-mono text-[11px] gap-1">
-              <div className="flex items-center gap-2 truncate">
-                <User className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                <span className="text-slate-400">Sender:</span>
-                <span className="text-cyan-300 font-bold truncate">{task.sender}</span>
+        {/* Content Details */}
+        <div className="space-y-3 text-xs">
+          {/* Email Sender */}
+          <div className="p-3 rounded-lg bg-background-elevated border border-border-subtle space-y-1.5 font-mono text-[11px]">
+            <div className="flex items-center justify-between text-text-muted">
+              <div className="flex items-center gap-1.5 truncate">
+                <User className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span>Sender:</span>
+                <span className="text-indigo-400 font-semibold truncate">{task.sender}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-slate-400 shrink-0">
-                <Clock className="w-3.5 h-3.5" />
-                <span>{task.receivedAt}</span>
-              </div>
+              <span>{task.receivedAt}</span>
             </div>
 
-            <div className="pt-2 border-t border-white/10">
-              <span className="text-slate-400 font-semibold font-mono text-[10px]">ORIGINAL EMAIL SNIPPET:</span>
-              <p className="text-slate-200 mt-1 leading-relaxed italic bg-black/40 p-3 rounded-xl border border-white/5 break-words">
+            <div className="pt-1.5 border-t border-border-subtle">
+              <span className="text-text-muted font-semibold text-[10px]">EMAIL SNIPPET:</span>
+              <p className="text-text-secondary mt-0.5 italic font-sans">
                 "{task.bodySnippet || task.subject}"
               </p>
             </div>
           </div>
 
-          {/* AI Understanding Breakdown */}
-          <div className="p-4 rounded-2xl bg-blue-500/[0.08] border border-blue-500/25 space-y-2">
-            <div className="flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-blue-400" />
-              <span className="font-mono font-bold text-blue-300 text-[11px] uppercase">ORKA AI UNDERSTANDING</span>
+          {/* AI Understanding */}
+          <div className="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 space-y-1">
+            <div className="flex items-center gap-1.5 text-indigo-400 font-semibold font-mono text-[10px] uppercase">
+              <Cpu className="w-3.5 h-3.5" />
+              <span>ORKA AI UNDERSTANDING</span>
             </div>
-            <p className="text-slate-100 font-semibold leading-relaxed">{task.summary}</p>
+            <p className="text-text-primary font-semibold leading-relaxed">{task.summary}</p>
             {task.technicalTask && (
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-cyan-400/15 text-cyan-300 border border-cyan-400/30 font-bold max-w-full truncate">
-                <Code className="w-3 h-3 shrink-0" />
-                <span className="truncate">TECHNICAL CODING TASK • REPO HINT: {task.repositoryHint || 'orkaAI'}</span>
+              <div className="inline-flex items-center gap-1 text-[10px] font-mono text-indigo-400 pt-0.5">
+                <Code className="w-3 h-3" />
+                <span>Technical Task • Repo: {task.repositoryHint || 'orkaAI'}</span>
               </div>
             )}
           </div>
 
           {/* Proposed Execution Plan */}
-          <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 space-y-2.5">
-            <span className="font-mono font-bold text-slate-400 text-[10px] uppercase">PROPOSED EXECUTION PLAN</span>
-            <div className="space-y-1.5 font-mono text-[11px]">
+          <div className="p-3 rounded-lg bg-background-elevated border border-border-subtle space-y-1.5">
+            <span className="font-mono font-semibold text-text-muted text-[10px] uppercase">PROPOSED EXECUTION PLAN</span>
+            <div className="space-y-1 font-mono text-[11px]">
               {task.proposedPlan.map((step, idx) => (
-                <div key={idx} className="flex items-start gap-2 text-slate-200">
-                  <span className="text-emerald-400 font-bold shrink-0">✓</span>
-                  <span className="leading-relaxed">{step}</span>
+                <div key={idx} className="flex items-start gap-2 text-text-secondary">
+                  <span className="text-emerald-400 font-semibold">✓</span>
+                  <span>{step}</span>
                 </div>
               ))}
             </div>
@@ -127,34 +124,26 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({ task, onClose,
         </div>
 
         {/* Action Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-white/10">
+        <div className="flex items-center justify-between pt-2 border-t border-border-subtle">
           <button
             onClick={onClose}
-            className="text-xs text-slate-400 hover:text-white font-bold transition-colors cursor-pointer px-2 py-1"
+            className="text-xs text-text-muted hover:text-text-primary font-medium"
           >
             Cancel
           </button>
 
-          <TactileButton
+          <Button
             onClick={handleApproveAndExecute}
             disabled={isExecuting || task.status === 'EXECUTING' || task.status === 'COMPLETED'}
+            isLoading={isExecuting}
             variant="primary"
             size="md"
           >
-            {isExecuting ? (
-              <>
-                <Clock className="w-4 h-4 animate-spin text-white" />
-                <span>Initializing Agent...</span>
-              </>
-            ) : (
-              <>
-                <span>Approve & Execute Plan</span>
-                <ArrowRight className="w-4 h-4 text-white" />
-              </>
-            )}
-          </TactileButton>
+            <span>Approve & Execute Plan</span>
+            <ArrowRight className="w-4 h-4" />
+          </Button>
         </div>
-      </GlassPanel>
+      </Card>
     </div>
   );
 };

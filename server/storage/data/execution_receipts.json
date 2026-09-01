@@ -1,5 +1,33 @@
 [
   {
+    "receiptId": "rcpt_e2e_mti8t67h",
+    "taskId": "task_e2e_msg_test_collaborator_001",
+    "originalRequest": "I have shared a repo with you and added you as a collaborator, it is a calculator project, I have done with CLI can you make the remaining GUI for the same.",
+    "sender": "sarthakpatil6636@gmail.com",
+    "repository": "sarthakpatil6636/L3Zhci9mb2xkZXJzL204L2hfOGpqXzYx-d1rPrO",
+    "branch": "orka/task/calculator-project-gui-i-mti8t5z9",
+    "commitSha": "e3ed0d2",
+    "filesChangedCount": 2,
+    "testsPassed": true,
+    "buildPassed": true,
+    "status": "COMPLETED",
+    "completedAt": "2026-09-01T05:44:47.021Z"
+  },
+  {
+    "receiptId": "rcpt_e2e_mti8d077",
+    "taskId": "task_e2e_msg_test_collaborator_001",
+    "originalRequest": "I have shared a repo with you and added you as a collaborator, it is a calculator project, I have done with CLI can you make the remaining GUI for the same.",
+    "sender": "sarthakpatil6636@gmail.com",
+    "repository": "sarthakpatil6636/L3Zhci9mb2xkZXJzL204L2hfOGpqXzYx-3U2FMc",
+    "branch": "orka/task/calculator-project-gui-i-mti8czyt",
+    "commitSha": "ee4c90b",
+    "filesChangedCount": 2,
+    "testsPassed": true,
+    "buildPassed": true,
+    "status": "COMPLETED",
+    "completedAt": "2026-09-01T05:32:12.739Z"
+  },
+  {
     "receiptId": "rcpt_mthidsdq",
     "taskId": "task_email_1a058d9914a1e5f9",
     "originalRequest": "make a colorful design for cli github repo link : https://github.com/sarthakpatil6636/atestproject",

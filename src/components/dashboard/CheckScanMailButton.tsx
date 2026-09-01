@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Mail, Sparkles, RefreshCw, ArrowRight, CheckCircle2, ShieldAlert } from 'lucide-react';
-import { GlassPanel, TactileButton, AIIndicator } from '../ui/NeoTactileSystem';
+import { Mail, RefreshCw, ArrowRight } from 'lucide-react';
+import { Button } from '../ui/Button';
 import { EmailTaskItem } from '../../../server/storage/emailTaskStore';
 
 interface CheckScanMailButtonProps {
@@ -13,10 +13,8 @@ export const CheckScanMailButton: React.FC<CheckScanMailButtonProps> = ({ onScan
 
   const handleScanMail = async () => {
     setIsScanning(true);
-    setScanMessage('Connecting to Gmail API & searching candidate threads...');
+    setScanMessage('Scanning inbox...');
     try {
-      setTimeout(() => setScanMessage('Running Gemini semantic task classifier...'), 1200);
-
       const res = await fetch('/api/mail/scan', { method: 'POST' });
       const data = await res.json();
 
@@ -33,55 +31,28 @@ export const CheckScanMailButton: React.FC<CheckScanMailButtonProps> = ({ onScan
   };
 
   return (
-    <GlassPanel glowEdge={true} className="p-7 border border-cyan-400/40 shadow-2xl relative overflow-hidden select-none">
-      {/* Background radial glow */}
-      <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-cyan-400/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-        <div className="space-y-2 text-left max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-cyan-400/15 border border-cyan-400/30 text-cyan-300 text-xs font-mono font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>AUTONOMOUS EMAIL SCANNER</span>
-          </div>
-
-          <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-            Check & Scan My Mail
-          </h2>
-
-          <p className="text-xs md:text-sm text-slate-300 leading-relaxed font-medium">
-            Scans your authenticated Gmail inbox for actionable work, repository invitations, bug reports, and task assignments.
+    <div className="p-3.5 rounded-lg bg-background-card border border-border-subtle flex items-center justify-between gap-4">
+      <div className="flex items-center gap-2.5">
+        <Mail className="w-4 h-4 text-text-muted" />
+        <div>
+          <h3 className="text-xs font-semibold text-text-primary">
+            Check & Scan Workspace Mail
+          </h3>
+          <p className="text-[11px] text-text-muted">
+            {scanMessage || 'Scan Gmail inbox for actionable requests and repository tasks.'}
           </p>
-
-          {scanMessage && (
-            <div className="flex items-center gap-2 text-xs font-mono text-cyan-300 animate-pulse pt-1">
-              <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-              <span>{scanMessage}</span>
-            </div>
-          )}
         </div>
-
-        {/* Hero Scan Action Button */}
-        <TactileButton
-          onClick={handleScanMail}
-          disabled={isScanning}
-          variant="primary"
-          size="lg"
-          className="py-4 px-7 text-white font-extrabold justify-center shadow-[0_15px_35px_rgba(59,130,246,0.4)] hover:shadow-[0_20px_45px_rgba(34,211,238,0.5)] shrink-0 w-full lg:w-auto"
-        >
-          {isScanning ? (
-            <div className="flex items-center gap-3">
-              <AIIndicator size="sm" active={true} />
-              <span>✦ Scanning your workspace...</span>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center gap-3">
-              <Sparkles className="w-5 h-5 text-cyan-300 animate-pulse" />
-              <span className="text-sm md:text-base font-bold">✦ Scan Gmail Inbox</span>
-              <ArrowRight className="w-4 h-4 ml-1 text-white" />
-            </div>
-          )}
-        </TactileButton>
       </div>
-    </GlassPanel>
+
+      <Button
+        onClick={handleScanMail}
+        isLoading={isScanning}
+        variant="secondary"
+        size="sm"
+        className="shrink-0"
+      >
+        <span>Scan Inbox</span>
+      </Button>
+    </div>
   );
 };

@@ -1,33 +1,27 @@
 import React from 'react';
 import { useWorkflow } from '../context/WorkflowContext';
-import { WorkflowGraph } from '../components/workflow/WorkflowGraph';
 import { ExecutionTimeline } from '../components/workflow/ExecutionTimeline';
 import { AIReasoningCard } from '../components/workflow/AIReasoningCard';
 import { ApprovalModal } from '../components/workflow/ApprovalModal';
 import { ResultView } from '../components/result/ResultView';
-import { Sparkles, ArrowLeft } from 'lucide-react';
-import { GlassPanel, GlassCard, TactileButton, StatusPill, ExecutionDialGauge } from '../components/ui/NeoTactileSystem';
+import { ArrowLeft, CheckCircle2, Clock } from 'lucide-react';
+import { Button } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
+import { Card } from '../components/ui/Card';
+import { EmptyState } from '../components/ui/EmptyState';
 
 export const ExecutionPage: React.FC = () => {
   const { currentWorkflow, resetWorkflow } = useWorkflow();
 
   if (!currentWorkflow) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-5 text-center">
-        <div className="w-16 h-16 rounded-3xl bg-blue-500/20 text-blue-300 border border-blue-400/40 flex items-center justify-center shadow-[0_0_25px_rgba(59,130,246,0.3)]">
-          <Sparkles className="w-8 h-8 animate-pulse" />
-        </div>
-        <h3 className="text-xl font-extrabold text-white">No Execution Currently Active</h3>
-        <p className="text-sm text-slate-400 max-w-md leading-relaxed">
-          Start a new outcome goal in the Command Control Center to run autonomous workflow tool execution.
-        </p>
-        <TactileButton
-          onClick={resetWorkflow}
-          variant="primary"
-          size="md"
-        >
-          Go to Home Control Center
-        </TactileButton>
+      <div className="py-8 max-w-xl mx-auto">
+        <EmptyState
+          title="No active task"
+          description="Enter a task description on the Overview page to start execution."
+          actionLabel="Go to Overview"
+          onAction={resetWorkflow}
+        />
       </div>
     );
   }
@@ -35,67 +29,67 @@ export const ExecutionPage: React.FC = () => {
   const isCompleted = currentWorkflow.status === 'completed' && currentWorkflow.result;
   const completedStepsCount = currentWorkflow.steps.filter(s => s.status === 'completed').length;
   const totalStepsCount = currentWorkflow.steps.length || 1;
-  const progressPercent = Math.min(100, Math.round((completedStepsCount / totalStepsCount) * 100));
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Top Header Navigation */}
+    <div className="space-y-6 animate-fadeIn max-w-3xl mx-auto">
+      {/* Top Bar */}
       <div className="flex items-center justify-between">
-        <button
+        <Button
           onClick={resetWorkflow}
-          className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-cyan-300 transition-colors cursor-pointer"
+          variant="ghost"
+          size="sm"
+          className="text-text-secondary hover:text-text-primary"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Control Center</span>
-        </button>
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Overview</span>
+        </Button>
 
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400 font-mono font-medium">Goal:</span>
-          <span className="text-xs font-bold text-cyan-300 max-w-xs truncate font-mono">{currentWorkflow.prompt}</span>
-          <StatusPill
-            status={
-              currentWorkflow.status === 'completed'
-                ? 'completed'
-                : currentWorkflow.status === 'waiting_approval'
-                ? 'waiting_approval'
-                : 'running'
-            }
-            text={currentWorkflow.status}
-          />
-        </div>
+        <Badge variant={currentWorkflow.status === 'completed' ? 'success' : 'info'}>
+          {currentWorkflow.status}
+        </Badge>
       </div>
 
-      {/* Hero Execution Control Card with Radial Dial Gauge (Target Image 2) */}
-      <GlassPanel glowEdge={true} className="p-8 flex flex-col md:flex-row items-center justify-between gap-8 border border-blue-500/40">
-        <div className="space-y-3 max-w-lg">
-          <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-wider px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30">
-            LIVE AI CONTROL SCREEN
-          </span>
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-tight">
-            {currentWorkflow.prompt}
-          </h2>
-          <p className="text-xs text-slate-300 font-mono">
-            {completedStepsCount} of {totalStepsCount} tool actions completed • {currentWorkflow.status.toUpperCase()}
+      {/* Task Goal Header */}
+      <Card className="p-5 space-y-3">
+        <div className="space-y-1">
+          <span className="text-[11px] font-mono text-text-muted uppercase">Active Task</span>
+          <h2 className="text-base font-semibold text-text-primary">{currentWorkflow.prompt}</h2>
+          <p className="text-xs text-text-secondary">
+            {completedStepsCount} of {totalStepsCount} steps completed
           </p>
         </div>
 
-        {/* Circular Progress Arc Gauge */}
-        <div className="shrink-0">
-          <ExecutionDialGauge progress={progressPercent} title="Progress" subtitle="Track Record" size={190} />
+        {/* Clean step list */}
+        <div className="space-y-1.5 pt-2 border-t border-border-subtle text-xs font-mono">
+          {currentWorkflow.steps.map((step, idx) => {
+            const isDone = step.status === 'completed';
+            const isRunning = step.status === 'running';
+            return (
+              <div key={step.id || idx} className="flex items-center gap-2 text-text-secondary">
+                {isDone ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                ) : isRunning ? (
+                  <Clock className="w-3.5 h-3.5 text-blue-600 animate-spin shrink-0" />
+                ) : (
+                  <span className="w-3.5 h-3.5 text-center text-text-muted shrink-0">○</span>
+                )}
+                <span className={isDone ? 'text-text-primary font-medium' : isRunning ? 'text-text-primary font-semibold' : 'text-text-muted'}>
+                  {step.name}
+                </span>
+              </div>
+            );
+          })}
         </div>
-      </GlassPanel>
-
-      {/* Interactive Execution Graph */}
-      <WorkflowGraph steps={currentWorkflow.steps} currentStepId={currentWorkflow.currentStepId} />
+      </Card>
 
       {/* High-Risk Approval Modal Gate */}
       <ApprovalModal />
 
-      {/* Main Content: Timeline & Reasoning logs during execution, OR ResultView when completed */}
+      {/* Main Content: Timeline & Reasoning logs, OR ResultView when completed */}
       {isCompleted ? (
         <ResultView result={currentWorkflow.result!} onReset={resetWorkflow} />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ExecutionTimeline steps={currentWorkflow.steps} />
           <AIReasoningCard logs={currentWorkflow.reasoningLog} />
         </div>
